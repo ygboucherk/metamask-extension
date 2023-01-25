@@ -14,6 +14,7 @@ import {
 import EthQuery from 'eth-query';
 import createFilterMiddleware from 'eth-json-rpc-filters';
 import createSubscriptionManager from 'eth-json-rpc-filters/subscriptionManager';
+import { v4 as random } from 'uuid';
 import {
   INFURA_PROVIDER_TYPES,
   BUILT_IN_NETWORKS,
@@ -22,13 +23,22 @@ import {
   CHAIN_IDS,
   NETWORK_TYPES,
 } from '../../../../shared/constants/network';
+import getFetchWithTimeout from '../../../../shared/modules/fetch-with-timeout';
 import {
   isPrefixedFormattedHexString,
   isSafeChainId,
 } from '../../../../shared/modules/network.utils';
-import getFetchWithTimeout from '../../../../shared/modules/fetch-with-timeout';
 import createInfuraClient from './createInfuraClient';
 import createJsonRpcClient from './createJsonRpcClient';
+
+/**
+ * @typedef {object} NetworkConfiguration
+ * @property {string} rpcUrl - RPC target URL.
+ * @property {string} chainId - Network ID as per EIP-155
+ * @property {string} ticker - Currency ticker.
+ * @property {object} rpcPrefs - Personalized preferences.
+ * @property {string} [chainName] - Personalized network name.
+ */
 
 const env = process.env.METAMASK_ENV;
 const fetchWithTimeout = getFetchWithTimeout();
@@ -39,7 +49,7 @@ if (process.env.IN_TEST) {
     type: NETWORK_TYPES.RPC,
     rpcUrl: 'http://localhost:8545',
     chainId: '0x539',
-    nickname: 'Localhost 8545',
+    chainName: 'Localhost 8545',
   };
 } else if (process.env.METAMASK_DEBUG || env === 'test') {
   defaultProviderConfigOpts = {
@@ -105,11 +115,16 @@ export default class NetworkController extends EventEmitter {
         ...defaultNetworkDetailsState,
       },
     );
+
+    this.networkConfigurationsStore = new ObservableStore(
+      state.networkConfigurations || {},
+    );
     this.store = new ComposedStore({
       provider: this.providerStore,
       previousProviderStore: this.previousProviderStore,
       network: this.networkStore,
       networkDetails: this.networkDetails,
+      networkConfigurations: this.networkConfigurationsStore,
     });
 
     // provider and block tracker
@@ -224,42 +239,48 @@ export default class NetworkController extends EventEmitter {
     }
   }
 
-  setRpcTarget(rpcUrl, chainId, ticker = 'ETH', nickname = '', rpcPrefs) {
-    assert.ok(
-      isPrefixedFormattedHexString(chainId),
-      `Invalid chain ID "${chainId}": invalid hex string.`,
-    );
-    assert.ok(
-      isSafeChainId(parseInt(chainId, 16)),
-      `Invalid chain ID "${chainId}": numerical value greater than max safe value.`,
-    );
+  /**
+   * A method for setting the currently selected network provider by networkConfigurationId.
+   *
+   * @param {string} networkConfigurationId - the universal unique identifier that corresponds to the network configuration to set as active.
+   * @returns {string} The rpcUrl of the network that was just set as active
+   */
+  setActiveNetwork(networkConfigurationId) {
+    const targetNetwork =
+      this.networkConfigurationsStore.getState()[networkConfigurationId];
+
+    if (!targetNetwork) {
+      throw new Error(
+        `networkConfigurationId ${networkConfigurationId} does not match a configured networkConfiguration`,
+      );
+    }
+
     this._setProviderConfig({
       type: NETWORK_TYPES.RPC,
-      rpcUrl,
-      chainId,
-      ticker,
-      nickname,
-      rpcPrefs,
+      ...targetNetwork,
     });
+
+    return targetNetwork.rpcUrl;
   }
 
   setProviderType(type) {
     assert.notStrictEqual(
       type,
       NETWORK_TYPES.RPC,
-      `NetworkController - cannot call "setProviderType" with type "${NETWORK_TYPES.RPC}". Use "setRpcTarget"`,
+      `NetworkController - cannot call "setProviderType" with type "${NETWORK_TYPES.RPC}". Use "setActiveNetwork"`,
     );
     assert.ok(
       INFURA_PROVIDER_TYPES.includes(type),
       `Unknown Infura provider type "${type}".`,
     );
-    const { chainId, ticker } = BUILT_IN_NETWORKS[type];
+    const { chainId, ticker, blockExplorerUrl } = BUILT_IN_NETWORKS[type];
     this._setProviderConfig({
       type,
       rpcUrl: '',
       chainId,
       ticker: ticker ?? 'ETH',
-      nickname: '',
+      chainName: '',
+      rpcPrefs: { blockExplorerUrl },
     });
   }
 
@@ -475,5 +496,63 @@ export default class NetworkController extends EventEmitter {
     // set new provider and blockTracker
     this._provider = provider;
     this._blockTracker = blockTracker;
+  }
+
+  /**
+   * Network Configuration management functions
+   */
+
+  /**
+   * Adds a network configuration if the rpcUrl is not already present on an
+   * existing network configuration. Otherwise updates the entry with the matching rpcUrl.
+   *
+   * @param {NetworkConfiguration} - - The network configuration to add or, if rpcUrl matches an existing entry, to modify.
+   * @returns {string} networkConfigurationId for the added or updated network configuration
+   */
+  upsertNetworkConfiguration({ rpcUrl, chainId, ticker, chainName, rpcPrefs }) {
+    assert.ok(
+      isPrefixedFormattedHexString(chainId),
+      `Invalid chain ID "${chainId}": invalid hex string.`,
+    );
+    assert.ok(
+      isSafeChainId(parseInt(chainId, 16)),
+      `Invalid chain ID "${chainId}": numerical value greater than max safe value.`,
+    );
+
+    const networkConfigurations = this.networkConfigurationsStore.getState();
+    const newNetworkConfiguration = {
+      rpcUrl,
+      chainId,
+      ticker,
+      chainName,
+      rpcPrefs,
+    };
+
+    const oldNetworkConfigurationId = Object.values(networkConfigurations).find(
+      (networkConfiguration) =>
+        networkConfiguration.rpcUrl?.toLowerCase() === rpcUrl?.toLowerCase(),
+    )?.id;
+
+    const newNetworkConfigurationId = oldNetworkConfigurationId || random();
+    this.networkConfigurationsStore.updateState({
+      ...networkConfigurations,
+      [newNetworkConfigurationId]: {
+        ...newNetworkConfiguration,
+        id: newNetworkConfigurationId,
+      },
+    });
+
+    return newNetworkConfigurationId;
+  }
+
+  /**
+   * Removes network configuration from state.
+   *
+   * @param {string} networkConfigurationId - the unique id for the network configuration to remove.
+   */
+  removeNetworkConfiguration(networkConfigurationId) {
+    const networkConfigurations = this.networkConfigurationsStore.getState();
+    delete networkConfigurations[networkConfigurationId];
+    this.networkConfigurationsStore.updateState(networkConfigurations);
   }
 }

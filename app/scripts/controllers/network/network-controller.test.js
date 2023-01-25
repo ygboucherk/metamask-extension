@@ -1,14 +1,25 @@
 import { inspect, isDeepStrictEqual, promisify } from 'util';
 import { isMatch } from 'lodash';
+import { v4 } from 'uuid';
 import nock from 'nock';
 import sinon from 'sinon';
 import * as ethJsonRpcMiddlewareModule from '@metamask/eth-json-rpc-middleware';
+import { BUILT_IN_NETWORKS } from '../../../../shared/constants/network';
 import NetworkController from './network-controller';
 
 jest.mock('@metamask/eth-json-rpc-middleware', () => {
   return {
     __esModule: true,
     ...jest.requireActual('@metamask/eth-json-rpc-middleware'),
+  };
+});
+
+jest.mock('uuid', () => {
+  const actual = jest.requireActual('uuid');
+
+  return {
+    ...actual,
+    v4: jest.fn(),
   };
 });
 
@@ -119,21 +130,21 @@ const JSONRPC_RESPONSE_BODY_PROPERTIES = ['id', 'jsonrpc', 'result', 'error'];
  */
 const INFURA_NETWORKS = [
   {
-    networkName: 'Mainnet',
+    chainName: 'Mainnet',
     networkType: 'mainnet',
     chainId: '0x1',
     networkVersion: '1',
     ticker: 'ETH',
   },
   {
-    networkName: 'Goerli',
+    chainName: 'Goerli',
     networkType: 'goerli',
     chainId: '0x5',
     networkVersion: '5',
     ticker: 'GoerliETH',
   },
   {
-    networkName: 'Sepolia',
+    chainName: 'Sepolia',
     networkType: 'sepolia',
     chainId: '0xaa36a7',
     networkVersion: '11155111',
@@ -449,7 +460,7 @@ describe('NetworkController', () => {
           type: 'rpc',
           rpcUrl: 'http://example-custom-rpc.metamask.io',
           chainId: '0x9999',
-          nickname: 'Test initial state',
+          chainName: 'Test initial state',
         },
         networkDetails: {
           EIPS: {
@@ -466,6 +477,7 @@ describe('NetworkController', () => {
           expect(controller.store.getState()).toMatchInlineSnapshot(`
             {
               "network": "loading",
+              "networkConfigurations": {},
               "networkDetails": {
                 "EIPS": {
                   "1559": false,
@@ -473,13 +485,13 @@ describe('NetworkController', () => {
               },
               "previousProviderStore": {
                 "chainId": "0x9999",
-                "nickname": "Test initial state",
+                "chainName": "Test initial state",
                 "rpcUrl": "http://example-custom-rpc.metamask.io",
                 "type": "rpc",
               },
               "provider": {
                 "chainId": "0x9999",
-                "nickname": "Test initial state",
+                "chainName": "Test initial state",
                 "rpcUrl": "http://example-custom-rpc.metamask.io",
                 "type": "rpc",
               },
@@ -494,6 +506,7 @@ describe('NetworkController', () => {
         expect(controller.store.getState()).toMatchInlineSnapshot(`
           {
             "network": "loading",
+            "networkConfigurations": {},
             "networkDetails": {
               "EIPS": {
                 "1559": undefined,
@@ -501,14 +514,14 @@ describe('NetworkController', () => {
             },
             "previousProviderStore": {
               "chainId": "0x539",
-              "nickname": "Localhost 8545",
+              "chainName": "Localhost 8545",
               "rpcUrl": "http://localhost:8545",
               "ticker": "ETH",
               "type": "rpc",
             },
             "provider": {
               "chainId": "0x539",
-              "nickname": "Localhost 8545",
+              "chainName": "Localhost 8545",
               "rpcUrl": "http://localhost:8545",
               "ticker": "ETH",
               "type": "rpc",
@@ -568,13 +581,13 @@ describe('NetworkController', () => {
     });
 
     for (const {
-      networkName,
+      chainName,
       networkType,
       chainId,
       networkVersion,
     } of INFURA_NETWORKS) {
       describe(`when the type in the provider configuration is "${networkType}"`, () => {
-        it(`initializes a provider pointed to the ${networkName} Infura network (chainId: ${chainId})`, async () => {
+        it(`initializes a provider pointed to the ${chainName} Infura network (chainId: ${chainId})`, async () => {
           await withController(
             {
               state: {
@@ -631,7 +644,7 @@ describe('NetworkController', () => {
           );
         });
 
-        it(`persists "${networkVersion}" to state as the network version of ${networkName}`, async () => {
+        it(`persists "${networkVersion}" to state as the network version of ${chainName}`, async () => {
           await withController(
             {
               state: {
@@ -691,8 +704,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -735,8 +776,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -762,8 +831,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -789,11 +886,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
               },
-              networkDetails: {
-                EIPS: {},
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -837,16 +959,44 @@ describe('NetworkController', () => {
       });
     });
 
-    for (const { networkName, networkType, chainId } of INFURA_NETWORKS) {
+    for (const { chainName, networkType, chainId } of INFURA_NETWORKS) {
       describe(`when the type in the provider configuration is changed to "${networkType}"`, () => {
-        it(`returns a provider object that was pointed to another network before the switch and is pointed to ${networkName} afterward`, async () => {
+        it(`returns a provider object that was pointed to another network before the switch and is pointed to ${chainName} afterward`, async () => {
           await withController(
             {
               state: {
                 provider: {
                   type: 'rpc',
-                  rpcUrl: 'https://mock-rpc-url',
+                  rpcUrl: 'https://mock-rpc-url-2',
                   chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
+                networkConfigurations: {
+                  testNetworkConfigurationId1: {
+                    rpcUrl: 'https://mock-rpc-url',
+                    chainId: '0xtest',
+                    chainName: 'test-chain',
+                    ticker: 'TEST',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer.com',
+                    },
+                    id: 'testNetworkConfigurationId1',
+                  },
+                  testNetworkConfigurationId2: {
+                    rpcUrl: 'https://mock-rpc-url-2',
+                    chainId: '0x1337',
+                    chainName: 'test-chain-2',
+                    ticker: 'TEST2',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer-2.com',
+                    },
+                    id: 'testNetworkConfigurationId2',
+                  },
                 },
               },
             },
@@ -885,6 +1035,18 @@ describe('NetworkController', () => {
               provider: {
                 type: 'goerli',
               },
+              networkConfigurations: {
+                testNetworkConfigurationId: {
+                  id: 'testNetworkConfigurationId',
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                },
+              },
             },
           },
           async ({ controller, network }) => {
@@ -900,14 +1062,14 @@ describe('NetworkController', () => {
             });
             expect(oldChainIdResult).toBe('0x5');
 
-            controller.setRpcTarget('https://mock-rpc-url', '0x1337');
+            controller.setActiveNetwork('testNetworkConfigurationId');
             const promisifiedSendAsync2 = promisify(provider.sendAsync).bind(
               provider,
             );
             const { result: newChainIdResult } = await promisifiedSendAsync2({
               method: 'eth_chainId',
             });
-            expect(newChainIdResult).toBe('0x1337');
+            expect(newChainIdResult).toBe('0xtest');
           },
         );
       });
@@ -1058,7 +1220,7 @@ describe('NetworkController', () => {
           type: 'rpc',
           rpcUrl: 'http://example-custom-rpc.metamask.io',
           chainId: '0x9999',
-          nickname: 'Test initial state',
+          chainName: 'Test initial state',
         };
         const initialState = {
           provider: providerConfig,
@@ -1119,11 +1281,7 @@ describe('NetworkController', () => {
       });
     });
 
-    for (const {
-      networkName,
-      networkType,
-      networkVersion,
-    } of INFURA_NETWORKS) {
+    for (const { chainName, networkType, networkVersion } of INFURA_NETWORKS) {
       describe(`when the type in the provider configuration is "${networkType}"`, () => {
         describe('if the request for eth_blockNumber responds successfully', () => {
           it('emits infuraIsUnblocked as long as the network has not changed by the time the request ends', async () => {
@@ -1291,6 +1449,18 @@ describe('NetworkController', () => {
                     // of the network selected, it just needs to exist
                     chainId: '0x9999999',
                   },
+                  networkConfigurations: {
+                    testNetworkConfigurationId: {
+                      id: 'testNetworkConfigurationId',
+                      rpcUrl: 'https://mock-rpc-url',
+                      chainId: '0xtest',
+                      chainName: 'test-chain',
+                      ticker: 'TEST',
+                      rpcPrefs: {
+                        blockExplorerUrl: 'test-block-explorer.com',
+                      },
+                    },
+                  },
                 },
               },
               async ({ controller, network: network1 }) => {
@@ -1308,9 +1478,8 @@ describe('NetworkController', () => {
                             controller,
                             eventName: 'networkDidChange',
                             operation: () => {
-                              controller.setRpcTarget(
-                                'http://some-rpc-url',
-                                '0x1337',
+                              controller.setActiveNetwork(
+                                'testNetworkConfigurationId',
                               );
                             },
                           });
@@ -1390,7 +1559,7 @@ describe('NetworkController', () => {
           });
         });
 
-        it(`persists "${networkVersion}" to state as the network version of ${networkName}`, async () => {
+        it(`persists "${networkVersion}" to state as the network version of ${chainName}`, async () => {
           await withController(
             {
               state: {
@@ -1592,9 +1761,9 @@ describe('NetworkController', () => {
         });
 
         describe('if the network was switched after the net_version request started but before it completed', () => {
-          it(`persists to state the network version of the newly switched network, not the initial one for ${networkName}`, async () => {
+          it(`persists to state the network version of the newly switched network, not the initial one for ${chainName}`, async () => {
             const oldNetworkVersion = networkVersion;
-            const newNetworkName = 'goerli';
+            const newChainName = 'goerli';
             const newNetworkVersion = '5';
 
             await withController(
@@ -1621,7 +1790,7 @@ describe('NetworkController', () => {
                             controller,
                             propertyPath: ['network'],
                             operation: () => {
-                              controller.setProviderType(newNetworkName);
+                              controller.setProviderType(newChainName);
                             },
                           })
                             .then(() => {
@@ -1708,9 +1877,9 @@ describe('NetworkController', () => {
             );
           });
 
-          it(`persists to state the EIP-1559 support for the newly switched network, not the initial one for ${networkName}`, async () => {
+          it(`persists to state the EIP-1559 support for the newly switched network, not the initial one for ${chainName}`, async () => {
             const oldNetworkVersion = networkVersion;
-            const newNetworkName = 'goerli';
+            const newChainName = 'goerli';
             const newNetworkVersion = '5';
 
             await withController(
@@ -1737,7 +1906,7 @@ describe('NetworkController', () => {
                             controller,
                             propertyPath: ['network'],
                             operation: () => {
-                              controller.setProviderType(newNetworkName);
+                              controller.setProviderType(newChainName);
                             },
                           })
                             .then(() => {
@@ -1834,8 +2003,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -1868,8 +2065,36 @@ describe('NetworkController', () => {
               state: {
                 provider: {
                   type: 'rpc',
-                  rpcUrl: 'https://mock-rpc-url',
+                  rpcUrl: 'https://mock-rpc-url-2',
                   chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
+                networkConfigurations: {
+                  testNetworkConfigurationId1: {
+                    rpcUrl: 'https://mock-rpc-url',
+                    chainId: '0xtest',
+                    chainName: 'test-chain',
+                    ticker: 'TEST',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer.com',
+                    },
+                    id: 'testNetworkConfigurationId1',
+                  },
+                  testNetworkConfigurationId2: {
+                    rpcUrl: 'https://mock-rpc-url-2',
+                    chainId: '0x1337',
+                    chainName: 'test-chain-2',
+                    ticker: 'TEST2',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer-2.com',
+                    },
+                    id: 'testNetworkConfigurationId2',
+                  },
                 },
               },
             },
@@ -1907,8 +2132,36 @@ describe('NetworkController', () => {
               state: {
                 provider: {
                   type: 'rpc',
-                  rpcUrl: 'https://mock-rpc-url',
+                  rpcUrl: 'https://mock-rpc-url-2',
                   chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
+                networkConfigurations: {
+                  testNetworkConfigurationId1: {
+                    rpcUrl: 'https://mock-rpc-url',
+                    chainId: '0xtest',
+                    chainName: 'test-chain',
+                    ticker: 'TEST',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer.com',
+                    },
+                    id: 'testNetworkConfigurationId1',
+                  },
+                  testNetworkConfigurationId2: {
+                    rpcUrl: 'https://mock-rpc-url-2',
+                    chainId: '0x1337',
+                    chainName: 'test-chain-2',
+                    ticker: 'TEST2',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer-2.com',
+                    },
+                    id: 'testNetworkConfigurationId2',
+                  },
                 },
               },
             },
@@ -1956,11 +2209,36 @@ describe('NetworkController', () => {
                 state: {
                   provider: {
                     type: 'rpc',
-                    rpcUrl: 'https://mock-rpc-url',
+                    rpcUrl: 'https://mock-rpc-url-2',
                     chainId: '0x1337',
+                    chainName: 'test-chain-2',
+                    ticker: 'TEST2',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer-2.com',
+                    },
+                    id: 'testNetworkConfigurationId2',
                   },
-                  networkDetails: {
-                    EIPS: {},
+                  networkConfigurations: {
+                    testNetworkConfigurationId1: {
+                      rpcUrl: 'https://mock-rpc-url',
+                      chainId: '0xtest',
+                      chainName: 'test-chain',
+                      ticker: 'TEST',
+                      rpcPrefs: {
+                        blockExplorerUrl: 'test-block-explorer.com',
+                      },
+                      id: 'testNetworkConfigurationId1',
+                    },
+                    testNetworkConfigurationId2: {
+                      rpcUrl: 'https://mock-rpc-url-2',
+                      chainId: '0x1337',
+                      chainName: 'test-chain-2',
+                      ticker: 'TEST2',
+                      rpcPrefs: {
+                        blockExplorerUrl: 'test-block-explorer-2.com',
+                      },
+                      id: 'testNetworkConfigurationId2',
+                    },
                   },
                 },
               },
@@ -1990,14 +2268,43 @@ describe('NetworkController', () => {
                 state: {
                   provider: {
                     type: 'rpc',
-                    rpcUrl: 'https://mock-rpc-url',
+                    rpcUrl: 'https://mock-rpc-url-2',
                     chainId: '0x1337',
+                    chainName: 'test-chain-2',
+                    ticker: 'TEST2',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer-2.com',
+                    },
+                    id: 'testNetworkConfigurationId2',
+                  },
+                  networkConfigurations: {
+                    testNetworkConfigurationId1: {
+                      rpcUrl: 'https://mock-rpc-url',
+                      chainId: '0xtest',
+                      chainName: 'test-chain',
+                      ticker: 'TEST',
+                      rpcPrefs: {
+                        blockExplorerUrl: 'test-block-explorer.com',
+                      },
+                      id: 'testNetworkConfigurationId1',
+                    },
+                    testNetworkConfigurationId2: {
+                      rpcUrl: 'https://mock-rpc-url-2',
+                      chainId: '0x1337',
+                      chainName: 'test-chain-2',
+                      ticker: 'TEST2',
+                      rpcPrefs: {
+                        blockExplorerUrl: 'test-block-explorer-2.com',
+                      },
+                      id: 'testNetworkConfigurationId2',
+                    },
                   },
                   networkDetails: {
                     EIPS: {},
                   },
                 },
               },
+
               async ({ controller, network }) => {
                 network.mockEssentialRpcCalls({
                   latestBlock: PRE_1559_BLOCK,
@@ -2029,8 +2336,36 @@ describe('NetworkController', () => {
                 state: {
                   provider: {
                     type: 'rpc',
-                    rpcUrl: 'https://mock-rpc-url',
+                    rpcUrl: 'https://mock-rpc-url-2',
                     chainId: '0x1337',
+                    chainName: 'test-chain-2',
+                    ticker: 'TEST2',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer-2.com',
+                    },
+                    id: 'testNetworkConfigurationId2',
+                  },
+                  networkConfigurations: {
+                    testNetworkConfigurationId1: {
+                      rpcUrl: 'https://mock-rpc-url',
+                      chainId: '0xtest',
+                      chainName: 'test-chain',
+                      ticker: 'TEST',
+                      rpcPrefs: {
+                        blockExplorerUrl: 'test-block-explorer.com',
+                      },
+                      id: 'testNetworkConfigurationId1',
+                    },
+                    testNetworkConfigurationId2: {
+                      rpcUrl: 'https://mock-rpc-url-2',
+                      chainId: '0x1337',
+                      chainName: 'test-chain-2',
+                      ticker: 'TEST2',
+                      rpcPrefs: {
+                        blockExplorerUrl: 'test-block-explorer-2.com',
+                      },
+                      id: 'testNetworkConfigurationId2',
+                    },
                   },
                   networkDetails: {
                     EIPS: {},
@@ -2090,8 +2425,36 @@ describe('NetworkController', () => {
               state: {
                 provider: {
                   type: 'rpc',
-                  rpcUrl: 'https://mock-rpc-url',
+                  rpcUrl: 'https://mock-rpc-url-2',
                   chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
+                networkConfigurations: {
+                  testNetworkConfigurationId1: {
+                    rpcUrl: 'https://mock-rpc-url',
+                    chainId: '0xtest',
+                    chainName: 'test-chain',
+                    ticker: 'TEST',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer.com',
+                    },
+                    id: 'testNetworkConfigurationId1',
+                  },
+                  testNetworkConfigurationId2: {
+                    rpcUrl: 'https://mock-rpc-url-2',
+                    chainId: '0x1337',
+                    chainName: 'test-chain-2',
+                    ticker: 'TEST2',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer-2.com',
+                    },
+                    id: 'testNetworkConfigurationId2',
+                  },
                 },
               },
             },
@@ -2138,8 +2501,39 @@ describe('NetworkController', () => {
               state: {
                 provider: {
                   type: 'rpc',
-                  rpcUrl: 'https://mock-rpc-url',
+                  rpcUrl: 'https://mock-rpc-url-2',
                   chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
+                networkConfigurations: {
+                  testNetworkConfigurationId1: {
+                    rpcUrl: 'https://mock-rpc-url',
+                    chainId: '0xtest',
+                    chainName: 'test-chain',
+                    ticker: 'TEST',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer.com',
+                    },
+                    id: 'testNetworkConfigurationId1',
+                  },
+                  testNetworkConfigurationId2: {
+                    rpcUrl: 'https://mock-rpc-url-2',
+                    chainId: '0x1337',
+                    chainName: 'test-chain-2',
+                    ticker: 'TEST2',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer-2.com',
+                    },
+                    id: 'testNetworkConfigurationId2',
+                  },
+                },
+                networkDetails: {
+                  EIPS: {},
                 },
               },
             },
@@ -2193,6 +2587,37 @@ describe('NetworkController', () => {
                   type: 'rpc',
                   rpcUrl: 'https://mock-rpc-url-1',
                   chainId: '0x1337',
+                  chainName: 'rpc-chain',
+                  ticker: 'RPC',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'rpc-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
+                networkDetails: {
+                  EIPS: {},
+                },
+                networkConfigurations: {
+                  testNetworkConfigurationId1: {
+                    rpcUrl: 'https://mock-rpc-url-2',
+                    chainId: '0xtest',
+                    chainName: 'test-chain',
+                    ticker: 'TEST',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer.com',
+                    },
+                    id: 'testNetworkConfigurationId1',
+                  },
+                  testNetworkConfigurationId2: {
+                    rpcUrl: 'https://mock-rpc-url-1',
+                    chainId: '0x1337',
+                    chainName: 'rpc-chain',
+                    ticker: 'RPC',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'rpc-block-explorer.com',
+                    },
+                    id: 'testNetworkConfigurationId2',
+                  },
                 },
               },
             },
@@ -2207,9 +2632,8 @@ describe('NetworkController', () => {
                       controller,
                       propertyPath: ['network'],
                       operation: () => {
-                        controller.setRpcTarget(
-                          'https://mock-rpc-url-2',
-                          '0x9999',
+                        controller.setActiveNetwork(
+                          'testNetworkConfigurationId1',
                         );
                       },
                     });
@@ -2228,6 +2652,7 @@ describe('NetworkController', () => {
                   },
                 },
               });
+
               await withoutCallingLookupNetwork({
                 controller,
                 operation: async () => {
@@ -2249,6 +2674,7 @@ describe('NetworkController', () => {
         });
 
         it('persists to state the EIP-1559 support for the newly switched network, not the initial one', async () => {
+          const nonEip1559RpcUrl = 'https://mock-rpc-url-2';
           await withController(
             {
               state: {
@@ -2256,6 +2682,37 @@ describe('NetworkController', () => {
                   type: 'rpc',
                   rpcUrl: 'https://mock-rpc-url-1',
                   chainId: '0x1337',
+                  chainName: 'rpc-chain',
+                  ticker: 'RPC',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'rpc-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
+                networkDetails: {
+                  EIPS: {},
+                },
+                networkConfigurations: {
+                  testNetworkConfigurationId1: {
+                    rpcUrl: nonEip1559RpcUrl,
+                    chainId: '0xtest',
+                    chainName: 'test-chain',
+                    ticker: 'TEST',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer.com',
+                    },
+                    id: 'testNetworkConfigurationId1',
+                  },
+                  testNetworkConfigurationId2: {
+                    rpcUrl: 'https://mock-rpc-url-1',
+                    chainId: '0x1337',
+                    chainName: 'rpc-chain',
+                    ticker: 'RPC',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'rpc-block-explorer.com',
+                    },
+                    id: 'testNetworkConfigurationId2',
+                  },
                 },
               },
             },
@@ -2268,11 +2725,10 @@ describe('NetworkController', () => {
                   beforeCompleting: async () => {
                     await waitForStateChanges({
                       controller,
-                      propertyPath: ['network'],
+                      propertyPath: ['networkDetails'],
                       operation: () => {
-                        controller.setRpcTarget(
-                          'https://mock-rpc-url-2',
-                          '0x9999',
+                        controller.setActiveNetwork(
+                          'testNetworkConfigurationId1',
                         );
                       },
                     });
@@ -2286,7 +2742,7 @@ describe('NetworkController', () => {
               });
               const network2 = network1.with({
                 networkClientOptions: {
-                  customRpcUrl: 'https://mock-rpc-url-2',
+                  customRpcUrl: nonEip1559RpcUrl,
                 },
               });
               network2.mockEssentialRpcCalls({
@@ -2301,18 +2757,10 @@ describe('NetworkController', () => {
                   },
                 },
               });
-              await withoutCallingLookupNetwork({
+              await waitForLookupNetworkToComplete({
                 controller,
                 operation: async () => {
                   await controller.initializeProvider();
-                },
-              });
-
-              await waitForStateChanges({
-                controller,
-                propertyPath: ['networkDetails'],
-                operation: async () => {
-                  await controller.lookupNetwork();
                 },
               });
 
@@ -2326,31 +2774,37 @@ describe('NetworkController', () => {
     });
   });
 
-  describe('setRpcTarget', () => {
-    it('throws if the given chain ID is not a 0x-prefixed hex number', async () => {
-      await withController(async ({ controller, network }) => {
-        network.mockEssentialRpcCalls();
+  describe('setActiveNetwork', () => {
+    it('throws if the given networkConfigurationId does not match one in networkConfigurations', async () => {
+      await withController(
+        {
+          state: {
+            networkConfigurations: {
+              testNetworkConfigurationId: {
+                id: 'testNetworkConfigurationId',
+                rpcUrl: 'https://mock-rpc-url',
+                chainId: '0xtest',
+                chainName: 'test-chain',
+                ticker: 'TEST',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer.com',
+                },
+              },
+            },
+          },
+        },
+        async ({ controller, network }) => {
+          network.mockEssentialRpcCalls();
 
-        expect(() =>
-          controller.setRpcTarget('http://some.url', 'not a chain id'),
-        ).toThrow(
-          new Error('Invalid chain ID "not a chain id": invalid hex string.'),
-        );
-      });
-    });
-
-    it('throws if the given chain ID is greater than the maximum allowed ID', async () => {
-      await withController(async ({ controller, network }) => {
-        network.mockEssentialRpcCalls();
-
-        expect(() =>
-          controller.setRpcTarget('http://some.url', '0xFFFFFFFFFFFFFFFF'),
-        ).toThrow(
-          new Error(
-            'Invalid chain ID "0xFFFFFFFFFFFFFFFF": numerical value greater than max safe value.',
-          ),
-        );
-      });
+          expect(() =>
+            controller.setActiveNetwork('invalid-network-configuration-id'),
+          ).toThrow(
+            new Error(
+              'networkConfigurationId invalid-network-configuration-id does not match a configured networkConfiguration',
+            ),
+          );
+        },
+      );
     });
 
     it('captures the current provider configuration before overwriting it', async () => {
@@ -2361,7 +2815,34 @@ describe('NetworkController', () => {
               type: 'rpc',
               rpcUrl: 'http://example-custom-rpc.metamask.io',
               chainId: '0x9999',
-              nickname: 'Test initial state',
+              chainName: 'rpc-chain',
+              ticker: 'RPC',
+              rpcPrefs: {
+                blockExplorerUrl: 'rpc-block-explorer.com',
+              },
+              id: 'testNetworkConfigurationId2',
+            },
+            networkConfigurations: {
+              testNetworkConfigurationId1: {
+                rpcUrl: 'https://mock-rpc-url',
+                chainId: '0xtest',
+                chainName: 'test-chain',
+                ticker: 'TEST',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer.com',
+                },
+                id: 'testNetworkConfigurationId1',
+              },
+              testNetworkConfigurationId2: {
+                rpcUrl: 'http://example-custom-rpc.metamask.io',
+                chainId: '0x9999',
+                chainName: 'rpc-chain',
+                ticker: 'RPC',
+                rpcPrefs: {
+                  blockExplorerUrl: 'rpc-block-explorer.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
             },
           },
         },
@@ -2374,7 +2855,7 @@ describe('NetworkController', () => {
           });
           network.mockEssentialRpcCalls();
 
-          controller.setRpcTarget('https://mock-rpc-url', '0x1337');
+          controller.setActiveNetwork('testNetworkConfigurationId1');
 
           expect(
             controller.store.getState().previousProviderStore,
@@ -2382,13 +2863,18 @@ describe('NetworkController', () => {
             type: 'rpc',
             rpcUrl: 'http://example-custom-rpc.metamask.io',
             chainId: '0x9999',
-            nickname: 'Test initial state',
+            chainName: 'rpc-chain',
+            ticker: 'RPC',
+            rpcPrefs: {
+              blockExplorerUrl: 'rpc-block-explorer.com',
+            },
+            id: 'testNetworkConfigurationId2',
           });
         },
       );
     });
 
-    it('overwrites the provider configuration given a minimal set of arguments, filling in ticker, nickname, and rpcPrefs with default values', async () => {
+    it('overwrites the provider configuration given a networkConfigurationId that matches a configured networkConfiguration', async () => {
       await withController(
         {
           state: {
@@ -2396,7 +2882,36 @@ describe('NetworkController', () => {
               type: 'rpc',
               rpcUrl: 'http://example-custom-rpc.metamask.io',
               chainId: '0x9999',
-              nickname: 'Test initial state',
+              chainName: 'rpc-test-chain',
+              ticker: 'RPC',
+              rpcPrefs: {
+                blockExplorerUrl: 'rpc-block-explorer.com',
+              },
+              id: 'testNetworkConfigurationId2',
+            },
+            networkConfigurations: {
+              testNetworkConfigurationId1: {
+                rpcUrl: 'https://mock-rpc-url',
+                chainId: '0xtest',
+                chainName: 'test-chain',
+                ticker: 'TEST',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer.com',
+                },
+                type: 'rpc',
+                id: 'testNetworkConfigurationId1',
+              },
+              testNetworkConfigurationId2: {
+                rpcUrl: 'http://example-custom-rpc.metamask.io',
+                chainId: '0x9999',
+                chainName: 'rpc-test-chain',
+                ticker: 'RPC',
+                rpcPrefs: {
+                  blockExplorerUrl: 'rpc-block-explorer.com',
+                },
+                type: 'rpc',
+                id: 'testNetworkConfigurationId2',
+              },
             },
           },
         },
@@ -2409,56 +2924,18 @@ describe('NetworkController', () => {
           });
           network.mockEssentialRpcCalls();
 
-          controller.setRpcTarget('https://mock-rpc-url', '0x1337');
+          controller.setActiveNetwork('testNetworkConfigurationId1');
 
           expect(controller.store.getState().provider).toStrictEqual({
-            type: 'rpc',
             rpcUrl: 'https://mock-rpc-url',
-            chainId: '0x1337',
-            ticker: 'ETH',
-            nickname: '',
-            rpcPrefs: undefined,
-          });
-        },
-      );
-    });
-
-    it('overwrites the provider configuration completely given a maximal set of arguments', async () => {
-      await withController(
-        {
-          state: {
-            provider: {
-              type: 'rpc',
-              rpcUrl: 'http://example-custom-rpc.metamask.io',
-              chainId: '0x9999',
-              nickname: 'Test initial state',
+            chainId: '0xtest',
+            chainName: 'test-chain',
+            ticker: 'TEST',
+            rpcPrefs: {
+              blockExplorerUrl: 'test-block-explorer.com',
             },
-          },
-        },
-        async ({ controller }) => {
-          const network = new NetworkCommunications({
-            networkClientType: 'custom',
-            networkClientOptions: {
-              customRpcUrl: 'https://mock-rpc-url',
-            },
-          });
-          network.mockEssentialRpcCalls();
-
-          controller.setRpcTarget(
-            'https://mock-rpc-url',
-            '0x1337',
-            'DAI',
-            'Cool network',
-            'RPC prefs',
-          );
-
-          expect(controller.store.getState().provider).toStrictEqual({
             type: 'rpc',
-            rpcUrl: 'https://mock-rpc-url',
-            chainId: '0x1337',
-            ticker: 'DAI',
-            nickname: 'Cool network',
-            rpcPrefs: 'RPC prefs',
+            id: 'testNetworkConfigurationId1',
           });
         },
       );
@@ -2471,8 +2948,35 @@ describe('NetworkController', () => {
             provider: {
               type: 'rpc',
               rpcUrl: 'http://example-custom-rpc.metamask.io',
-              chainId: '0x9999',
-              nickname: 'Test initial state',
+              chainId: '0xtest2',
+              chainName: 'test-chain-2',
+              ticker: 'TEST2',
+              rpcPrefs: {
+                blockExplorerUrl: 'test-block-explorer-2.com',
+              },
+              id: 'testNetworkConfigurationId2',
+            },
+            networkConfigurations: {
+              testNetworkConfigurationId1: {
+                rpcUrl: 'https://mock-rpc-url',
+                chainId: '0xtest',
+                chainName: 'test-chain',
+                ticker: 'TEST',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer.com',
+                },
+                id: 'testNetworkConfigurationId1',
+              },
+              testNetworkConfigurationId2: {
+                rpcUrl: 'http://example-custom-rpc.metamask.io',
+                chainId: '0xtest2',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
             },
           },
         },
@@ -2509,7 +3013,7 @@ describe('NetworkController', () => {
             controller,
             eventName: 'networkWillChange',
             operation: () => {
-              controller.setRpcTarget('https://mock-rpc-url', '0x1337');
+              controller.setActiveNetwork('testNetworkConfigurationId2');
             },
             beforeResolving: () => {
               expect(controller.store.getState().network).toBe(initialNetwork);
@@ -2526,8 +3030,36 @@ describe('NetworkController', () => {
           state: {
             provider: {
               type: 'rpc',
-              rpcUrl: 'http://mock-rpc-url-1',
-              chainId: '0xFF',
+              rpcUrl: 'http://mock-rpc-url-2',
+              chainId: '0xtest2',
+              chainName: 'test-chain-2',
+              ticker: 'TEST2',
+              rpcPrefs: {
+                blockExplorerUrl: 'test-block-explorer-2.com',
+              },
+              id: 'testNetworkConfigurationId2',
+            },
+            networkConfigurations: {
+              testNetworkConfigurationId1: {
+                rpcUrl: 'https://mock-rpc-url-1',
+                chainId: '0xtest',
+                chainName: 'test-chain',
+                ticker: 'TEST',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer.com',
+                },
+                id: 'testNetworkConfigurationId1',
+              },
+              testNetworkConfigurationId2: {
+                rpcUrl: 'http://mock-rpc-url-2',
+                chainId: '0xtest2',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
             },
           },
         },
@@ -2536,19 +3068,6 @@ describe('NetworkController', () => {
             net_version: {
               response: {
                 result: '255',
-              },
-            },
-          });
-          const network2 = network1.with({
-            networkClientType: 'custom',
-            networkClientOptions: {
-              customRpcUrl: 'https://mock-rpc-url-2',
-            },
-          });
-          network2.mockEssentialRpcCalls({
-            net_version: {
-              response: {
-                result: "this got used when it shouldn't",
               },
             },
           });
@@ -2563,7 +3082,7 @@ describe('NetworkController', () => {
             // before networkDidChange
             count: 1,
             operation: () => {
-              controller.setRpcTarget('https://mock-rpc-url-2', '0xCC');
+              controller.setActiveNetwork('testNetworkConfigurationId1');
             },
           });
           expect(controller.store.getState().network).toBe('loading');
@@ -2577,8 +3096,36 @@ describe('NetworkController', () => {
           state: {
             provider: {
               type: 'rpc',
-              rpcUrl: 'http://mock-rpc-url-1',
-              chainId: '0xFF',
+              rpcUrl: 'http://mock-rpc-url-2',
+              chainId: '0xtest2',
+              chainName: 'test-chain-2',
+              ticker: 'TEST2',
+              rpcPrefs: {
+                blockExplorerUrl: 'test-block-explorer-2.com',
+              },
+              id: 'testNetworkConfigurationId2',
+            },
+            networkConfigurations: {
+              testNetworkConfigurationId1: {
+                rpcUrl: 'https://mock-rpc-url-1',
+                chainId: '0xtest',
+                chainName: 'test-chain',
+                ticker: 'TEST',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer.com',
+                },
+                id: 'testNetworkConfigurationId1',
+              },
+              testNetworkConfigurationId2: {
+                rpcUrl: 'http://mock-rpc-url-2',
+                chainId: '0xtest2',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
             },
           },
         },
@@ -2610,7 +3157,7 @@ describe('NetworkController', () => {
             // before networkDidChange
             count: 1,
             operation: () => {
-              controller.setRpcTarget('https://mock-rpc-url-2', '0xCC');
+              controller.setActiveNetwork('testNetworkConfigurationId1');
             },
           });
           expect(controller.store.getState().networkDetails).toStrictEqual({
@@ -2623,135 +3170,225 @@ describe('NetworkController', () => {
     });
 
     it('initializes a provider pointed to the given RPC URL whose chain ID matches the configured chain ID', async () => {
-      await withController(async ({ controller }) => {
-        const network = new NetworkCommunications({
-          networkClientType: 'custom',
-          networkClientOptions: {
-            customRpcUrl: 'https://mock-rpc-url',
+      await withController(
+        {
+          state: {
+            networkConfigurations: {
+              testNetworkConfigurationId: {
+                id: 'testNetworkConfigurationId',
+                rpcUrl: 'https://mock-rpc-url',
+                chainId: '0xtest',
+                chainName: 'test-chain',
+                ticker: 'TEST',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer.com',
+                },
+              },
+            },
           },
-        });
-        network.mockEssentialRpcCalls();
-        network.mockRpcCall({
-          request: {
+        },
+        async ({ controller }) => {
+          const network = new NetworkCommunications({
+            networkClientType: 'custom',
+            networkClientOptions: {
+              customRpcUrl: 'https://mock-rpc-url',
+            },
+          });
+          network.mockEssentialRpcCalls();
+          network.mockRpcCall({
+            request: {
+              method: 'test',
+              params: [],
+            },
+            response: {
+              result: 'test response',
+            },
+          });
+
+          controller.setActiveNetwork('testNetworkConfigurationId');
+
+          const { provider } = controller.getProviderAndBlockTracker();
+          const promisifiedSendAsync = promisify(provider.sendAsync).bind(
+            provider,
+          );
+          const { result: testResult } = await promisifiedSendAsync({
+            id: 99999,
+            jsonrpc: '2.0',
             method: 'test',
             params: [],
-          },
-          response: {
-            result: 'test response',
-          },
-        });
-
-        controller.setRpcTarget('https://mock-rpc-url', '0x1337');
-
-        const { provider } = controller.getProviderAndBlockTracker();
-        const promisifiedSendAsync = promisify(provider.sendAsync).bind(
-          provider,
-        );
-        const { result: testResult } = await promisifiedSendAsync({
-          id: 99999,
-          jsonrpc: '2.0',
-          method: 'test',
-          params: [],
-        });
-        expect(testResult).toBe('test response');
-        const { result: chainIdResult } = await promisifiedSendAsync({
-          method: 'eth_chainId',
-        });
-        expect(chainIdResult).toBe('0x1337');
-      });
+          });
+          expect(testResult).toBe('test response');
+          const { result: chainIdResult } = await promisifiedSendAsync({
+            method: 'eth_chainId',
+          });
+          expect(chainIdResult).toBe('0xtest');
+        },
+      );
     });
 
     it('replaces the provider object underlying the provider proxy without creating a new instance of the proxy itself', async () => {
-      await withController(async ({ controller }) => {
-        const network = new NetworkCommunications({
-          networkClientType: 'custom',
-          networkClientOptions: {
-            customRpcUrl: 'https://mock-rpc-url',
+      await withController(
+        {
+          state: {
+            networkConfigurations: {
+              testNetworkConfigurationId: {
+                id: 'testNetworkConfigurationId',
+                rpcUrl: 'https://mock-rpc-url',
+                chainId: '0xtest',
+                chainName: 'test-chain',
+                ticker: 'TEST',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer.com',
+                },
+              },
+            },
           },
-        });
-        network.mockEssentialRpcCalls();
-        await controller.initializeProvider();
+        },
+        async ({ controller }) => {
+          const network = new NetworkCommunications({
+            networkClientType: 'custom',
+            networkClientOptions: {
+              customRpcUrl: 'https://mock-rpc-url',
+            },
+          });
+          network.mockEssentialRpcCalls();
+          await controller.initializeProvider();
 
-        const { provider: providerBefore } =
-          controller.getProviderAndBlockTracker();
-        controller.setRpcTarget('https://mock-rpc-url', '0x1337');
-        const { provider: providerAfter } =
-          controller.getProviderAndBlockTracker();
+          const { provider: providerBefore } =
+            controller.getProviderAndBlockTracker();
+          controller.setActiveNetwork('testNetworkConfigurationId');
+          const { provider: providerAfter } =
+            controller.getProviderAndBlockTracker();
 
-        expect(providerBefore).toBe(providerAfter);
-      });
+          expect(providerBefore).toBe(providerAfter);
+        },
+      );
     });
 
     it('emits networkDidChange', async () => {
-      await withController(async ({ controller }) => {
-        const network = new NetworkCommunications({
-          networkClientType: 'custom',
-          networkClientOptions: {
-            customRpcUrl: 'https://mock-rpc-url',
+      await withController(
+        {
+          state: {
+            networkConfigurations: {
+              testNetworkConfigurationId: {
+                id: 'testNetworkConfigurationId',
+                rpcUrl: 'https://mock-rpc-url',
+                chainId: '0xtest',
+                chainName: 'test-chain',
+                ticker: 'TEST',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer.com',
+                },
+              },
+            },
           },
-        });
-        network.mockEssentialRpcCalls();
+        },
+        async ({ controller }) => {
+          const network = new NetworkCommunications({
+            networkClientType: 'custom',
+            networkClientOptions: {
+              customRpcUrl: 'https://mock-rpc-url',
+            },
+          });
+          network.mockEssentialRpcCalls();
 
-        const networkDidChange = await waitForEvent({
-          controller,
-          eventName: 'networkDidChange',
-          operation: () => {
-            controller.setRpcTarget('https://mock-rpc-url', '0x1337');
-          },
-        });
+          const networkDidChange = await waitForEvent({
+            controller,
+            eventName: 'networkDidChange',
+            operation: () => {
+              controller.setActiveNetwork('testNetworkConfigurationId');
+            },
+          });
 
-        expect(networkDidChange).toBe(true);
-      });
+          expect(networkDidChange).toBe(true);
+        },
+      );
     });
 
     it('emits infuraIsUnblocked', async () => {
-      await withController(async ({ controller }) => {
-        const network = new NetworkCommunications({
-          networkClientType: 'custom',
-          networkClientOptions: {
-            customRpcUrl: 'https://mock-rpc-url',
+      await withController(
+        {
+          state: {
+            networkConfigurations: {
+              testNetworkConfigurationId: {
+                id: 'testNetworkConfigurationId',
+                rpcUrl: 'https://mock-rpc-url',
+                chainId: '0xtest',
+                chainName: 'test-chain',
+                ticker: 'TEST',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer.com',
+                },
+              },
+            },
           },
-        });
-        network.mockEssentialRpcCalls();
+        },
+        async ({ controller }) => {
+          const network = new NetworkCommunications({
+            networkClientType: 'custom',
+            networkClientOptions: {
+              customRpcUrl: 'https://mock-rpc-url',
+            },
+          });
+          network.mockEssentialRpcCalls();
 
-        const infuraIsUnblocked = await waitForEvent({
-          controller,
-          eventName: 'infuraIsUnblocked',
-          operation: () => {
-            controller.setRpcTarget('https://mock-rpc-url', '0x1337');
-          },
-        });
+          const infuraIsUnblocked = await waitForEvent({
+            controller,
+            eventName: 'infuraIsUnblocked',
+            operation: () => {
+              controller.setActiveNetwork('testNetworkConfigurationId');
+            },
+          });
 
-        expect(infuraIsUnblocked).toBe(true);
-      });
+          expect(infuraIsUnblocked).toBe(true);
+        },
+      );
     });
 
     it('persists the network version to state (assuming that the request for net_version responds successfully)', async () => {
-      await withController(async ({ controller }) => {
-        const network = new NetworkCommunications({
-          networkClientType: 'custom',
-          networkClientOptions: {
-            customRpcUrl: 'https://mock-rpc-url',
-          },
-        });
-        network.mockEssentialRpcCalls({
-          net_version: {
-            response: {
-              result: '42',
+      await withController(
+        {
+          state: {
+            networkConfigurations: {
+              testNetworkConfigurationId: {
+                id: 'testNetworkConfigurationId',
+                rpcUrl: 'https://mock-rpc-url',
+                chainId: '0xtest',
+                chainName: 'test-chain',
+                ticker: 'TEST',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer.com',
+                },
+              },
             },
           },
-        });
+        },
+        async ({ controller }) => {
+          const network = new NetworkCommunications({
+            networkClientType: 'custom',
+            networkClientOptions: {
+              customRpcUrl: 'https://mock-rpc-url',
+            },
+          });
+          network.mockEssentialRpcCalls({
+            net_version: {
+              response: {
+                result: '42',
+              },
+            },
+          });
 
-        await waitForStateChanges({
-          controller,
-          propertyPath: ['network'],
-          operation: () => {
-            controller.setRpcTarget('https://mock-rpc-url', '0x1337');
-          },
-        });
+          await waitForStateChanges({
+            controller,
+            propertyPath: ['network'],
+            operation: () => {
+              controller.setActiveNetwork('testNetworkConfigurationId');
+            },
+          });
 
-        expect(controller.store.getState().network).toBe('42');
-      });
+          expect(controller.store.getState().network).toBe('42');
+        },
+      );
     });
 
     it('persists to state whether the network supports EIP-1559 (assuming that the request for eth_getBlockByNumber responds successfully)', async () => {
@@ -2760,6 +3397,18 @@ describe('NetworkController', () => {
           state: {
             networkDetails: {
               EIPS: {},
+            },
+            networkConfigurations: {
+              testNetworkConfigurationId: {
+                id: 'testNetworkConfigurationId',
+                rpcUrl: 'https://mock-rpc-url',
+                chainId: '0xtest',
+                chainName: 'test-chain',
+                ticker: 'TEST',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer.com',
+                },
+              },
             },
           },
         },
@@ -2779,7 +3428,7 @@ describe('NetworkController', () => {
             propertyPath: ['networkDetails'],
             count: 2,
             operation: () => {
-              controller.setRpcTarget('https://mock-rpc-url', '0x1337');
+              controller.setActiveNetwork('testNetworkConfigurationId');
             },
           });
 
@@ -2793,7 +3442,7 @@ describe('NetworkController', () => {
 
   describe('setProviderType', () => {
     for (const {
-      networkName,
+      chainName,
       networkType,
       chainId,
       networkVersion,
@@ -2805,10 +3454,36 @@ describe('NetworkController', () => {
             {
               state: {
                 provider: {
-                  type: 'rpc',
-                  rpcUrl: 'http://example-custom-rpc.metamask.io',
-                  chainId: '0x9999',
-                  nickname: 'Test initial state',
+                  rpcUrl: 'http://mock-rpc-url-2',
+                  chainId: '0xtest2',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
+                networkConfigurations: {
+                  testNetworkConfigurationId1: {
+                    rpcUrl: 'https://mock-rpc-url-1',
+                    chainId: '0xtest',
+                    chainName: 'test-chain',
+                    ticker: 'TEST',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer.com',
+                    },
+                    id: 'testNetworkConfigurationId1',
+                  },
+                  testNetworkConfigurationId2: {
+                    rpcUrl: 'http://mock-rpc-url-2',
+                    chainId: '0xtest2',
+                    chainName: 'test-chain-2',
+                    ticker: 'TEST2',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer-2.com',
+                    },
+                    id: 'testNetworkConfigurationId2',
+                  },
                 },
               },
             },
@@ -2826,24 +3501,54 @@ describe('NetworkController', () => {
               expect(
                 controller.store.getState().previousProviderStore,
               ).toStrictEqual({
-                type: 'rpc',
-                rpcUrl: 'http://example-custom-rpc.metamask.io',
-                chainId: '0x9999',
-                nickname: 'Test initial state',
+                rpcUrl: 'http://mock-rpc-url-2',
+                chainId: '0xtest2',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
               });
             },
           );
         });
 
-        it(`overwrites the provider configuration using type: "${networkType}", chainId: "${chainId}", and ticker "${ticker}", clearing rpcUrl and nickname, and removing rpcPrefs`, async () => {
+        it(`overwrites the provider configuration using type: "${networkType}", chainId: "${chainId}", and ticker "${ticker}", clearing rpcUrl and chainName, and removing rpcPrefs`, async () => {
           await withController(
             {
               state: {
                 provider: {
-                  type: 'rpc',
-                  rpcUrl: 'http://example-custom-rpc.metamask.io',
-                  chainId: '0x9999',
-                  nickname: 'Test initial state',
+                  rpcUrl: 'http://mock-rpc-url-2',
+                  chainId: '0xtest2',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
+                networkConfigurations: {
+                  testNetworkConfigurationId1: {
+                    rpcUrl: 'https://mock-rpc-url-1',
+                    chainId: '0xtest',
+                    chainName: 'test-chain',
+                    ticker: 'TEST',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer.com',
+                    },
+                    id: 'testNetworkConfigurationId1',
+                  },
+                  testNetworkConfigurationId2: {
+                    rpcUrl: 'http://mock-rpc-url-2',
+                    chainId: '0xtest2',
+                    chainName: 'test-chain-2',
+                    ticker: 'TEST2',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer-2.com',
+                    },
+                    id: 'testNetworkConfigurationId2',
+                  },
                 },
               },
             },
@@ -2863,7 +3568,12 @@ describe('NetworkController', () => {
                 rpcUrl: '',
                 chainId,
                 ticker,
-                nickname: '',
+                chainName: '',
+                rpcPrefs: {
+                  blockExplorerUrl:
+                    BUILT_IN_NETWORKS[networkType].blockExplorerUrl,
+                },
+                id: 'testNetworkConfigurationId2',
               });
             },
           );
@@ -2896,9 +3606,37 @@ describe('NetworkController', () => {
             {
               state: {
                 provider: {
+                  rpcUrl: 'http://mock-rpc-url-2',
+                  chainId: '0xtest2',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
                   type: 'rpc',
-                  rpcUrl: 'http://mock-rpc-url',
-                  chainId: '0xFF',
+                },
+                networkConfigurations: {
+                  testNetworkConfigurationId1: {
+                    rpcUrl: 'https://mock-rpc-url-1',
+                    chainId: '0xtest',
+                    chainName: 'test-chain',
+                    ticker: 'TEST',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer.com',
+                    },
+                    id: 'testNetworkConfigurationId1',
+                  },
+                  testNetworkConfigurationId2: {
+                    rpcUrl: 'http://mock-rpc-url',
+                    chainId: '0xtest2',
+                    chainName: 'test-chain-2',
+                    ticker: 'TEST2',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer-2.com',
+                    },
+                    id: 'testNetworkConfigurationId2',
+                  },
                 },
               },
             },
@@ -2941,9 +3679,37 @@ describe('NetworkController', () => {
             {
               state: {
                 provider: {
+                  rpcUrl: 'https://mock-rpc-url-1',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
                   type: 'rpc',
-                  rpcUrl: 'http://mock-rpc-url-1',
-                  chainId: '0xFF',
+                },
+                networkConfigurations: {
+                  testNetworkConfigurationId1: {
+                    rpcUrl: 'https://mock-rpc-url-1',
+                    chainId: '0xtest',
+                    chainName: 'test-chain',
+                    ticker: 'TEST',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer.com',
+                    },
+                    id: 'testNetworkConfigurationId1',
+                  },
+                  testNetworkConfigurationId2: {
+                    rpcUrl: 'http://mock-rpc-url',
+                    chainId: '0xtest2',
+                    chainName: 'test-chain-2',
+                    ticker: 'TEST2',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer-2.com',
+                    },
+                    id: 'testNetworkConfigurationId2',
+                  },
                 },
               },
             },
@@ -2987,7 +3753,7 @@ describe('NetworkController', () => {
           );
         });
 
-        it(`initializes a provider pointed to the ${networkName} Infura network (chainId: ${chainId})`, async () => {
+        it(`initializes a provider pointed to the ${chainName} Infura network (chainId: ${chainId})`, async () => {
           await withController(async ({ controller }) => {
             const network = new NetworkCommunications({
               networkClientType: 'infura',
@@ -3075,7 +3841,7 @@ describe('NetworkController', () => {
           });
         });
 
-        it(`persists "${networkVersion}" to state as the network version of ${networkName}`, async () => {
+        it(`persists "${networkVersion}" to state as the network version of ${chainName}`, async () => {
           await withController(async ({ controller }) => {
             const network = new NetworkCommunications({
               networkClientType: 'infura',
@@ -3140,7 +3906,7 @@ describe('NetworkController', () => {
         await withController(async ({ controller }) => {
           expect(() => controller.setProviderType('rpc')).toThrow(
             new Error(
-              'NetworkController - cannot call "setProviderType" with type "rpc". Use "setRpcTarget"',
+              'NetworkController - cannot call "setProviderType" with type "rpc". Use "setActiveNetwork"',
             ),
           );
         });
@@ -3160,7 +3926,7 @@ describe('NetworkController', () => {
 
   describe('resetConnection', () => {
     for (const {
-      networkName,
+      chainName,
       networkType,
       chainId,
       networkVersion,
@@ -3277,7 +4043,7 @@ describe('NetworkController', () => {
           );
         });
 
-        it(`initializes a new provider object pointed to the current Infura network (name: ${networkName}, chain ID: ${chainId})`, async () => {
+        it(`initializes a new provider object pointed to the current Infura network (name: ${chainName}, chain ID: ${chainId})`, async () => {
           await withController(
             {
               state: {
@@ -3456,8 +4222,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -3483,8 +4277,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
-                chainId: '0xFF',
+                rpcUrl: 'https://mock-rpc-url-2',
+                chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -3524,8 +4346,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
-                chainId: '0xFF',
+                rpcUrl: 'https://mock-rpc-url-2',
+                chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -3569,8 +4419,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -3597,8 +4475,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -3628,8 +4534,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -3655,8 +4589,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -3682,8 +4644,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -3715,8 +4705,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -3742,7 +4760,7 @@ describe('NetworkController', () => {
 
   describe('rollbackToPreviousProvider', () => {
     for (const {
-      networkName,
+      chainName,
       networkType,
       chainId,
       networkVersion,
@@ -3754,9 +4772,39 @@ describe('NetworkController', () => {
               state: {
                 provider: {
                   type: networkType,
-                  // NOTE: This doesn't need to match the logical chain ID
-                  // of the network selected, it just needs to exist
-                  chainId: '0x999',
+                  rpcUrl: '',
+                  chainId: BUILT_IN_NETWORKS[networkType].chainId,
+                  chainName: '',
+                  ticker: BUILT_IN_NETWORKS[networkType].ticker,
+                  rpcPrefs: {
+                    blockExplorerUrl:
+                      BUILT_IN_NETWORKS[networkType].blockExplorerUrl,
+                  },
+                },
+                networkConfigurations: {
+                  testNetworkConfigurationId1: {
+                    rpcUrl: 'https://mock-rpc-url-1',
+                    chainId: '0xtest',
+                    chainName: 'test-chain',
+                    ticker: 'TEST',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer.com',
+                    },
+                    id: 'testNetworkConfigurationId1',
+                  },
+                  testNetworkConfigurationId2: {
+                    rpcUrl: 'http://mock-rpc-url-2',
+                    chainId: '0xtest2',
+                    chainName: 'test-chain-2',
+                    ticker: 'TEST2',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer-2.com',
+                    },
+                    id: 'testNetworkConfigurationId2',
+                  },
+                },
+                networkDetails: {
+                  EIPS: {},
                 },
               },
             },
@@ -3773,16 +4821,19 @@ describe('NetworkController', () => {
               await waitForLookupNetworkToComplete({
                 controller,
                 operation: () => {
-                  controller.setRpcTarget('https://mock-rpc-url', '0x1337');
+                  controller.setActiveNetwork('testNetworkConfigurationId1');
                 },
               });
               expect(controller.store.getState().provider).toStrictEqual({
+                rpcUrl: 'https://mock-rpc-url-1',
+                chainId: '0xtest',
+                chainName: 'test-chain',
+                ticker: 'TEST',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer.com',
+                },
+                id: 'testNetworkConfigurationId1',
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
-                chainId: '0x1337',
-                ticker: 'ETH',
-                nickname: '',
-                rpcPrefs: undefined,
               });
 
               await waitForLookupNetworkToComplete({
@@ -3793,11 +4844,15 @@ describe('NetworkController', () => {
               });
               expect(controller.store.getState().provider).toStrictEqual({
                 type: networkType,
-                rpcUrl: 'https://mock-rpc-url',
-                chainId: '0x999',
-                ticker: 'ETH',
-                nickname: '',
-                rpcPrefs: undefined,
+                rpcUrl: '',
+                chainId: BUILT_IN_NETWORKS[networkType].chainId,
+                ticker: BUILT_IN_NETWORKS[networkType].ticker,
+                chainName: '',
+                id: 'testNetworkConfigurationId1',
+                rpcPrefs: {
+                  blockExplorerUrl:
+                    BUILT_IN_NETWORKS[networkType].blockExplorerUrl,
+                },
               });
             },
           );
@@ -3813,6 +4868,23 @@ describe('NetworkController', () => {
                   // the network selected, it just needs to exist
                   chainId: '0x9999999',
                 },
+                networkDetails: {
+                  EIPS: {
+                    1559: false,
+                  },
+                },
+                networkConfigurations: {
+                  testNetworkConfigurationId: {
+                    id: 'testNetworkConfigurationId',
+                    rpcUrl: 'https://mock-rpc-url',
+                    chainId: '0xtest',
+                    chainName: 'test-chain',
+                    ticker: 'TEST',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer.com',
+                    },
+                  },
+                },
               },
             },
             async ({ controller, network: network1 }) => {
@@ -3827,7 +4899,7 @@ describe('NetworkController', () => {
               await waitForLookupNetworkToComplete({
                 controller,
                 operation: () => {
-                  controller.setRpcTarget('https://mock-rpc-url', '0x1337');
+                  controller.setActiveNetwork('testNetworkConfigurationId');
                 },
               });
 
@@ -3859,6 +4931,23 @@ describe('NetworkController', () => {
                   // the network selected, it just needs to exist
                   chainId: '0x9999999',
                 },
+                networkDetails: {
+                  EIPS: {
+                    1559: false,
+                  },
+                },
+                networkConfigurations: {
+                  testNetworkConfigurationId: {
+                    id: 'testNetworkConfigurationId',
+                    rpcUrl: 'https://mock-rpc-url',
+                    chainId: '0xtest',
+                    chainName: 'test-chain',
+                    ticker: 'TEST',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer.com',
+                    },
+                  },
+                },
               },
             },
             async ({ controller, network: network1 }) => {
@@ -3880,7 +4969,7 @@ describe('NetworkController', () => {
               await waitForLookupNetworkToComplete({
                 controller,
                 operation: () => {
-                  controller.setRpcTarget('https://mock-rpc-url', '0x1337');
+                  controller.setActiveNetwork('testNetworkConfigurationId');
                 },
               });
               expect(controller.store.getState().network).toBe('255');
@@ -3915,6 +5004,23 @@ describe('NetworkController', () => {
                   // the network selected, it just needs to exist
                   chainId: '0x9999999',
                 },
+                networkDetails: {
+                  EIPS: {
+                    1559: false,
+                  },
+                },
+                networkConfigurations: {
+                  testNetworkConfigurationId: {
+                    id: 'testNetworkConfigurationId',
+                    rpcUrl: 'https://mock-rpc-url',
+                    chainId: '0xtest',
+                    chainName: 'test-chain',
+                    ticker: 'TEST',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer.com',
+                    },
+                  },
+                },
               },
             },
             async ({ controller, network: network1 }) => {
@@ -3932,7 +5038,7 @@ describe('NetworkController', () => {
               await waitForLookupNetworkToComplete({
                 controller,
                 operation: () => {
-                  controller.setRpcTarget('https://mock-rpc-url', '0x1337');
+                  controller.setActiveNetwork('testNetworkConfigurationId');
                 },
               });
               expect(controller.store.getState().networkDetails).toStrictEqual({
@@ -3967,7 +5073,7 @@ describe('NetworkController', () => {
           );
         });
 
-        it(`initializes a provider pointed to the ${networkName} Infura network (chainId: ${chainId})`, async () => {
+        it(`initializes a provider pointed to the ${chainName} Infura network (chainId: ${chainId})`, async () => {
           await withController(
             {
               state: {
@@ -3976,6 +5082,23 @@ describe('NetworkController', () => {
                   // NOTE: This doesn't need to match the logical chain ID of
                   // the network selected, it just needs to exist
                   chainId: '0x9999999',
+                },
+                networkDetails: {
+                  EIPS: {
+                    1559: false,
+                  },
+                },
+                networkConfigurations: {
+                  testNetworkConfigurationId: {
+                    id: 'testNetworkConfigurationId',
+                    rpcUrl: 'https://mock-rpc-url',
+                    chainId: '0xtest',
+                    chainName: 'test-chain',
+                    ticker: 'TEST',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer.com',
+                    },
+                  },
                 },
               },
             },
@@ -3991,7 +5114,7 @@ describe('NetworkController', () => {
               await waitForLookupNetworkToComplete({
                 controller,
                 operation: () => {
-                  controller.setRpcTarget('https://mock-rpc-url', '0x1337');
+                  controller.setActiveNetwork('testNetworkConfigurationId');
                 },
               });
 
@@ -4024,6 +5147,23 @@ describe('NetworkController', () => {
                   // the network selected, it just needs to exist
                   chainId: '0x9999999',
                 },
+                networkDetails: {
+                  EIPS: {
+                    1559: false,
+                  },
+                },
+                networkConfigurations: {
+                  testNetworkConfigurationId: {
+                    id: 'testNetworkConfigurationId',
+                    rpcUrl: 'https://mock-rpc-url',
+                    chainId: '0xtest',
+                    chainName: 'test-chain',
+                    ticker: 'TEST',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer.com',
+                    },
+                  },
+                },
               },
             },
             async ({ controller, network: network1 }) => {
@@ -4038,7 +5178,7 @@ describe('NetworkController', () => {
               await waitForLookupNetworkToComplete({
                 controller,
                 operation: () => {
-                  controller.setRpcTarget('https://mock-rpc-url', '0x1337');
+                  controller.setActiveNetwork('testNetworkConfigurationId');
                 },
               });
 
@@ -4068,6 +5208,23 @@ describe('NetworkController', () => {
                   // the network selected, it just needs to exist
                   chainId: '0x9999999',
                 },
+                networkDetails: {
+                  EIPS: {
+                    1559: false,
+                  },
+                },
+                networkConfigurations: {
+                  testNetworkConfigurationId: {
+                    id: 'testNetworkConfigurationId',
+                    rpcUrl: 'https://mock-rpc-url',
+                    chainId: '0xtest',
+                    chainName: 'test-chain',
+                    ticker: 'TEST',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer.com',
+                    },
+                  },
+                },
               },
             },
             async ({ controller, network: network1 }) => {
@@ -4083,7 +5240,7 @@ describe('NetworkController', () => {
               await waitForLookupNetworkToComplete({
                 controller,
                 operation: () => {
-                  controller.setRpcTarget('https://mock-rpc-url', '0x1337');
+                  controller.setActiveNetwork('testNetworkConfigurationId');
                 },
               });
 
@@ -4114,6 +5271,23 @@ describe('NetworkController', () => {
                   // the network selected, it just needs to exist
                   chainId: '0x9999999',
                 },
+                networkDetails: {
+                  EIPS: {
+                    1559: false,
+                  },
+                },
+                networkConfigurations: {
+                  testNetworkConfigurationId: {
+                    id: 'testNetworkConfigurationId',
+                    rpcUrl: 'https://mock-rpc-url',
+                    chainId: '0xtest',
+                    chainName: 'test-chain',
+                    ticker: 'TEST',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer.com',
+                    },
+                  },
+                },
               },
             },
             async ({ controller, network: network1 }) => {
@@ -4129,7 +5303,7 @@ describe('NetworkController', () => {
               await waitForLookupNetworkToComplete({
                 controller,
                 operation: () => {
-                  controller.setRpcTarget('https://mock-rpc-url', '0x1337');
+                  controller.setActiveNetwork('testNetworkConfigurationId');
                 },
               });
 
@@ -4151,7 +5325,7 @@ describe('NetworkController', () => {
           );
         });
 
-        it(`persists "${networkVersion}" to state as the network version of ${networkName}`, async () => {
+        it(`persists "${networkVersion}" to state as the network version of ${chainName}`, async () => {
           await withController(
             {
               state: {
@@ -4160,6 +5334,23 @@ describe('NetworkController', () => {
                   // NOTE: This doesn't need to match the logical chain ID of
                   // the network selected, it just needs to exist
                   chainId: '0x9999999',
+                },
+                networkDetails: {
+                  EIPS: {
+                    1559: false,
+                  },
+                },
+                networkConfigurations: {
+                  testNetworkConfigurationId: {
+                    id: 'testNetworkConfigurationId',
+                    rpcUrl: 'https://mock-rpc-url',
+                    chainId: '0xtest',
+                    chainName: 'test-chain',
+                    ticker: 'TEST',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer.com',
+                    },
+                  },
                 },
               },
             },
@@ -4182,7 +5373,7 @@ describe('NetworkController', () => {
               await waitForLookupNetworkToComplete({
                 controller,
                 operation: () => {
-                  controller.setRpcTarget('https://mock-rpc-url', '0x1337');
+                  controller.setActiveNetwork('testNetworkConfigurationId');
                 },
               });
               expect(controller.store.getState().network).toBe('255');
@@ -4209,6 +5400,18 @@ describe('NetworkController', () => {
                   // the network selected, it just needs to exist
                   chainId: '0x9999999',
                 },
+                networkConfigurations: {
+                  testNetworkConfigurationId: {
+                    id: 'testNetworkConfigurationId',
+                    rpcUrl: 'https://mock-rpc-url',
+                    chainId: '0xtest',
+                    chainName: 'test-chain',
+                    ticker: 'TEST',
+                    rpcPrefs: {
+                      blockExplorerUrl: 'test-block-explorer.com',
+                    },
+                  },
+                },
               },
             },
             async ({ controller, network: network1 }) => {
@@ -4233,7 +5436,7 @@ describe('NetworkController', () => {
               await waitForLookupNetworkToComplete({
                 controller,
                 operation: () => {
-                  controller.setRpcTarget('https://mock-rpc-url', '0x1337');
+                  controller.setActiveNetwork('testNetworkConfigurationId');
                 },
               });
               expect(
@@ -4263,8 +5466,41 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkDetails: {
+                EIPS: {
+                  1559: false,
+                },
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -4289,7 +5525,11 @@ describe('NetworkController', () => {
               rpcUrl: '',
               chainId: '0x5',
               ticker: 'GoerliETH',
-              nickname: '',
+              chainName: '',
+              rpcPrefs: {
+                blockExplorerUrl: 'https://goerli.etherscan.io',
+              },
+              id: 'testNetworkConfigurationId2',
             });
 
             await waitForLookupNetworkToComplete({
@@ -4300,10 +5540,14 @@ describe('NetworkController', () => {
             });
             expect(controller.store.getState().provider).toStrictEqual({
               type: 'rpc',
-              rpcUrl: 'https://mock-rpc-url',
+              rpcUrl: 'https://mock-rpc-url-2',
               chainId: '0x1337',
-              ticker: 'GoerliETH',
-              nickname: '',
+              ticker: 'TEST2',
+              chainName: 'test-chain-2',
+              rpcPrefs: {
+                blockExplorerUrl: 'test-block-explorer-2.com',
+              },
+              id: 'testNetworkConfigurationId2',
             });
           },
         );
@@ -4315,8 +5559,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -4360,8 +5632,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -4409,8 +5709,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -4470,8 +5798,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -4516,8 +5872,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -4559,8 +5943,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -4604,8 +6016,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -4650,8 +6090,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -4696,8 +6164,36 @@ describe('NetworkController', () => {
             state: {
               provider: {
                 type: 'rpc',
-                rpcUrl: 'https://mock-rpc-url',
+                rpcUrl: 'https://mock-rpc-url-2',
                 chainId: '0x1337',
+                chainName: 'test-chain-2',
+                ticker: 'TEST2',
+                rpcPrefs: {
+                  blockExplorerUrl: 'test-block-explorer-2.com',
+                },
+                id: 'testNetworkConfigurationId2',
+              },
+              networkConfigurations: {
+                testNetworkConfigurationId1: {
+                  rpcUrl: 'https://mock-rpc-url',
+                  chainId: '0xtest',
+                  chainName: 'test-chain',
+                  ticker: 'TEST',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer.com',
+                  },
+                  id: 'testNetworkConfigurationId1',
+                },
+                testNetworkConfigurationId2: {
+                  rpcUrl: 'https://mock-rpc-url-2',
+                  chainId: '0x1337',
+                  chainName: 'test-chain-2',
+                  ticker: 'TEST2',
+                  rpcPrefs: {
+                    blockExplorerUrl: 'test-block-explorer-2.com',
+                  },
+                  id: 'testNetworkConfigurationId2',
+                },
               },
             },
           },
@@ -4739,6 +6235,225 @@ describe('NetworkController', () => {
             expect(
               controller.store.getState().networkDetails.EIPS['1559'],
             ).toBe(true);
+          },
+        );
+      });
+    });
+  });
+  describe('upsertNetworkConfiguration', () => {
+    it('throws if the given chain ID is not a 0x-prefixed hex number', async () => {
+      const invalidChainId = '1';
+      await withController(async ({ controller }) => {
+        expect(() =>
+          controller.upsertNetworkConfiguration({
+            chainId: invalidChainId,
+            chainName: 'RPC',
+            rpcPrefs: { blockExplorerUrl: 'test-block-explorer.com' },
+            rpcUrl: 'rpc_url',
+            ticker: 'RPC',
+          }),
+        ).toThrow(
+          new Error(
+            `Invalid chain ID "${invalidChainId}": invalid hex string.`,
+          ),
+        );
+      });
+    });
+
+    it('throws if the given chain ID is greater than the maximum allowed ID', async () => {
+      await withController(async ({ controller }) => {
+        expect(() =>
+          controller.upsertNetworkConfiguration({
+            chainId: '0xFFFFFFFFFFFFFFFF',
+            chainName: 'RPC',
+            rpcPrefs: { blockExplorerUrl: 'test-block-explorer.com' },
+            rpcUrl: 'rpc_url',
+            ticker: 'RPC',
+          }),
+        ).toThrow(
+          new Error(
+            'Invalid chain ID "0xFFFFFFFFFFFFFFFF": numerical value greater than max safe value.',
+          ),
+        );
+      });
+    });
+
+    it('should add the given network configuration if its rpcURL does not match an existing configuration without changing or overwriting other configurations', async () => {
+      v4.mockImplementationOnce(() => 'networkConfigurationId2');
+      await withController(
+        {
+          state: {
+            networkConfigurations: {
+              networkConfigurationId: {
+                rpcUrl: 'https://test-rpc-url',
+                ticker: 'ticker',
+                chainName: 'chainName',
+                rpcPrefs: { blockExplorerUrl: 'testchainscan.io' },
+                chainId: '0x1',
+                id: 'networkConfigurationId',
+              },
+            },
+          },
+        },
+        async ({ controller }) => {
+          const rpcUrlNetwork = {
+            chainId: '0x1',
+            chainName: 'RPC',
+            rpcPrefs: undefined,
+            rpcUrl: 'rpc_url',
+            ticker: 'RPC',
+          };
+
+          controller.upsertNetworkConfiguration(rpcUrlNetwork);
+
+          expect(
+            Object.values(controller.store.getState().networkConfigurations),
+          ).toStrictEqual(
+            expect.arrayContaining([
+              {
+                rpcUrl: 'https://test-rpc-url',
+                ticker: 'ticker',
+                chainName: 'chainName',
+                rpcPrefs: { blockExplorerUrl: 'testchainscan.io' },
+                chainId: '0x1',
+                id: 'networkConfigurationId',
+              },
+              { ...rpcUrlNetwork, id: 'networkConfigurationId2' },
+            ]),
+          );
+        },
+      );
+    });
+
+    it('should use the given configuration to update an existing network configuration that matches has a matching rpcUrl', async () => {
+      await withController(
+        {
+          state: {
+            networkConfigurations: {
+              networkConfigurationId: {
+                rpcUrl: 'test_rpc_url',
+                ticker: 'old_rpc_ticker',
+                chainName: 'old_rpc_chainName',
+                rpcPrefs: { blockExplorerUrl: 'testchainscan.io' },
+                chainId: '0x1',
+                id: 'networkConfigurationId',
+              },
+            },
+          },
+        },
+        async ({ controller }) => {
+          controller.upsertNetworkConfiguration({
+            rpcUrl: 'test_rpc_url',
+            ticker: 'new_rpc_ticker',
+            chainName: 'new_rpc_chainName',
+            rpcPrefs: { blockExplorerUrl: 'alternativetestchainscan.io' },
+            chainId: '0x1',
+          });
+          expect(
+            Object.values(controller.store.getState().networkConfigurations),
+          ).toStrictEqual([
+            expect.objectContaining({
+              rpcUrl: 'test_rpc_url',
+              chainName: 'new_rpc_chainName',
+              ticker: 'new_rpc_ticker',
+              rpcPrefs: { blockExplorerUrl: 'alternativetestchainscan.io' },
+              chainId: '0x1',
+            }),
+          ]);
+        },
+      );
+    });
+
+    it('should use the given configuration to update an existing network configuration that has a matching rpcUrl without changing or overwriting other networkConfigurations', async () => {
+      await withController(
+        {
+          state: {
+            networkConfigurations: {
+              networkConfigurationId: {
+                rpcUrl: 'https://test-rpc-url',
+                ticker: 'ticker',
+                chainName: 'chainName',
+                rpcPrefs: { blockExplorerUrl: 'testchainscan.io' },
+                chainId: '0x1',
+                id: 'networkConfigurationId',
+              },
+              networkConfigurationId2: {
+                rpcUrl: 'https://test-rpc-url-2',
+                ticker: 'ticker-2',
+                chainName: 'chainName-2',
+                rpcPrefs: { blockExplorerUrl: 'testchainscan.io' },
+                chainId: '0x9999',
+                id: 'networkConfigurationId2',
+              },
+            },
+          },
+        },
+        async ({ controller }) => {
+          controller.upsertNetworkConfiguration({
+            rpcUrl: 'https://test-rpc-url',
+            ticker: 'new-ticker',
+            chainName: 'new-chainName',
+            rpcPrefs: { blockExplorerUrl: 'alternativetestchainscan.io' },
+            chainId: '0x1',
+          });
+
+          expect(
+            Object.values(controller.store.getState().networkConfigurations),
+          ).toStrictEqual([
+            {
+              rpcUrl: 'https://test-rpc-url',
+              ticker: 'new-ticker',
+              chainName: 'new-chainName',
+              rpcPrefs: { blockExplorerUrl: 'alternativetestchainscan.io' },
+              chainId: '0x1',
+              id: 'networkConfigurationId',
+            },
+            {
+              rpcUrl: 'https://test-rpc-url-2',
+              ticker: 'ticker-2',
+              chainName: 'chainName-2',
+              rpcPrefs: { blockExplorerUrl: 'testchainscan.io' },
+              chainId: '0x9999',
+              id: 'networkConfigurationId2',
+            },
+          ]);
+        },
+      );
+    });
+
+    describe('removeNetworkConfigurations', () => {
+      it('should remove a network configuration', async () => {
+        const networkConfigurationId = 'networkConfigurationId';
+        await withController(
+          {
+            state: {
+              networkConfigurations: {
+                [networkConfigurationId]: {
+                  rpcUrl: 'test_rpc_url',
+                  ticker: 'old_rpc_ticker',
+                  chainName: 'old_rpc_chainName',
+                  rpcPrefs: { blockExplorerUrl: 'testchainscan.io' },
+                  chainId: '1',
+                },
+              },
+            },
+          },
+          async ({ controller }) => {
+            expect(
+              Object.values(controller.store.getState().networkConfigurations),
+            ).toStrictEqual([
+              {
+                rpcUrl: 'test_rpc_url',
+                ticker: 'old_rpc_ticker',
+                chainName: 'old_rpc_chainName',
+                rpcPrefs: { blockExplorerUrl: 'testchainscan.io' },
+                chainId: '1',
+              },
+            ]);
+            controller.removeNetworkConfiguration(networkConfigurationId);
+            expect(
+              controller.store.getState().networkConfigurations,
+            ).toStrictEqual({});
           },
         );
       });

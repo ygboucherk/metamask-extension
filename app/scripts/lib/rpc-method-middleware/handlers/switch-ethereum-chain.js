@@ -18,26 +18,26 @@ const switchEthereumChain = {
   implementation: switchEthereumChainHandler,
   hookNames: {
     getCurrentChainId: true,
-    findCustomRpcBy: true,
+    findNetworkConfigurationBy: true,
     setProviderType: true,
-    updateRpcTarget: true,
+    setActiveNetwork: true,
     requestUserApproval: true,
   },
 };
 export default switchEthereumChain;
 
-function findExistingNetwork(chainId, findCustomRpcBy) {
+function findExistingNetwork(chainId, findNetworkConfigurationBy) {
   if (chainId in CHAIN_ID_TO_TYPE_MAP) {
     return {
       chainId,
       ticker: CURRENCY_SYMBOLS.ETH,
-      nickname: NETWORK_TO_NAME_MAP[chainId],
+      chainName: NETWORK_TO_NAME_MAP[chainId],
       rpcUrl: CHAIN_ID_TO_RPC_URL_MAP[chainId],
       type: CHAIN_ID_TO_TYPE_MAP[chainId],
     };
   }
 
-  return findCustomRpcBy({ chainId });
+  return findNetworkConfigurationBy({ chainId });
 }
 
 async function switchEthereumChainHandler(
@@ -47,9 +47,9 @@ async function switchEthereumChainHandler(
   end,
   {
     getCurrentChainId,
-    findCustomRpcBy,
+    findNetworkConfigurationBy,
     setProviderType,
-    updateRpcTarget,
+    setActiveNetwork,
     requestUserApproval,
   },
 ) {
@@ -95,7 +95,7 @@ async function switchEthereumChainHandler(
     );
   }
 
-  const requestData = findExistingNetwork(_chainId, findCustomRpcBy);
+  const requestData = findExistingNetwork(_chainId, findNetworkConfigurationBy);
   if (requestData) {
     const currentChainId = getCurrentChainId();
     if (currentChainId === _chainId) {
@@ -114,7 +114,7 @@ async function switchEthereumChainHandler(
       ) {
         setProviderType(approvedRequestData.type);
       } else {
-        await updateRpcTarget(approvedRequestData);
+        await setActiveNetwork(approvedRequestData);
       }
       res.result = null;
     } catch (error) {

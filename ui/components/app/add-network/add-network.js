@@ -21,7 +21,7 @@ import Tooltip from '../../ui/tooltip';
 import IconWithFallback from '../../ui/icon-with-fallback';
 import IconBorder from '../../ui/icon-border';
 import {
-  getFrequentRpcListDetail,
+  getNetworkConfigurations,
   getUnapprovedConfirmations,
 } from '../../../selectors';
 
@@ -38,25 +38,26 @@ import { ADD_NETWORK_ROUTE } from '../../../helpers/constants/routes';
 import { getEnvironmentType } from '../../../../app/scripts/lib/util';
 import ZENDESK_URLS from '../../../helpers/constants/zendesk-url';
 import { Icon, ICON_NAMES, ICON_SIZES } from '../../component-library';
+import { EVENT } from '../../../../shared/constants/metametrics';
 
 const AddNetwork = () => {
   const t = useContext(I18nContext);
   const dispatch = useDispatch();
   const history = useHistory();
-  const frequentRpcList = useSelector(getFrequentRpcListDetail);
+  const networkConfigurations = useSelector(getNetworkConfigurations);
 
-  const frequentRpcListChainIds = Object.values(frequentRpcList).map(
+  const networkConfigurationChainIds = Object.values(networkConfigurations).map(
     (net) => net.chainId,
   );
 
   const infuraRegex = /infura.io/u;
 
   const nets = FEATURED_RPCS.sort((a, b) =>
-    a.nickname > b.nickname ? 1 : -1,
+    a.chainName > b.chainName ? 1 : -1,
   ).slice(0, FEATURED_RPCS.length);
 
-  const notFrequentRpcNetworks = nets.filter(
-    (net) => frequentRpcListChainIds.indexOf(net.chainId) === -1,
+  const notExistingNetworkConfigurations = nets.filter(
+    (net) => networkConfigurationChainIds.indexOf(net.chainId) === -1,
   );
   const unapprovedConfirmations = useSelector(getUnapprovedConfirmations);
   const [showPopover, setShowPopover] = useState(false);
@@ -80,7 +81,7 @@ const AddNetwork = () => {
 
   return (
     <>
-      {Object.keys(notFrequentRpcNetworks).length === 0 ? (
+      {Object.keys(notExistingNetworkConfigurations).length === 0 ? (
         <Box
           className="add-network__edge-case-box"
           borderRadius={BorderRadius.MD}
@@ -178,7 +179,7 @@ const AddNetwork = () => {
             >
               {t('popularCustomNetworks')}
             </Typography>
-            {notFrequentRpcNetworks.map((item, index) => (
+            {notExistingNetworkConfigurations.map((item, index) => (
               <Box
                 key={index}
                 display={DISPLAY.FLEX}
@@ -192,7 +193,7 @@ const AddNetwork = () => {
                     <IconBorder size={24}>
                       <IconWithFallback
                         icon={item.rpcPrefs.imageUrl}
-                        name={item.nickname}
+                        name={item.chainName}
                         size={24}
                       />
                     </IconBorder>
@@ -203,7 +204,7 @@ const AddNetwork = () => {
                       color={TextColor.textDefault}
                       fontWeight={FONT_WEIGHT.BOLD}
                     >
-                      {item.nickname}
+                      {item.chainName}
                     </Typography>
                   </Box>
                 </Box>
@@ -250,7 +251,12 @@ const AddNetwork = () => {
                     type="inline"
                     className="add-network__add-button"
                     onClick={async () => {
-                      await dispatch(requestAddNetworkApproval(item, true));
+                      await dispatch(
+                        requestAddNetworkApproval(
+                          item,
+                          EVENT.SOURCE.NETWORK.POPULAR_NETWORK_LIST,
+                        ),
+                      );
                     }}
                   >
                     {t('add')}

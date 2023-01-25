@@ -18,35 +18,6 @@ import { deferredPromise } from './lib/util';
 
 const Ganache = require('../../test/e2e/ganache');
 
-const NOTIFICATION_ID = 'NHL8f2eSSTn9TKBamRLiU';
-
-const firstTimeState = {
-  config: {},
-  NetworkController: {
-    provider: {
-      type: NETWORK_TYPES.RPC,
-      rpcUrl: 'http://localhost:8545',
-      chainId: '0x539',
-    },
-    networkDetails: {
-      EIPS: {
-        1559: false,
-      },
-    },
-  },
-  NotificationController: {
-    notifications: {
-      [NOTIFICATION_ID]: {
-        id: NOTIFICATION_ID,
-        origin: 'local:http://localhost:8086/',
-        createdDate: 1652967897732,
-        readDate: null,
-        message: 'Hello, http://localhost:8086!',
-      },
-    },
-  },
-};
-
 const ganacheServer = new Ganache();
 
 const browserPolyfillMock = {
@@ -99,8 +70,78 @@ const TEST_ADDRESS_3 = '0xeb9e64b93097bc15f01f13eae97015c57ab64823';
 const TEST_SEED_ALT =
   'setup olympic issue mobile velvet surge alcohol burger horse view reopen gentle';
 const TEST_ADDRESS_ALT = '0xc42edfcc21ed14dda456aa0756c153f7985d8813';
-const CUSTOM_RPC_URL = 'http://localhost:8545';
-const CUSTOM_RPC_CHAIN_ID = '0x539';
+
+const NOTIFICATION_ID = 'NHL8f2eSSTn9TKBamRLiU';
+
+const ALT_MAINNET_RPC_URL = 'http://localhost:8545';
+const POLYGON_RPC_URL = 'https://polygon.llamarpc.com';
+const POLYGON_RPC_URL_2 = 'https://polygon-rpc.com';
+
+const NETWORK_CONFIGURATION_ID_1 = 'networkConfigurationId1';
+const NETWORK_CONFIGURATION_ID_2 = 'networkConfigurationId2';
+const NETWORK_CONFIGURATION_ID_3 = 'networkConfigurationId3';
+
+const ETH = 'ETH';
+const MATIC = 'MATIC';
+
+const POLYGON_CHAIN_ID = '0x89';
+const MAINNET_CHAIN_ID = '0x1';
+
+const firstTimeState = {
+  config: {},
+  NetworkController: {
+    provider: {
+      type: NETWORK_TYPES.RPC,
+      rpcUrl: ALT_MAINNET_RPC_URL,
+      chainId: MAINNET_CHAIN_ID,
+      ticker: ETH,
+      chainName: 'Alt Mainnet',
+      id: NETWORK_CONFIGURATION_ID_1,
+    },
+    networkConfigurations: {
+      [NETWORK_CONFIGURATION_ID_1]: {
+        rpcUrl: ALT_MAINNET_RPC_URL,
+        type: NETWORK_TYPES.RPC,
+        chainId: MAINNET_CHAIN_ID,
+        ticker: ETH,
+        chainName: 'Alt Mainnet',
+        id: NETWORK_CONFIGURATION_ID_1,
+      },
+      [NETWORK_CONFIGURATION_ID_2]: {
+        rpcUrl: POLYGON_RPC_URL,
+        type: NETWORK_TYPES.RPC,
+        chainId: POLYGON_CHAIN_ID,
+        ticker: MATIC,
+        chainName: 'Polygon',
+        id: NETWORK_CONFIGURATION_ID_2,
+      },
+      [NETWORK_CONFIGURATION_ID_3]: {
+        rpcUrl: POLYGON_RPC_URL_2,
+        type: NETWORK_TYPES.RPC,
+        chainId: POLYGON_CHAIN_ID,
+        ticker: MATIC,
+        chainName: 'Alt Polygon',
+        id: NETWORK_CONFIGURATION_ID_1,
+      },
+    },
+    networkDetails: {
+      EIPS: {
+        1559: false,
+      },
+    },
+  },
+  NotificationController: {
+    notifications: {
+      [NOTIFICATION_ID]: {
+        id: NOTIFICATION_ID,
+        origin: 'local:http://localhost:8086/',
+        createdDate: 1652967897732,
+        readDate: null,
+        message: 'Hello, http://localhost:8086!',
+      },
+    },
+  },
+};
 
 describe('MetaMaskController', function () {
   let metamaskController;
@@ -679,26 +720,6 @@ describe('MetaMaskController', function () {
     });
   });
 
-  describe('#setCustomRpc', function () {
-    it('returns custom RPC that when called', async function () {
-      const rpcUrl = await metamaskController.setCustomRpc(
-        CUSTOM_RPC_URL,
-        CUSTOM_RPC_CHAIN_ID,
-      );
-      assert.equal(rpcUrl, CUSTOM_RPC_URL);
-    });
-
-    it('changes the network controller rpc', async function () {
-      await metamaskController.setCustomRpc(
-        CUSTOM_RPC_URL,
-        CUSTOM_RPC_CHAIN_ID,
-      );
-      const networkControllerState =
-        metamaskController.networkController.store.getState();
-      assert.equal(networkControllerState.provider.rpcUrl, CUSTOM_RPC_URL);
-    });
-  });
-
   describe('#addNewAccount', function () {
     it('errors when an primary keyring is does not exist', async function () {
       const addNewAccount = metamaskController.addNewAccount();
@@ -1270,6 +1291,204 @@ describe('MetaMaskController', function () {
       assert.ok(
         !Object.values(state).includes(NOTIFICATION_ID),
         'Object should not include the deleted notification',
+      );
+    });
+  });
+
+  describe('findNetworkConfigurationBy', function () {
+    it('returns null if passed an object containing a valid networkConfiguration key but no matching value is found', function () {
+      assert.strictEqual(
+        metamaskController.findNetworkConfigurationBy({
+          chainId: '0xnone',
+        }),
+        null,
+      );
+    });
+    it('returns null if passed an object containing an invalid networkConfiguration key', function () {
+      assert.strictEqual(
+        metamaskController.findNetworkConfigurationBy({
+          invalidKey: '0xnone',
+        }),
+        null,
+      );
+    });
+
+    it('returns matching networkConfiguration when passed a chainId that matches an existing configuration', function () {
+      assert.deepStrictEqual(
+        metamaskController.findNetworkConfigurationBy({
+          chainId: MAINNET_CHAIN_ID,
+        }),
+        {
+          chainId: MAINNET_CHAIN_ID,
+          chainName: 'Alt Mainnet',
+          id: NETWORK_CONFIGURATION_ID_1,
+          rpcUrl: ALT_MAINNET_RPC_URL,
+          ticker: ETH,
+          type: NETWORK_TYPES.RPC,
+        },
+      );
+    });
+
+    it('returns matching networkConfiguration when passed a ticker that matches an existing configuration', function () {
+      assert.deepStrictEqual(
+        metamaskController.findNetworkConfigurationBy({
+          ticker: MATIC,
+        }),
+        {
+          rpcUrl: POLYGON_RPC_URL,
+          type: NETWORK_TYPES.RPC,
+          chainId: POLYGON_CHAIN_ID,
+          ticker: MATIC,
+          chainName: 'Polygon',
+          id: NETWORK_CONFIGURATION_ID_2,
+        },
+      );
+    });
+
+    it('returns matching networkConfiguration when passed a chainName that matches an existing configuration', function () {
+      assert.deepStrictEqual(
+        metamaskController.findNetworkConfigurationBy({
+          chainName: 'Alt Mainnet',
+        }),
+        {
+          chainId: MAINNET_CHAIN_ID,
+          chainName: 'Alt Mainnet',
+          id: NETWORK_CONFIGURATION_ID_1,
+          rpcUrl: ALT_MAINNET_RPC_URL,
+          ticker: ETH,
+          type: NETWORK_TYPES.RPC,
+        },
+      );
+    });
+
+    it('returns null if passed an object containing mismatched networkConfiguration key/value combination', function () {
+      assert.deepStrictEqual(
+        metamaskController.findNetworkConfigurationBy({
+          chainName: MAINNET_CHAIN_ID,
+        }),
+        null,
+      );
+    });
+
+    it('returns the first networkConfiguration added if passed an key/value combination for which there are multiple matching configurations', function () {
+      assert.deepStrictEqual(
+        metamaskController.findNetworkConfigurationBy({
+          chainId: POLYGON_CHAIN_ID,
+        }),
+        {
+          rpcUrl: POLYGON_RPC_URL,
+          type: NETWORK_TYPES.RPC,
+          chainId: POLYGON_CHAIN_ID,
+          ticker: MATIC,
+          chainName: 'Polygon',
+          id: NETWORK_CONFIGURATION_ID_2,
+        },
+      );
+    });
+  });
+
+  describe('upsertNetworkConfiguration', function () {
+    it('adds new networkConfiguration to networkController store and does not set it as active if no options arg is passed', async function () {
+      const newNetworkConfiguration = {
+        rpcUrl: 'https://new-chain-rpc-url',
+        chainId: '0x9999',
+        ticker: 'NEW',
+        chainName: 'new-chain',
+        rpcPrefs: {},
+      };
+      const networkConfigurationId =
+        await metamaskController.upsertNetworkConfiguration(
+          newNetworkConfiguration,
+        );
+      assert.deepStrictEqual(
+        metamaskController.networkController.store.getState()
+          .networkConfigurations[networkConfigurationId],
+        { ...newNetworkConfiguration, id: networkConfigurationId },
+      );
+    });
+
+    it('adds new networkConfiguration to networkController store and sets it as current provider if options.setActive is true', async function () {
+      const newNetworkConfiguration = {
+        rpcUrl: 'https://new-chain-rpc-url',
+        chainId: '0x9999',
+        ticker: 'NEW',
+        chainName: 'new-chain',
+        rpcPrefs: {},
+      };
+      const networkConfigurationId =
+        await metamaskController.upsertNetworkConfiguration(
+          newNetworkConfiguration,
+          { setActive: true },
+        );
+
+      assert.deepStrictEqual(
+        metamaskController.networkController.store.getState()
+          .networkConfigurations[networkConfigurationId],
+        { ...newNetworkConfiguration, id: networkConfigurationId },
+      );
+
+      assert.deepStrictEqual(
+        metamaskController.networkController.store.getState().provider,
+        {
+          ...newNetworkConfiguration,
+          id: networkConfigurationId,
+          type: NETWORK_TYPES.RPC,
+        },
+      );
+    });
+
+    it('adds new networkConfiguration to networkController store and calls to the metametrics event tracking with the correct values', async function () {
+      sinon.spy(metamaskController.metaMetricsController, 'trackEvent');
+
+      const newNetworkConfiguration = {
+        rpcUrl: 'https://new-chain-rpc-url',
+        chainId: '0x9999',
+        ticker: 'NEW',
+        chainName: 'new-chain',
+        rpcPrefs: {},
+      };
+
+      await metamaskController.upsertNetworkConfiguration(
+        newNetworkConfiguration,
+        { source: 'https://chainlist.org/' },
+      );
+
+      assert(
+        metamaskController.metaMetricsController.trackEvent.calledWith({
+          event: 'Custom Network Added',
+          category: 'Network',
+          referrer: {
+            url: 'https://chainlist.org/',
+          },
+          properties: {
+            chain_id: '0x9999',
+            symbol: 'NEW',
+            source: 'dapp',
+          },
+        }),
+      );
+    });
+
+    it('adds new networkConfiguration to networkController store, but only adds valid properties (rpcUrl, chainId, ticker, chainName, rpcPrefs) and fills any missing properties from this list as undefined', async function () {
+      const networkConfigurationId =
+        await metamaskController.upsertNetworkConfiguration({
+          rpcUrl: 'https://new-chain-rpc-url',
+          chainId: '0x9999',
+          ticker: 'NEW',
+          invalidKey: 'new-chain',
+          invalidKey2: {},
+        });
+      assert.deepStrictEqual(
+        metamaskController.networkController.store.getState()
+          .networkConfigurations[networkConfigurationId],
+        {
+          rpcUrl: 'https://new-chain-rpc-url',
+          chainId: '0x9999',
+          ticker: 'NEW',
+          chainName: undefined,
+          rpcPrefs: undefined,
+          id: networkConfigurationId,
+        },
       );
     });
   });
