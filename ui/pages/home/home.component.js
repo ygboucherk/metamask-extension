@@ -134,8 +134,7 @@ export default class Home extends PureComponent {
         );
       }
     },
-    newNetworkAdded: PropTypes.string,
-    setNewNetworkAdded: PropTypes.func.isRequired,
+    newNetworkAddedName: PropTypes.string,
     // This prop is used in the `shouldCloseNotificationPopup` function
     // eslint-disable-next-line react/no-unused-prop-types
     isSigningQRHardwareTransaction: PropTypes.bool.isRequired,
@@ -146,9 +145,9 @@ export default class Home extends PureComponent {
     closeNotificationPopup: PropTypes.func.isRequired,
     newTokensImported: PropTypes.string,
     setNewTokensImported: PropTypes.func.isRequired,
-    newCustomNetworkAdded: PropTypes.object,
-    clearNewCustomNetworkAdded: PropTypes.func,
-    setRpcTarget: PropTypes.func,
+    newNetworkAddedUUID: PropTypes.string,
+    clearNewNetworkAdded: PropTypes.func,
+    setNetworkTarget: PropTypes.func,
     onboardedInThisUISession: PropTypes.bool,
   };
 
@@ -273,17 +272,16 @@ export default class Home extends PureComponent {
       ///: END:ONLY_INCLUDE_IN
       infuraBlocked,
       showOutdatedBrowserWarning,
-      newNetworkAdded,
-      setNewNetworkAdded,
       newNftAddedMessage,
+      newNetworkAddedName,
       setNewCollectibleAddedMessage,
       removeNftMessage,
       setRemoveCollectibleMessage,
       newTokensImported,
       setNewTokensImported,
-      newCustomNetworkAdded,
-      clearNewCustomNetworkAdded,
-      setRpcTarget,
+      newNetworkAddedUUID,
+      clearNewNetworkAdded,
+      setNetworkTarget,
     } = this.props;
 
     const onAutoHide = () => {
@@ -381,7 +379,7 @@ export default class Home extends PureComponent {
             }
           />
         ) : null}
-        {newNetworkAdded ? (
+        {newNetworkAddedName ? (
           <ActionableMessage
             type="success"
             className="home__new-network-notification"
@@ -392,12 +390,12 @@ export default class Home extends PureComponent {
                   variant={TypographyVariant.H7}
                   fontWeight={FONT_WEIGHT.NORMAL}
                 >
-                  {t('newNetworkAdded', [newNetworkAdded])}
+                  {t('newNetworkAdded', [newNetworkAddedName])}
                 </Typography>
                 <button
                   className="fas fa-times home__new-network-notification-close"
                   title={t('close')}
-                  onClick={() => setNewNetworkAdded('')}
+                  onClick={() => clearNewNetworkAdded()}
                 />
               </Box>
             }
@@ -506,7 +504,7 @@ export default class Home extends PureComponent {
             key="home-outdatedBrowserNotification"
           />
         ) : null}
-        {Object.keys(newCustomNetworkAdded).length !== 0 && (
+        {newNetworkAddedUUID && (
           <Popover className="home__new-network-added">
             <i className="fa fa-check-circle fa-2x home__new-network-added__check-circle" />
             <Typography
@@ -524,13 +522,8 @@ export default class Home extends PureComponent {
                 type="primary"
                 className="home__new-network-added__switch-to-button"
                 onClick={() => {
-                  setRpcTarget(
-                    newCustomNetworkAdded.rpcUrl,
-                    newCustomNetworkAdded.chainId,
-                    newCustomNetworkAdded.ticker,
-                    newCustomNetworkAdded.chainName,
-                  );
-                  clearNewCustomNetworkAdded();
+                  setNetworkTarget(newNetworkAddedUUID);
+                  clearNewNetworkAdded();
                 }}
               >
                 <Typography
@@ -538,13 +531,10 @@ export default class Home extends PureComponent {
                   fontWeight={FONT_WEIGHT.NORMAL}
                   color={TextColor.primaryInverse}
                 >
-                  {t('switchToNetwork', [newCustomNetworkAdded.chainName])}
+                  {t('switchToNetwork', [newNetworkAddedName])}
                 </Typography>
               </Button>
-              <Button
-                type="secondary"
-                onClick={() => clearNewCustomNetworkAdded()}
-              >
+              <Button type="secondary" onClick={() => clearNewNetworkAdded()}>
                 <Typography
                   variant={TypographyVariant.H6}
                   fontWeight={FONT_WEIGHT.NORMAL}
@@ -627,7 +617,7 @@ export default class Home extends PureComponent {
       completedOnboarding,
       shouldShowSeedPhraseReminder,
       onboardedInThisUISession,
-      newCustomNetworkAdded,
+      newNetworkAddedUUID,
     } = this.props;
 
     if (forgottenPassword) {
@@ -643,7 +633,7 @@ export default class Home extends PureComponent {
       showWhatsNewPopup &&
       !showPortfolioTooltip &&
       !portfolioTooltipWasShownInThisSession &&
-      Object.keys(newCustomNetworkAdded).length === 0;
+      !newNetworkAddedUUID;
     return (
       <div className="main-container">
         <Route path={CONNECTED_ROUTE} component={ConnectedSites} exact />

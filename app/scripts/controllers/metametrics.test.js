@@ -932,11 +932,17 @@ describe('MetaMetricsController', function () {
           },
         },
         allTokens: MOCK_ALL_TOKENS,
-        frequentRpcListDetail: [
-          { chainId: CHAIN_IDS.MAINNET, ticker: CURRENCY_SYMBOLS.ETH },
-          { chainId: CHAIN_IDS.GOERLI, ticker: CURRENCY_SYMBOLS.TEST_ETH },
-          { chainId: '0xaf' },
-        ],
+        networkConfigurations: {
+          'test-uuid-1': {
+            chainId: CHAIN_IDS.MAINNET,
+            ticker: CURRENCY_SYMBOLS.ETH,
+          },
+          'test-uuid-2': {
+            chainId: CHAIN_IDS.GOERLI,
+            ticker: CURRENCY_SYMBOLS.TEST_ETH,
+          },
+          'test-uuid-3': { chainId: '0xaf' },
+        },
         identities: [{}, {}],
         ledgerTransportType: 'web-hid',
         openSeaEnabled: true,
@@ -971,10 +977,10 @@ describe('MetaMetricsController', function () {
           [CHAIN_IDS.GOERLI]: [{ address: '0x' }, { address: '0x0' }],
         },
         allTokens: {},
-        frequentRpcListDetail: [
-          { chainId: CHAIN_IDS.MAINNET },
-          { chainId: CHAIN_IDS.GOERLI },
-        ],
+        networkConfigurations: {
+          'test-uuid-1': { chainId: CHAIN_IDS.MAINNET },
+          'test-uuid-2': { chainId: CHAIN_IDS.GOERLI },
+        },
         ledgerTransportType: 'web-hid',
         openSeaEnabled: true,
         identities: [{}, {}],
@@ -991,10 +997,10 @@ describe('MetaMetricsController', function () {
         allTokens: {
           '0x1': { '0xabcde': [{ '0x12345': { address: '0xtestAddress' } }] },
         },
-        frequentRpcListDetail: [
-          { chainId: CHAIN_IDS.MAINNET },
-          { chainId: CHAIN_IDS.GOERLI },
-        ],
+        networkConfigurations: {
+          'test-uuid-1': { chainId: CHAIN_IDS.MAINNET },
+          'test-uuid-2': { chainId: CHAIN_IDS.GOERLI },
+        },
         ledgerTransportType: 'web-hid',
         openSeaEnabled: false,
         identities: [{}, {}, {}],
@@ -1019,10 +1025,10 @@ describe('MetaMetricsController', function () {
           [CHAIN_IDS.GOERLI]: [{ address: '0x' }, { address: '0x0' }],
         },
         allTokens: {},
-        frequentRpcListDetail: [
-          { chainId: CHAIN_IDS.MAINNET },
-          { chainId: CHAIN_IDS.GOERLI },
-        ],
+        networkConfigurations: {
+          'test-uuid-1': { chainId: CHAIN_IDS.MAINNET },
+          'test-uuid-2': { chainId: CHAIN_IDS.GOERLI },
+        },
         ledgerTransportType: 'web-hid',
         openSeaEnabled: true,
         identities: [{}, {}],
@@ -1037,10 +1043,10 @@ describe('MetaMetricsController', function () {
           [CHAIN_IDS.GOERLI]: [{ address: '0x' }, { address: '0x0' }],
         },
         allTokens: {},
-        frequentRpcListDetail: [
-          { chainId: CHAIN_IDS.MAINNET },
-          { chainId: CHAIN_IDS.GOERLI },
-        ],
+        networkConfigurations: {
+          'test-uuid-1': { chainId: CHAIN_IDS.MAINNET },
+          'test-uuid-2': { chainId: CHAIN_IDS.GOERLI },
+        },
         ledgerTransportType: 'web-hid',
         openSeaEnabled: true,
         identities: [{}, {}],

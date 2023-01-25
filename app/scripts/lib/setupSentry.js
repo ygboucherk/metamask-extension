@@ -56,7 +56,7 @@ export const SENTRY_STATE = {
     participateInMetaMetrics: true,
     preferences: true,
     provider: {
-      nickname: true,
+      chainName: true,
       ticker: true,
       type: true,
     },
