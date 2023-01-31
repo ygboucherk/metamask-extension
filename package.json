@@ -91,6 +91,7 @@
     "test-storybook:ci": "concurrently -k -s first -n \"SB,TEST\" -c \"magenta,blue\" \"yarn storybook:build && npx http-server storybook-build --port 6006 \" \"wait-on tcp:6006 && yarn test-storybook --maxWorkers=2\""
   },
   "resolutions": {
+    "@metamask/phishing-warning/ses": "^0.18.1",
     "analytics-node/axios": "^0.21.2",
     "cookiejar": "^2.1.4",
     "ganache-core/lodash": "^4.17.21",
@@ -340,7 +341,7 @@
     "remove-trailing-slash": "^0.1.1",
     "reselect": "^3.0.1",
     "safe-event-emitter": "^1.0.1",
-    "ses": "^0.12.4",
+    "ses": "^0.18.1",
     "single-call-balance-checker-abi": "^1.0.0",
     "swappable-obj-proxy": "^1.1.0",
     "unicode-confusables": "^0.1.1",
