@@ -1,4 +1,4 @@
-import 'ses/lockdown';
+import 'ses/dist/lockdown';
 import '../../app/scripts/lockdown-run';
 import '../../app/scripts/lockdown-more';
 import {
@@ -13,3 +13,5 @@ describe('non-modifiable intrinsics', function () {
     });
   });
 });
+
+// Test that TypedArray's are no longer modifiable after lockdown
