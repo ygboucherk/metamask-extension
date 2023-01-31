@@ -13,5 +13,3 @@ describe('non-modifiable intrinsics', function () {
     });
   });
 });
-
-// Test that TypedArray's are no longer modifiable after lockdown
