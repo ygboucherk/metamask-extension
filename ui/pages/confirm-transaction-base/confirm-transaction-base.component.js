@@ -60,6 +60,7 @@ import {
   hexWEIToDecGWEI,
 } from '../../../shared/modules/conversion.utils';
 import TransactionAlerts from '../../components/app/transaction-alerts';
+import { Icon, ICON_NAMES } from '../../components/component-library';
 
 const renderHeartBeatIfNotInTest = () =>
   process.env.IN_TEST ? null : <LoadingHeartBeat />;
@@ -458,7 +459,7 @@ export default class ConfirmTransactionBase extends Component {
                   contentText={t('transactionDetailDappGasTooltip')}
                   position="top"
                 >
-                  <i className="fa fa-info-circle" />
+                  <Icon name={ICON_NAMES.INFO} />
                 </InfoTooltip>
               </>
             ) : (
@@ -486,7 +487,7 @@ export default class ConfirmTransactionBase extends Component {
                   }
                   position="top"
                 >
-                  <i className="fa fa-info-circle" />
+                  <Icon name={ICON_NAMES.INFO} />
                 </InfoTooltip>
               </>
             )
