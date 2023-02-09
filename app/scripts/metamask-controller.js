@@ -17,7 +17,7 @@ import {
 } from 'eth-rpc-errors';
 import { Mutex } from 'await-semaphore';
 import log from 'loglevel';
-import TrezorKeyring from 'eth-trezor-keyring';
+import { TrezorKeyring, TrezorBridgeMv2 } from 'eth-trezor-keyring';
 import LedgerBridgeKeyring from '@metamask/eth-ledger-bridge-keyring';
 import LatticeKeyring from 'eth-lattice-keyring';
 import { MetaMaskKeyring as QRHardwareKeyring } from '@keystonehq/metamask-airgapped-keyring';
@@ -110,6 +110,7 @@ import { STATIC_MAINNET_TOKEN_LIST } from '../../shared/constants/tokens';
 import { getTokenValueParam } from '../../shared/lib/metamask-controller-utils';
 import { isManifestV3 } from '../../shared/modules/mv3.utils';
 import { hexToDecimal } from '../../shared/modules/conversion.utils';
+import { TrezorBridgeMv3 } from './lib/trezor-bridge-mv3';
 import {
   onMessageReceived,
   checkForMultipleVersionsRunning,
@@ -642,18 +643,28 @@ export default class MetamaskController extends EventEmitter {
       await opts.openPopup();
     });
 
-    let additionalKeyrings = [keyringBuilderFactory(QRHardwareKeyring)];
+    let additionalKeyrings;
 
-    if (this.canUseHardwareWallets()) {
-      const additionalKeyringTypes = [
-        TrezorKeyring,
-        LedgerBridgeKeyring,
-        LatticeKeyring,
-        QRHardwareKeyring,
+    if (isManifestV3) {
+      const TrezorBuilder = () =>
+        new TrezorKeyring({ bridge: new TrezorBridgeMv3() });
+      TrezorBuilder.type = TrezorKeyring.type;
+
+      additionalKeyrings = [
+        keyringBuilderFactory(QRHardwareKeyring),
+        TrezorBuilder,
       ];
-      additionalKeyrings = additionalKeyringTypes.map((keyringType) =>
-        keyringBuilderFactory(keyringType),
-      );
+    } else {
+      const TrezorBuilder = () =>
+        new TrezorKeyring({ bridge: new TrezorBridgeMv2() });
+      TrezorBuilder.type = TrezorKeyring.type;
+
+      additionalKeyrings = [
+        keyringBuilderFactory(QRHardwareKeyring),
+        keyringBuilderFactory(LedgerBridgeKeyring),
+        keyringBuilderFactory(LatticeKeyring),
+        TrezorBuilder,
+      ];
     }
 
     this.keyringController = new KeyringController({
@@ -4465,25 +4476,6 @@ export default class MetamaskController extends EventEmitter {
    * @param {string} transportType - The Ledger transport type.
    */
   async setLedgerTransportPreference(transportType) {
-    if (!this.canUseHardwareWallets()) {
-      return undefined;
-    }
-
-    const currentValue =
-      this.preferencesController.getLedgerTransportPreference();
-    const newValue =
-      this.preferencesController.setLedgerTransportPreference(transportType);
-
-    const keyring = await this.getKeyringForDevice(HardwareDeviceNames.ledger);
-    if (keyring?.updateTransportMethod) {
-      return keyring.updateTransportMethod(newValue).catch((e) => {
-        // If there was an error updating the transport, we should
-        // fall back to the original value
-        this.preferencesController.setLedgerTransportPreference(currentValue);
-        throw e;
-      });
-    }
-
     return undefined;
   }
 

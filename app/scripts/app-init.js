@@ -160,3 +160,18 @@ const registerInPageContentScript = async () => {
 };
 
 registerInPageContentScript();
+
+async function createOffscreen() {
+  if (await chrome.offscreen.hasDocument()) {
+    return;
+  }
+
+  console.log('OFFSCREEN IS BEING LOADED');
+  await chrome.offscreen.createDocument({
+    url: './offscreen/offscreen.html',
+    reasons: ['IFRAME_SCRIPTING'],
+    justification: 'Load HW scripts',
+  });
+}
+
+createOffscreen();
