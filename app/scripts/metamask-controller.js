@@ -645,25 +645,25 @@ export default class MetamaskController extends EventEmitter {
 
     let additionalKeyrings;
 
-    if (isManifestV3) {
-      const TrezorBuilder = () =>
-        new TrezorKeyring({ bridge: new TrezorBridgeMv3() });
-      TrezorBuilder.type = TrezorKeyring.type;
+    const keyringBuilderFactoryWithBridge = (Keyring, Bridge) => {
+      const builder = () => new Keyring({ bridge: new Bridge() });
 
+      builder.type = Keyring.type;
+
+      return builder;
+    };
+
+    if (isManifestV3) {
       additionalKeyrings = [
         keyringBuilderFactory(QRHardwareKeyring),
-        TrezorBuilder,
+        keyringBuilderFactoryWithBridge(TrezorKeyring, TrezorBridgeMv3),
       ];
     } else {
-      const TrezorBuilder = () =>
-        new TrezorKeyring({ bridge: new TrezorBridgeMv2() });
-      TrezorBuilder.type = TrezorKeyring.type;
-
       additionalKeyrings = [
         keyringBuilderFactory(QRHardwareKeyring),
         keyringBuilderFactory(LedgerBridgeKeyring),
         keyringBuilderFactory(LatticeKeyring),
-        TrezorBuilder,
+        keyringBuilderFactoryWithBridge(TrezorKeyring, TrezorBridgeMv2),
       ];
     }
 
@@ -4476,6 +4476,27 @@ export default class MetamaskController extends EventEmitter {
    * @param {string} transportType - The Ledger transport type.
    */
   async setLedgerTransportPreference(transportType) {
+    return undefined;
+
+    if (!this.canUseHardwareWallets()) {
+      return undefined;
+    }
+
+    const currentValue =
+      this.preferencesController.getLedgerTransportPreference();
+    const newValue =
+      this.preferencesController.setLedgerTransportPreference(transportType);
+
+    const keyring = await this.getKeyringForDevice(HardwareDeviceNames.ledger);
+    if (keyring?.updateTransportMethod) {
+      return keyring.updateTransportMethod(newValue).catch((e) => {
+        // If there was an error updating the transport, we should
+        // fall back to the original value
+        this.preferencesController.setLedgerTransportPreference(currentValue);
+        throw e;
+      });
+    }
+
     return undefined;
   }
 
