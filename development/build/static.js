@@ -208,6 +208,10 @@ function getCopyTargets(shouldIncludeLockdown, shouldIncludeSnow) {
       dest: `runtime-lavamoat.js`,
       pattern: '',
     },
+    {
+      src: `./app/offscreen/`,
+      dest: `offscreen`,
+    },
   ];
 
   const languageTags = new Set();
