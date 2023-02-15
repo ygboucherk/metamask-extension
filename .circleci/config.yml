@@ -685,9 +685,8 @@ jobs:
     parallelism: 8
     steps:
       - checkout
-      - run:
-          name: Re-Install Chrome
-          command: ./.circleci/scripts/chrome-install.sh
+      - browser-tools/install-chrome
+      - browser-tools/install-chromedriver
       - attach_workspace:
           at: .
       - run:
@@ -722,9 +721,8 @@ jobs:
     parallelism: 8
     steps:
       - checkout
-      - run:
-          name: Re-Install Chrome
-          command: ./.circleci/scripts/chrome-install.sh
+      - browser-tools/install-chrome
+      - browser-tools/install-chromedriver
       - attach_workspace:
           at: .
       - run:
@@ -750,9 +748,8 @@ jobs:
     parallelism: 1
     steps:
       - checkout
-      - run:
-          name: Re-Install Chrome
-          command: ./.circleci/scripts/chrome-install.sh
+      - browser-tools/install-chrome
+      - browser-tools/install-chromedriver
       - attach_workspace:
           at: .
       - run:
@@ -787,9 +784,8 @@ jobs:
     parallelism: 1
     steps:
       - checkout
-      - run:
-          name: Install Firefox
-          command: ./.circleci/scripts/firefox-install.sh
+      - browser-tools/install-firefox
+      - browser-tools/install-geckodriver
       - attach_workspace:
           at: .
       - run:
@@ -824,9 +820,8 @@ jobs:
     parallelism: 2
     steps:
       - checkout
-      - run:
-          name: Install Firefox
-          command: ./.circleci/scripts/firefox-install.sh
+      - browser-tools/install-firefox
+      - browser-tools/install-geckodriver
       - attach_workspace:
           at: .
       - run:
@@ -861,9 +856,8 @@ jobs:
     parallelism: 2
     steps:
       - checkout
-      - run:
-          name: Re-Install Chrome
-          command: ./.circleci/scripts/chrome-install.sh
+      - browser-tools/install-chrome
+      - browser-tools/install-chromedriver
       - attach_workspace:
           at: .
       - run:
@@ -898,9 +892,8 @@ jobs:
     parallelism: 8
     steps:
       - checkout
-      - run:
-          name: Install Firefox
-          command: ./.circleci/scripts/firefox-install.sh
+      - browser-tools/install-firefox
+      - browser-tools/install-geckodriver
       - attach_workspace:
           at: .
       - run:
@@ -934,9 +927,8 @@ jobs:
     executor: node-browsers-medium-plus
     steps:
       - checkout
-      - run:
-          name: Re-Install Chrome
-          command: ./.circleci/scripts/chrome-install.sh
+      - browser-tools/install-chrome
+      - browser-tools/install-chromedriver
       - attach_workspace:
           at: .
       - run:
@@ -960,9 +952,8 @@ jobs:
     executor: node-browsers-medium-plus
     steps:
       - checkout
-      - run:
-          name: Re-Install Chrome
-          command: ./.circleci/scripts/chrome-install.sh
+      - browser-tools/install-chrome
+      - browser-tools/install-chromedriver
       - attach_workspace:
           at: .
       - run:
@@ -986,9 +977,8 @@ jobs:
     executor: node-browsers-medium-plus
     steps:
       - checkout
-      - run:
-          name: Re-Install Chrome
-          command: ./.circleci/scripts/chrome-install.sh
+      - browser-tools/install-chrome
+      - browser-tools/install-chromedriver
       - attach_workspace:
           at: .
       - run:
