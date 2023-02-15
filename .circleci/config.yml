@@ -3,10 +3,10 @@ version: 2.1
 executors:
   node-browsers:
     docker:
-      - image: circleci/node:16-browsers
+      - image: cimg/node:16.16.0-browsers
   node-browsers-medium-plus:
     docker:
-      - image: circleci/node:16-browsers
+      - image: cimg/node:16.16.0-browsers
     resource_class: medium+
     environment:
       NODE_OPTIONS: --max_old_space_size=2048
@@ -17,6 +17,7 @@ executors:
 orbs:
   gh: circleci/github-cli@2.0
   codecov: codecov/codecov@3.2.2
+  browser-tools: circleci/browser-tools@1.4.1
 
 workflows:
   test_and_release:
@@ -817,7 +818,7 @@ jobs:
           destination: test-artifacts
       - store_test_results:
           path: test/test-results/e2e.xml
-          
+
   test-e2e-firefox-snaps:
     executor: node-browsers
     parallelism: 2
