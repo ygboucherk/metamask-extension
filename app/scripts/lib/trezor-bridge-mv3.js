@@ -4,7 +4,7 @@ const { TREZOR_CONNECT_MANIFEST } = require('eth-trezor-keyring');
 class TrezorBridgeMv3 {
   init() {
     chrome.runtime.onMessage.addListener((msg) => {
-      if (msg.type === 'TZDeviceEvent') {
+      if (msg.topic === 'trezor-device-event') {
         if (msg.event && msg.event.payload && msg.event.payload.features) {
           console.log(
             'MV3 BRIDGE DEVICE EVENT',
@@ -19,8 +19,9 @@ class TrezorBridgeMv3 {
       console.log('MV3 BRIDGE INIT SEND');
       chrome.runtime.sendMessage(
         {
-          type: 'TZInit',
-          offscreen: true,
+          offscreenIframe: true,
+          target: 'trezor',
+          topic: 'init',
           params: { manifest: TREZOR_CONNECT_MANIFEST, lazyLoad: true },
         },
         () => {
@@ -35,8 +36,9 @@ class TrezorBridgeMv3 {
     return new Promise((resolve) => {
       chrome.runtime.sendMessage(
         {
-          type: 'TZDispose',
-          offscreen: true,
+          offscreenIframe: true,
+          target: 'trezor',
+          topic: 'dispose',
         },
         () => {
           console.log('MV3 BRIDGE DISPOSE RECEIVED');
@@ -51,8 +53,9 @@ class TrezorBridgeMv3 {
       console.log('MV3 BRIDGE GETPUBLICKEY SEND');
       chrome.runtime.sendMessage(
         {
-          type: 'TZGetPublicKey',
-          offscreen: true,
+          offscreenIframe: true,
+          target: 'trezor',
+          topic: 'get-public-key',
           params,
         },
         (response) => {
@@ -68,8 +71,9 @@ class TrezorBridgeMv3 {
       console.log('MV3 BRIDGE SIGNTX SEND');
       chrome.runtime.sendMessage(
         {
-          type: 'TZSignTransaction',
-          offscreen: true,
+          offscreenIframe: true,
+          target: 'trezor',
+          topic: 'sign-transaction',
           params,
         },
         (response) => {
@@ -85,8 +89,9 @@ class TrezorBridgeMv3 {
       console.log('MV3 BRIDGE SIGNMSG SEND');
       chrome.runtime.sendMessage(
         {
-          type: 'TZSignMessage',
-          offscreen: true,
+          offscreenIframe: true,
+          target: 'trezor',
+          topic: 'sign-message',
           params,
         },
         (response) => {
@@ -102,8 +107,9 @@ class TrezorBridgeMv3 {
       console.log('MV3 BRIDGE SIGNDATA');
       chrome.runtime.sendMessage(
         {
-          type: 'TZSignTypedData',
-          offscreen: true,
+          offscreenIframe: true,
+          target: 'trezor',
+          topic: 'sign-typed-data',
           params,
         },
         (response) => {

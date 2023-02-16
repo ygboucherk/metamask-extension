@@ -1,15 +1,16 @@
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
-  if (!msg.offscreen) {
+  if (!msg.offscreenIframe || msg.target !== 'trezor') {
     return;
   }
-  switch (msg.type) {
-    case 'TZInit':
+
+  switch (msg.topic) {
+    case 'init':
       console.log('OFFSCREEN INIT', msg.params);
 
       TrezorConnect.on('DEVICE_EVENT', (event) => {
         if (event && event.payload && event.payload.features) {
           chrome.runtime.sendMessage({
-            type: 'TZDeviceEvent',
+            topic: 'trezor-device-event',
             event,
           });
         }
@@ -21,7 +22,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 
       break;
 
-    case 'TZDispose':
+    case 'dispose':
       console.log('OFFSCREEN DISPOSE');
 
       // This removes the Trezor Connect iframe from the DOM
@@ -33,7 +34,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 
       break;
 
-    case 'TZGetPublicKey':
+    case 'get-public-key':
       console.log('OFFSCREEN GET PUBLIC KEY', msg.params);
 
       TrezorConnect.getPublicKey(msg.params).then((result) => {
@@ -42,7 +43,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 
       break;
 
-    case 'TZSignTransaction':
+    case 'sign-transaction':
       console.log('OFFSCREEN SIGN TX', msg.params);
 
       TrezorConnect.ethereumSignTransaction(msg.params).then((result) => {
@@ -51,7 +52,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 
       break;
 
-    case 'TZSignMessage':
+    case 'sign-message':
       console.log('OFFSCREEN SIGN MSG', msg.params);
 
       TrezorConnect.ethereumSignMessage(msg.params).then((result) => {
@@ -60,7 +61,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 
       break;
 
-    case 'TZSignTypedData':
+    case 'sign-typed-data':
       console.log('OFFSCREEN SIGN TYPED DATA', msg.params);
 
       TrezorConnect.ethereumSignTypedData(msg.params).then((result) => {
