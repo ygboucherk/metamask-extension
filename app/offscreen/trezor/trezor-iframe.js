@@ -74,4 +74,4 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   return true;
 });
 
-console.log('OFFSCREEN LOADED', chrome.runtime);
+console.log('TREZOR IFRAME OFFSCREEN LOADED');
