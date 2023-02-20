@@ -3764,7 +3764,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@metamask/eth-ledger-bridge-keyring@npm:^0.13.0":
+"@metamask/eth-ledger-bridge-keyring@npm:0.13.0":
   version: 0.13.0
   resolution: "@metamask/eth-ledger-bridge-keyring@npm:0.13.0"
   dependencies:
@@ -3773,6 +3773,18 @@ __metadata:
     ethereumjs-util: ^7.0.9
     hdkey: 0.8.0
   checksum: 6aa98c17cefad9b8d3b879d9b0ab2357a500a932a57c54ba8dadabf9e1153469346b929e49853523f2ff300293746ceb07c7941f2c17adaf3feef3f30e95619a
+  languageName: node
+  linkType: hard
+
+"@metamask/eth-ledger-bridge-keyring@patch:@metamask/eth-ledger-bridge-keyring@npm%3A0.13.0#./.yarn/patches/@metamask-eth-ledger-bridge-keyring-npm-0.13.0-189684913d.patch::locator=metamask-crx%40workspace%3A.":
+  version: 0.13.0
+  resolution: "@metamask/eth-ledger-bridge-keyring@patch:@metamask/eth-ledger-bridge-keyring@npm%3A0.13.0#./.yarn/patches/@metamask-eth-ledger-bridge-keyring-npm-0.13.0-189684913d.patch::version=0.13.0&hash=ce5b02&locator=metamask-crx%40workspace%3A."
+  dependencies:
+    "@ethereumjs/tx": ^3.2.0
+    eth-sig-util: ^2.0.0
+    ethereumjs-util: ^7.0.9
+    hdkey: 0.8.0
+  checksum: dbcdac013acb7a055bcd9f4d9637dabb8b14d7125d2fdeeba56b4b082aa1fca49e4ffd99b1263f3435aa70b0b37d0b3fbf4b8c94cd1d48eba3362d3524d313e6
   languageName: node
   linkType: hard
 

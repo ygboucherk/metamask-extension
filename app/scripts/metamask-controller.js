@@ -18,7 +18,7 @@ import {
 import { Mutex } from 'await-semaphore';
 import log from 'loglevel';
 import { TrezorKeyring, TrezorBridgeMv2 } from 'eth-trezor-keyring';
-import LedgerBridgeKeyring from '@metamask/eth-ledger-bridge-keyring';
+import { LedgerKeyring, LedgerBridgeIframe } from '@metamask/eth-ledger-bridge-keyring';
 import LatticeKeyring from 'eth-lattice-keyring';
 import { MetaMaskKeyring as QRHardwareKeyring } from '@keystonehq/metamask-airgapped-keyring';
 import EthQuery from 'eth-query';
@@ -171,6 +171,8 @@ import {
 } from './controllers/permissions';
 import createRPCMethodTrackingMiddleware from './lib/createRPCMethodTrackingMiddleware';
 import { securityProviderCheck } from './lib/security-provider-helpers';
+
+// import { LedgerKeyringMv3 } from './ledger-keyring';
 
 export const METAMASK_CONTROLLER_EVENTS = {
   // Fired after state changes that impact the extension badge (unapproved msg count)
@@ -654,14 +656,17 @@ export default class MetamaskController extends EventEmitter {
     };
 
     if (isManifestV3) {
+      // LedgerKeyringMv3.type = 'Ledger Hardware';
+
       additionalKeyrings = [
         keyringBuilderFactory(QRHardwareKeyring),
         keyringBuilderFactoryWithBridge(TrezorKeyring, TrezorBridgeMv3),
+        // keyringBuilderFactory(LedgerKeyringMv3),
       ];
     } else {
       additionalKeyrings = [
         keyringBuilderFactory(QRHardwareKeyring),
-        keyringBuilderFactory(LedgerBridgeKeyring),
+        keyringBuilderFactoryWithBridge(LedgerKeyring, LedgerBridgeIframe),
         keyringBuilderFactory(LatticeKeyring),
         keyringBuilderFactoryWithBridge(TrezorKeyring, TrezorBridgeMv2),
       ];
@@ -2644,7 +2649,7 @@ export default class MetamaskController extends EventEmitter {
         keyringName = TrezorKeyring.type;
         break;
       case HardwareDeviceNames.ledger:
-        keyringName = LedgerBridgeKeyring.type;
+        keyringName = LedgerKeyring.type;
         break;
       case HardwareDeviceNames.qr:
         keyringName = QRHardwareKeyring.type;
@@ -4476,11 +4481,11 @@ export default class MetamaskController extends EventEmitter {
    * @param {string} transportType - The Ledger transport type.
    */
   async setLedgerTransportPreference(transportType) {
-    return undefined;
+    // return 'webhid';
 
-    if (!this.canUseHardwareWallets()) {
-      return undefined;
-    }
+    // if (!this.canUseHardwareWallets()) {
+    //   return undefined;
+    // }
 
     const currentValue =
       this.preferencesController.getLedgerTransportPreference();
