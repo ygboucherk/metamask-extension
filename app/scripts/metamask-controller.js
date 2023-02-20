@@ -172,8 +172,6 @@ import {
 import createRPCMethodTrackingMiddleware from './lib/createRPCMethodTrackingMiddleware';
 import { securityProviderCheck } from './lib/security-provider-helpers';
 
-// import { LedgerKeyringMv3 } from './ledger-keyring';
-
 export const METAMASK_CONTROLLER_EVENTS = {
   // Fired after state changes that impact the extension badge (unapproved msg count)
   // The process of updating the badge happens in app/scripts/background.js.
@@ -656,8 +654,6 @@ export default class MetamaskController extends EventEmitter {
     };
 
     if (isManifestV3) {
-      // LedgerKeyringMv3.type = 'Ledger Hardware';
-
       additionalKeyrings = [
         keyringBuilderFactory(QRHardwareKeyring),
         keyringBuilderFactoryWithBridge(TrezorKeyring, TrezorBridgeMv3),
