@@ -175,7 +175,7 @@ const PERMISSION_DESCRIPTIONS = deepFreeze({
     permissionValue,
   ) => {
     const baseDescription = {
-      leftIcon: 'fas fa-info',
+      leftIcon: <Icon name={ICON_NAMES.INFO} />,
       rightIcon: null,
     };
 

@@ -8,6 +8,7 @@ import UserPreferencedCurrencyDisplay from '../../app/user-preferenced-currency-
 import { PRIMARY } from '../../../helpers/constants/common';
 import Tooltip from '../tooltip';
 import { Icon, ICON_NAMES } from '../../component-library';
+import { IconColor } from 'ui/helpers/constants/design-system';
 
 const AccountList = ({
   selectNewAccountViaModal,
@@ -61,7 +62,11 @@ const AccountList = ({
                 </div>
               }
             >
-              <Icon name={ICON_NAMES.INFO} />
+              <Icon
+                name={ICON_NAMES.INFO}
+                color={IconColor.iconMuted}
+                className="info-circle"
+              />
             </Tooltip>
           </div>
         ) : null}
@@ -114,7 +119,11 @@ const AccountList = ({
                       addressLastConnectedMap[address]
                     }`}
                   >
-                    <Icon name={ICON_NAMES.INFO} />
+                    <Icon
+                      name={ICON_NAMES.INFO}
+                      color={IconColor.iconMuted}
+                      className="info-circle"
+                    />
                   </Tooltip>
                 ) : null}
               </div>
