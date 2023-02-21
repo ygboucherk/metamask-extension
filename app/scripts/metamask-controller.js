@@ -110,6 +110,7 @@ import { STATIC_MAINNET_TOKEN_LIST } from '../../shared/constants/tokens';
 import { getTokenValueParam } from '../../shared/lib/metamask-controller-utils';
 import { isManifestV3 } from '../../shared/modules/mv3.utils';
 import { hexToDecimal } from '../../shared/modules/conversion.utils';
+import { LedgerBridgeMv3 } from './lib/ledger-bridge-mv3';
 import { TrezorBridgeMv3 } from './lib/trezor-bridge-mv3';
 import {
   onMessageReceived,
@@ -657,7 +658,7 @@ export default class MetamaskController extends EventEmitter {
       additionalKeyrings = [
         keyringBuilderFactory(QRHardwareKeyring),
         keyringBuilderFactoryWithBridge(TrezorKeyring, TrezorBridgeMv3),
-        // keyringBuilderFactory(LedgerKeyringMv3),
+        keyringBuilderFactoryWithBridge(LedgerKeyring, LedgerBridgeMv3),
       ];
     } else {
       additionalKeyrings = [
