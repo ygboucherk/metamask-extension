@@ -6,17 +6,17 @@ class TrezorBridgeMv3 {
     chrome.runtime.onMessage.addListener((msg) => {
       if (msg.topic === 'trezor-device-event') {
         if (msg.event && msg.event.payload && msg.event.payload.features) {
-          console.log(
-            'MV3 BRIDGE DEVICE EVENT',
-            msg.event.payload.features.model,
-          );
+          // console.log(
+          //   'MV3 BRIDGE DEVICE EVENT',
+          //   msg.event.payload.features.model,
+          // );
           this.model = msg.event.payload.features.model;
         }
       }
     });
 
     return new Promise((resolve) => {
-      console.log('MV3 BRIDGE INIT SEND');
+      // console.log('MV3 BRIDGE INIT SEND');
       chrome.runtime.sendMessage(
         {
           offscreenIframe: true,
@@ -25,7 +25,7 @@ class TrezorBridgeMv3 {
           params: { manifest: TREZOR_CONNECT_MANIFEST, lazyLoad: true },
         },
         () => {
-          console.log('MV3 BRIDGE INIT RECEIVED');
+          // console.log('MV3 BRIDGE INIT RECEIVED');
           resolve();
         },
       );
@@ -41,7 +41,7 @@ class TrezorBridgeMv3 {
           topic: 'dispose',
         },
         () => {
-          console.log('MV3 BRIDGE DISPOSE RECEIVED');
+          // console.log('MV3 BRIDGE DISPOSE RECEIVED');
           resolve();
         },
       );
@@ -50,7 +50,7 @@ class TrezorBridgeMv3 {
 
   getPublicKey(params) {
     return new Promise((resolve) => {
-      console.log('MV3 BRIDGE GETPUBLICKEY SEND');
+      // console.log('MV3 BRIDGE GETPUBLICKEY SEND');
       chrome.runtime.sendMessage(
         {
           offscreenIframe: true,
@@ -59,7 +59,7 @@ class TrezorBridgeMv3 {
           params,
         },
         (response) => {
-          console.log('MV3 BRIDGE GETPUBLICKEY RECEIVED', response);
+          // console.log('MV3 BRIDGE GETPUBLICKEY RECEIVED', response);
           resolve(response);
         },
       );
@@ -68,7 +68,7 @@ class TrezorBridgeMv3 {
 
   ethereumSignTransaction(params) {
     return new Promise((resolve) => {
-      console.log('MV3 BRIDGE SIGNTX SEND');
+      // console.log('MV3 BRIDGE SIGNTX SEND');
       chrome.runtime.sendMessage(
         {
           offscreenIframe: true,
@@ -77,7 +77,7 @@ class TrezorBridgeMv3 {
           params,
         },
         (response) => {
-          console.log('MV3 BRIDGE SIGNTX RECEIVED', response);
+          // console.log('MV3 BRIDGE SIGNTX RECEIVED', response);
           resolve(response);
         },
       );
@@ -86,7 +86,7 @@ class TrezorBridgeMv3 {
 
   ethereumSignMessage(params) {
     return new Promise((resolve) => {
-      console.log('MV3 BRIDGE SIGNMSG SEND');
+      // console.log('MV3 BRIDGE SIGNMSG SEND');
       chrome.runtime.sendMessage(
         {
           offscreenIframe: true,
@@ -95,7 +95,7 @@ class TrezorBridgeMv3 {
           params,
         },
         (response) => {
-          console.log('MV3 BRIDGE SIGNMSG RECEIVED', response);
+          // console.log('MV3 BRIDGE SIGNMSG RECEIVED', response);
           resolve(response);
         },
       );
@@ -104,7 +104,7 @@ class TrezorBridgeMv3 {
 
   ethereumSignTypedData(params) {
     return new Promise((resolve) => {
-      console.log('MV3 BRIDGE SIGNDATA');
+      // console.log('MV3 BRIDGE SIGNDATA');
       chrome.runtime.sendMessage(
         {
           offscreenIframe: true,
@@ -113,7 +113,7 @@ class TrezorBridgeMv3 {
           params,
         },
         (response) => {
-          console.log('MV3 BRIDGE SIGNDATA RECEIVED', response);
+          // console.log('MV3 BRIDGE SIGNDATA RECEIVED', response);
           resolve(response);
         },
       );

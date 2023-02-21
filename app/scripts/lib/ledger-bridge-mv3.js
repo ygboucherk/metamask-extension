@@ -1,33 +1,32 @@
 /* eslint-disable no-undef */
-const CONNECTION_EVENT = 'ledger-connection-change';
-
 export class LedgerBridgeMv3 {
   init() {
     console.log('LEDGER MV3 BRIDGE - INIT');
-    this.currentMessageId = 0;
-    this.messageCallbacks = {};
-    this._setupListener();
-
     return Promise.resolve();
   }
 
   destroy() {
+    console.log('LEDGER MV3 BRIDGE - DESTROY');
     // chrome.runtime.onMessage.removeListener();
     return Promise.resolve();
   }
 
   attemptMakeApp() {
-    console.log('LEDGER MV3 BRIDGE - MAKE APP');
     return new Promise((resolve, reject) => {
-      this._sendMessage(
+      console.log('LEDGER MV3 BRIDGE - MAKE APP');
+      chrome.runtime.sendMessage(
         {
+          offscreenIframe: true,
+          target: 'ledger',
           action: 'ledger-make-app',
         },
-        ({ success, error }) => {
-          if (success) {
+        (response) => {
+          console.log('LEDGER MV3 BRIDGE - MAKE APP RESPONSE', response);
+
+          if (response.success) {
             resolve(true);
           } else {
-            reject(error);
+            reject(response.error);
           }
         },
       );
@@ -35,15 +34,22 @@ export class LedgerBridgeMv3 {
   }
 
   updateTransportMethod(transportType) {
-    console.log('LEDGER MV3 BRIDGE - UPDATE TRANSPORT');
     return new Promise((resolve, reject) => {
-      this._sendMessage(
+      console.log('LEDGER MV3 BRIDGE - UPDATE TRANSPORT');
+      chrome.runtime.sendMessage(
         {
+          offscreenIframe: true,
+          target: 'ledger',
           action: 'ledger-update-transport',
           params: { transportType },
         },
-        ({ success }) => {
-          if (success) {
+        (response) => {
+          console.log(
+            'LEDGER MV3 BRIDGE - UPDATE TRANSPORT RESPONSE',
+            response,
+          );
+
+          if (response.success) {
             resolve(true);
           } else {
             reject(new Error('Ledger transport could not be updated'));
@@ -54,16 +60,20 @@ export class LedgerBridgeMv3 {
   }
 
   getPublicKey(params) {
-    console.log('LEDGER MV3 BRIDGE - GET PUB KEY');
     return new Promise((resolve, reject) => {
-      this._sendMessage(
+      console.log('LEDGER MV3 BRIDGE - GET PUB KEY');
+      chrome.runtime.sendMessage(
         {
+          offscreenIframe: true,
+          target: 'ledger',
           action: 'ledger-unlock',
           params,
         },
-        ({ success, payload }) => {
-          if (success) {
-            resolve(payload);
+        (response) => {
+          console.log('LEDGER MV3 BRIDGE - GET PUB KEY RESPONSE', response);
+
+          if (response.success) {
+            resolve(response.payload);
           }
           // eslint-disable-next-line prefer-promise-reject-errors
           reject(payload && payload.error);
@@ -73,16 +83,20 @@ export class LedgerBridgeMv3 {
   }
 
   deviceSignTransaction(params) {
-    console.log('LEDGER MV3 BRIDGE - SIGN TX');
     return new Promise((resolve, reject) => {
-      this._sendMessage(
+      console.log('LEDGER MV3 BRIDGE - SIGN TX');
+      chrome.runtime.sendMessage(
         {
+          offscreenIframe: true,
+          target: 'ledger',
           action: 'ledger-sign-transaction',
           params,
         },
-        ({ success, payload }) => {
-          if (success) {
-            resolve(payload);
+        (response) => {
+          console.log('LEDGER MV3 BRIDGE - SIGN TX RESPONSE', response);
+
+          if (response.success) {
+            resolve(response.payload);
           }
           // eslint-disable-next-line prefer-promise-reject-errors
           reject(payload && payload.error);
@@ -92,16 +106,20 @@ export class LedgerBridgeMv3 {
   }
 
   deviceSignMessage(params) {
-    console.log('LEDGER MV3 BRIDGE - SIGN MSG');
     return new Promise((resolve, reject) => {
-      this._sendMessage(
+      console.log('LEDGER MV3 BRIDGE - SIGN MSG');
+      chrome.runtime.sendMessage(
         {
+          offscreenIframe: true,
+          target: 'ledger',
           action: 'ledger-sign-personal-message',
           params,
         },
-        ({ success, payload }) => {
-          if (success) {
-            resolve(payload);
+        (response) => {
+          console.log('LEDGER MV3 BRIDGE - SIGN MSG RESPONSE', response);
+
+          if (response.success) {
+            resolve(response.payload);
           }
           // eslint-disable-next-line prefer-promise-reject-errors
           reject(payload && payload.error);
@@ -111,50 +129,25 @@ export class LedgerBridgeMv3 {
   }
 
   deviceSignTypedData(params) {
-    console.log('LEDGER MV3 BRIDGE - SIGN TYPED DATA');
     return new Promise((resolve, reject) => {
-      this._sendMessage(
+      console.log('LEDGER MV3 BRIDGE - SIGN TYPED DATA');
+      chrome.runtime.sendMessage(
         {
+          offscreenIframe: true,
+          target: 'ledger',
           action: 'ledger-sign-typed-data',
           params,
         },
-        ({ success, payload }) => {
-          if (success) {
-            resolve(payload);
+        (response) => {
+          console.log('LEDGER MV3 BRIDGE - SIGN TYPED DATA RESPONSE', response);
+
+          if (response.success) {
+            resolve(response.payload);
           }
           // eslint-disable-next-line prefer-promise-reject-errors
           reject(payload && payload.error);
         },
       );
     });
-  }
-
-  _setupListener() {
-    chrome.runtime.onMessage.addListener((msg) => {
-      if (msg.name === 'WORKER_KEEP_ALIVE_MESSAGE') {
-        return;
-      }
-
-      console.log('LISTENER MV3', msg);
-
-      if (msg.data) {
-        if (this.messageCallbacks[data.messageId]) {
-          this.messageCallbacks[data.messageId](data);
-        } else if (data.action === CONNECTION_EVENT) {
-          this.isDeviceConnected = data.payload.connected;
-        }
-      }
-    });
-  }
-
-  _sendMessage(msg, cb) {
-    msg.target = 'LEDGER-IFRAME';
-
-    this.currentMessageId += 1;
-    msg.messageId = this.currentMessageId;
-
-    this.messageCallbacks[this.currentMessageId] = cb;
-    chrome.runtime.sendMessage(msg);
-    // this.iframe.contentWindow.postMessage(msg, '*');
   }
 }
