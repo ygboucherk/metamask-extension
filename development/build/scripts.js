@@ -302,6 +302,12 @@ function createScriptTasks({
       createSentryBundle({ buildTarget }),
     );
 
+    // this can run whenever
+    const offscreenSubtask = createTask(
+      `${taskPrefix}:offscreen`,
+      createOffscreenBundle({ buildTarget }),
+    );
+
     // task for initiating browser livereload
     const initiateLiveReload = async () => {
       if (isDevBuild(buildTarget)) {
@@ -324,6 +330,7 @@ function createScriptTasks({
       contentscriptSubtask,
       disableConsoleSubtask,
       installSentrySubtask,
+      offscreenSubtask,
     ].map((subtask) =>
       runInChildProcess(subtask, {
         applyLavaMoat,
@@ -418,6 +425,46 @@ function createScriptTasks({
         destFilepath: `${contentscript}.js`,
         entryFilepath: `./app/scripts/${contentscript}.js`,
         label: contentscript,
+        ignoredFiles,
+        policyOnly,
+        shouldLintFenceFiles,
+        version,
+        applyLavaMoat,
+      }),
+    );
+  }
+
+  /**
+   * Create a bundle for the "offscreen" module.
+   *
+   * @param {object} options - The build options.
+   * @param {BUILD_TARGETS} options.buildTarget - The current build target.
+   * @returns {Function} A function that creates the bundle.
+   */
+  function createOffscreenBundle({ buildTarget }) {
+    const trezor = 'trezor';
+    const ledger = 'ledger';
+    return composeSeries(
+      createNormalBundle({
+        buildTarget,
+        buildType,
+        browserPlatforms,
+        destFilepath: `offscreen/${trezor}/${trezor}-iframe.js`,
+        entryFilepath: `./app/scripts/offscreen/${trezor}/${trezor}-iframe.js`,
+        label: trezor,
+        ignoredFiles,
+        policyOnly,
+        shouldLintFenceFiles,
+        version,
+        applyLavaMoat,
+      }),
+      createNormalBundle({
+        buildTarget,
+        buildType,
+        browserPlatforms,
+        destFilepath: `offscreen/${ledger}/${ledger}-iframe.js`,
+        entryFilepath: `./app/scripts/offscreen/${ledger}/${ledger}-iframe.js`,
+        label: ledger,
         ignoredFiles,
         policyOnly,
         shouldLintFenceFiles,

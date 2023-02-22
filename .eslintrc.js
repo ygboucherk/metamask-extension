@@ -10,6 +10,7 @@ module.exports = {
   ignorePatterns: [
     'app/vendor/**',
     'app/offscreen/**',
+    'app/scripts/offscreen/**',
     'builds/**/*',
     'development/chromereload.js',
     'development/charts/**',
