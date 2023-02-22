@@ -1,3 +1,6 @@
+/* eslint-disable no-undef */
+import TrezorConnect from '@trezor/connect-web';
+
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (!msg.offscreenIframe || msg.target !== 'trezor') {
     return;
@@ -16,7 +19,10 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         }
       });
 
-      TrezorConnect.init(msg.params).then(() => {
+      TrezorConnect.init({
+        ...msg.params,
+        env: 'web',
+      }).then(() => {
         sendResponse();
       });
 
@@ -69,9 +75,14 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       });
 
       break;
+
+    default:
+      console.error('Trezor message not supported', msg);
+      sendResponse();
   }
 
+  // eslint-disable-next-line consistent-return
   return true;
 });
 
-console.log('TREZOR IFRAME OFFSCREEN LOADED');
+console.log('TREZOR IFRAME OFFSCREEN LOADED', TrezorConnect);
