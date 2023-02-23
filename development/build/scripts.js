@@ -444,6 +444,7 @@ function createScriptTasks({
   function createOffscreenBundle({ buildTarget }) {
     const trezor = 'trezor';
     const ledger = 'ledger';
+    const lattice = 'lattice';
     return composeSeries(
       createNormalBundle({
         buildTarget,
@@ -465,6 +466,19 @@ function createScriptTasks({
         destFilepath: `offscreen/${ledger}/${ledger}-iframe.js`,
         entryFilepath: `./app/scripts/offscreen/${ledger}/${ledger}-iframe.js`,
         label: ledger,
+        ignoredFiles,
+        policyOnly,
+        shouldLintFenceFiles,
+        version,
+        applyLavaMoat,
+      }),
+      createNormalBundle({
+        buildTarget,
+        buildType,
+        browserPlatforms,
+        destFilepath: `offscreen/${lattice}/${lattice}-iframe.js`,
+        entryFilepath: `./app/scripts/offscreen/${lattice}/${lattice}-iframe.js`,
+        label: lattice,
         ignoredFiles,
         policyOnly,
         shouldLintFenceFiles,

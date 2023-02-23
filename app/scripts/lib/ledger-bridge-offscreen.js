@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-export class LedgerBridgeMv3 {
+export class LedgerBridgeOffscreen {
   init() {
     console.log('LEDGER MV3 BRIDGE - INIT');
     return Promise.resolve();

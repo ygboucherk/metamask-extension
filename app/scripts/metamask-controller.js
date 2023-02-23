@@ -18,7 +18,10 @@ import {
 import { Mutex } from 'await-semaphore';
 import log from 'loglevel';
 import { TrezorKeyring, TrezorBridgeMv2 } from 'eth-trezor-keyring';
-import { LedgerKeyring, LedgerBridgeIframe } from '@metamask/eth-ledger-bridge-keyring';
+import {
+  LedgerKeyring,
+  LedgerBridgeIframe,
+} from '@metamask/eth-ledger-bridge-keyring';
 import LatticeKeyring from 'eth-lattice-keyring';
 import { MetaMaskKeyring as QRHardwareKeyring } from '@keystonehq/metamask-airgapped-keyring';
 import EthQuery from 'eth-query';
@@ -110,8 +113,9 @@ import { STATIC_MAINNET_TOKEN_LIST } from '../../shared/constants/tokens';
 import { getTokenValueParam } from '../../shared/lib/metamask-controller-utils';
 import { isManifestV3 } from '../../shared/modules/mv3.utils';
 import { hexToDecimal } from '../../shared/modules/conversion.utils';
-import { LedgerBridgeMv3 } from './lib/ledger-bridge-mv3';
-import { TrezorBridgeMv3 } from './lib/trezor-bridge-mv3';
+import { LedgerBridgeOffscreen } from './lib/ledger-bridge-offscreen';
+import { TrezorBridgeOffscreen } from './lib/trezor-bridge-offscreen';
+import { LatticeKeyringOffscreen } from './lib/lattice-keyring-offscreen';
 import {
   onMessageReceived,
   checkForMultipleVersionsRunning,
@@ -657,8 +661,9 @@ export default class MetamaskController extends EventEmitter {
     if (isManifestV3) {
       additionalKeyrings = [
         keyringBuilderFactory(QRHardwareKeyring),
-        keyringBuilderFactoryWithBridge(TrezorKeyring, TrezorBridgeMv3),
-        keyringBuilderFactoryWithBridge(LedgerKeyring, LedgerBridgeMv3),
+        keyringBuilderFactoryWithBridge(TrezorKeyring, TrezorBridgeOffscreen),
+        keyringBuilderFactoryWithBridge(LedgerKeyring, LedgerBridgeOffscreen),
+        keyringBuilderFactory(LatticeKeyringOffscreen),
       ];
     } else {
       additionalKeyrings = [

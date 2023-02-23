@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 const { TREZOR_CONNECT_MANIFEST } = require('eth-trezor-keyring');
 
-class TrezorBridgeMv3 {
+export class TrezorBridgeOffscreen {
   init() {
     chrome.runtime.onMessage.addListener((msg) => {
       if (msg.topic === 'trezor-device-event') {
@@ -120,5 +120,3 @@ class TrezorBridgeMv3 {
     });
   }
 }
-
-export { TrezorBridgeMv3 };

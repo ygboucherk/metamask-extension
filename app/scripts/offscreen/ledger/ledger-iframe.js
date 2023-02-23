@@ -1,11 +1,14 @@
+/* eslint-disable no-undef */
+/* eslint-disable import/unambiguous */
 const CONNECTION_EVENT = 'ledger-connection-change';
 
+const messageCallbacks = {};
 let currentMessageId = 0;
-let messageCallbacks = {};
+// eslint-disable-next-line no-unused-vars
 let isDeviceConnected = false;
 
 window.addEventListener('message', ({ origin, data }) => {
-  console.log('MESSAGE', { origin, data });
+  console.log('MESSAGE FOR LEDGER EXTERNAL IFRAME', { origin, data });
   if (origin !== 'https://metamask.github.io') {
     return;
   }
@@ -14,12 +17,10 @@ window.addEventListener('message', ({ origin, data }) => {
     if (messageCallbacks[data.messageId]) {
       messageCallbacks[data.messageId](data);
     } else if (data.action === CONNECTION_EVENT) {
-      // Not doing anything
+      // TODO NEEDS REVIEW - Not doing anything
       isDeviceConnected = data.payload.connected;
     }
   }
-
-  return;
 });
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
@@ -33,19 +34,20 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   }
 
   const iframe = document.querySelector('iframe');
-  
+
   currentMessageId += 1;
   const iframeMsg = {
     ...msg,
     target: 'LEDGER-IFRAME',
     messageId: currentMessageId,
-  }
-  messageCallbacks[currentMessageId] = sendResponse
+  };
+  messageCallbacks[currentMessageId] = sendResponse;
 
   console.log('LEDGER IFRAME MESSAGE RECEIVED 2', iframeMsg, iframe);
 
   iframe.contentWindow.postMessage(iframeMsg, '*');
 
+  // eslint-disable-next-line consistent-return
   return true;
 });
 
