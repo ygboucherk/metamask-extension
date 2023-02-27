@@ -20,6 +20,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
           console.log('LATTICE IFRAME EVENT RECEIVED', event);
 
           // Ensure origin
+          const base = 'https://lattice.gridplus.io';
           if (event.origin !== base) {
             return;
           }
