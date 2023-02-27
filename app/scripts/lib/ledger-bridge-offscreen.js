@@ -74,9 +74,10 @@ export class LedgerBridgeOffscreen {
 
           if (response.success) {
             resolve(response.payload);
+          } else {
+            // eslint-disable-next-line prefer-promise-reject-errors
+            reject(payload && payload.error);
           }
-          // eslint-disable-next-line prefer-promise-reject-errors
-          reject(payload && payload.error);
         },
       );
     });
@@ -97,9 +98,10 @@ export class LedgerBridgeOffscreen {
 
           if (response.success) {
             resolve(response.payload);
+          } else {
+            // eslint-disable-next-line prefer-promise-reject-errors
+            reject(payload && payload.error);
           }
-          // eslint-disable-next-line prefer-promise-reject-errors
-          reject(payload && payload.error);
         },
       );
     });
@@ -120,9 +122,10 @@ export class LedgerBridgeOffscreen {
 
           if (response.success) {
             resolve(response.payload);
+          } else {
+            // eslint-disable-next-line prefer-promise-reject-errors
+            reject(payload && payload.error);
           }
-          // eslint-disable-next-line prefer-promise-reject-errors
-          reject(payload && payload.error);
         },
       );
     });
@@ -143,9 +146,10 @@ export class LedgerBridgeOffscreen {
 
           if (response.success) {
             resolve(response.payload);
+          } else {
+            // eslint-disable-next-line prefer-promise-reject-errors
+            reject(payload && payload.error);
           }
-          // eslint-disable-next-line prefer-promise-reject-errors
-          reject(payload && payload.error);
         },
       );
     });
