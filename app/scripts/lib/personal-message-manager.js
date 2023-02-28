@@ -63,7 +63,16 @@ export default class PersonalMessageManager extends EventEmitter {
    * @returns {number} The number of 'unapproved' PersonalMessages in this.messages
    */
   get unapprovedPersonalMsgCount() {
-    return Object.keys(this.getUnapprovedMsgs()).length;
+    const messages = this.getUnapprovedMsgs();
+    const messageKeys = Object.keys(messages);
+
+    ///: BEGIN:ONLY_INCLUDE_IN(mmi)
+    if (messages?.length > 0) {
+      return messageKeys.filter((key) => !messages[key].custodyId).length;
+    }
+    ///: END:ONLY_INCLUDE_IN
+
+    return messageKeys.length;
   }
 
   /**
@@ -208,6 +217,19 @@ export default class PersonalMessageManager extends EventEmitter {
     return this.messages.find((msg) => msg.id === msgId);
   }
 
+  ///: BEGIN:ONLY_INCLUDE_IN(mmi)
+  /**
+   * Returns a specified custodian PersonalMessage.
+   *
+   * @param {number} custodyId - The id of the PersonalMessage to get
+   * @returns {PersonalMessage|undefined} The PersonalMessage with the id that matches the passed custodyId, or undefined
+   * if no PersonalMessage has that id.
+   */
+  getMsgByCustodyId(custodyId) {
+    return this.messages.find((msg) => msg.custodyId === custodyId);
+  }
+  ///: END:ONLY_INCLUDE_IN
+
   /**
    * Approves a PersonalMessage. Sets the message status via a call to this.setMsgStatusApproved, and returns a promise
    * with any the message params modified for proper signing.
@@ -229,6 +251,31 @@ export default class PersonalMessageManager extends EventEmitter {
   setMsgStatusApproved(msgId) {
     this._setMsgStatus(msgId, 'approved');
   }
+
+  ///: BEGIN:ONLY_INCLUDE_IN(mmi)
+  /**
+   * Updates that PersonalMessage in this.messages by adding the raw signature data
+   * of the signature request to the PersonalMessage
+   *
+   * @param {number} msgId - The id of the PersonalMessage to sign.
+   * @param {number} custodyId - The id of the custodian to sign.
+   */
+  setMsgCustodyId(msgId, custodyId) {
+    const msg = this.getMsg(msgId);
+    msg.custodyId = custodyId;
+    this._updateMsg(msg);
+  }
+
+  /**
+   * Sets a PersonalMessage status to 'inProgress' via a call to this._setMsgStatus
+   * in order to allow users to use extension while waiting for custodian signature
+   *
+   * @param {number} msgId - The id of the PersonalMessage to sign.
+   */
+  setMsgInProgress(msgId) {
+    this._setMsgStatus(msgId, 'inProgress');
+  }
+  ///: END:ONLY_INCLUDE_IN
 
   /**
    * Sets a PersonalMessage status to 'signed' via a call to this._setMsgStatus and updates that PersonalMessage in

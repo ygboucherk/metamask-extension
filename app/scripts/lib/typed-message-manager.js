@@ -63,7 +63,16 @@ export default class TypedMessageManager extends EventEmitter {
    * @returns {number} The number of 'unapproved' TypedMessages in this.messages
    */
   get unapprovedTypedMessagesCount() {
-    return Object.keys(this.getUnapprovedMsgs()).length;
+    const messages = this.getUnapprovedMsgs();
+    const messageKeys = Object.keys(messages);
+
+    ///: BEGIN:ONLY_INCLUDE_IN(mmi)
+    if (messages?.length > 0) {
+      return messageKeys.filter((key) => !messages[key].custodyId).length;
+    }
+    ///: END:ONLY_INCLUDE_IN
+
+    return messageKeys.length;
   }
 
   /**
@@ -263,6 +272,19 @@ export default class TypedMessageManager extends EventEmitter {
     return this.messages.find((msg) => msg.id === msgId);
   }
 
+  ///: BEGIN:ONLY_INCLUDE_IN(mmi)
+  /**
+   * Returns a specified custodian TypedMessage.
+   *
+   * @param {number} custodyId - The id of the TypedMessage to get
+   * @returns {TypedMessage|undefined} The TypedMessage with the id that matches the passed custodyId, or undefined
+   * if no TypedMessage has that id.
+   */
+  getMsgByCustodyId(custodyId) {
+    return this.messages.find((msg) => msg.custodyId === custodyId);
+  }
+  ///: END:ONLY_INCLUDE_IN
+
   /**
    * Approves a TypedMessage. Sets the message status via a call to this.setMsgStatusApproved, and returns a promise
    * with any the message params modified for proper signing.
@@ -284,6 +306,30 @@ export default class TypedMessageManager extends EventEmitter {
   setMsgStatusApproved(msgId) {
     this._setMsgStatus(msgId, 'approved');
   }
+
+  ///: BEGIN:ONLY_INCLUDE_IN(mmi)
+  /**
+   * Updates that TypedMessage in this.messages by adding the raw signature data
+   * of the signature request to the TypedMessage
+   *
+   * @param {number} msgId - The id of the TypedMessage to sign.
+   * @param {number} custodyId - The id of the custodian to sign.
+   */
+  setMsgCustodyId(msgId, custodyId) {
+    const msg = this.getMsg(msgId);
+    msg.custodyId = custodyId;
+    this._updateMsg(msg);
+  }
+
+  /**
+   * Sets message status to inProgress in order to allow users to allow users to use extension while waiting for custodian signature
+   *
+   * @param msgId
+   */
+  setMsgInProgress(msgId) {
+    this._setMsgStatus(msgId, 'inProgress');
+  }
+  ///: END:ONLY_INCLUDE_IN
 
   /**
    * Sets a TypedMessage status to 'signed' via a call to this._setMsgStatus and updates that TypedMessage in
