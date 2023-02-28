@@ -3365,19 +3365,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/devices@npm:^5.51.1":
-  version: 5.51.1
-  resolution: "@ledgerhq/devices@npm:5.51.1"
-  dependencies:
-    "@ledgerhq/errors": ^5.50.0
-    "@ledgerhq/logs": ^5.50.0
-    rxjs: 6
-    semver: ^7.3.5
-  checksum: bb63548b4b143d3669fab33f219aa705d9114be9fbb42f1b26064fbf89a047186972518cd608ad90329a760a6ff0e91b32aaf9d2e543ae384fe381fbf29fea64
-  languageName: node
-  linkType: hard
-
-"@ledgerhq/devices@npm:^8.0.0":
+"@ledgerhq/devices@npm:8.0.0":
   version: 8.0.0
   resolution: "@ledgerhq/devices@npm:8.0.0"
   dependencies:
@@ -3386,6 +3374,18 @@ __metadata:
     rxjs: 6
     semver: ^7.3.5
   checksum: 467bc30c8e60753762e52de708d5231234be4c35e0e73e39f8a0d0c7cf795a566208de4687f491de801a0f5642b16ae7de6527813f5283e247b800066ae4c4d0
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/devices@patch:@ledgerhq/devices@npm%3A8.0.0#./.yarn/patches/@ledgerhq-devices-npm-8.0.0-e81f779f99.patch::locator=metamask-crx%40workspace%3A.":
+  version: 8.0.0
+  resolution: "@ledgerhq/devices@patch:@ledgerhq/devices@npm%3A8.0.0#./.yarn/patches/@ledgerhq-devices-npm-8.0.0-e81f779f99.patch::version=8.0.0&hash=051ed1&locator=metamask-crx%40workspace%3A."
+  dependencies:
+    "@ledgerhq/errors": ^6.12.3
+    "@ledgerhq/logs": ^6.10.1
+    rxjs: 6
+    semver: ^7.3.5
+  checksum: 235a6a23afe8ad40225e6ccfe734e6e7abf0524d5401e25402420bb773045eb1e3f60193d7281c7e6ef86ccf14427313a2e1f04727c66c7a379294dbc60008e6
   languageName: node
   linkType: hard
 
@@ -3403,7 +3403,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/hw-app-eth@npm:^6.12.2":
+"@ledgerhq/hw-app-eth@npm:6.32.0":
   version: 6.32.0
   resolution: "@ledgerhq/hw-app-eth@npm:6.32.0"
   dependencies:
@@ -3418,6 +3418,24 @@ __metadata:
     bignumber.js: ^9.1.0
     crypto-js: ^4.1.1
   checksum: 55ea5d27ee06b419532b91d652a92922651ba9c988dddaf24322be51c1d98b08789863d7f696cf3336f0d26f033b2ffc4f90b972cb808edc64f96a5f92bc04aa
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/hw-app-eth@patch:@ledgerhq/hw-app-eth@npm%3A6.32.0#./.yarn/patches/@ledgerhq-hw-app-eth-npm-6.32.0-b8c53a85d2.patch::locator=metamask-crx%40workspace%3A.":
+  version: 6.32.0
+  resolution: "@ledgerhq/hw-app-eth@patch:@ledgerhq/hw-app-eth@npm%3A6.32.0#./.yarn/patches/@ledgerhq-hw-app-eth-npm-6.32.0-b8c53a85d2.patch::version=6.32.0&hash=5eeab5&locator=metamask-crx%40workspace%3A."
+  dependencies:
+    "@ethersproject/abi": ^5.5.0
+    "@ethersproject/rlp": ^5.5.0
+    "@ledgerhq/cryptoassets": ^9.0.0
+    "@ledgerhq/errors": ^6.12.3
+    "@ledgerhq/hw-transport": ^6.28.1
+    "@ledgerhq/hw-transport-mocker": ^6.27.12
+    "@ledgerhq/logs": ^6.10.1
+    axios: ^0.26.1
+    bignumber.js: ^9.1.0
+    crypto-js: ^4.1.1
+  checksum: 3af219b0df8fbb0ffa1e767319d2f2b73c9a7cad6e493d785745bbd791e90a0c99081306bb6b2f0f5345a022265f521d5a0b4b6e7d7adb0f670ce7d5fea01634
   languageName: node
   linkType: hard
 
@@ -3456,7 +3474,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/hw-transport-webhid@npm:^6.7.0":
+"@ledgerhq/hw-transport-webhid@npm:6.27.12":
   version: 6.27.12
   resolution: "@ledgerhq/hw-transport-webhid@npm:6.27.12"
   dependencies:
@@ -3465,6 +3483,18 @@ __metadata:
     "@ledgerhq/hw-transport": ^6.28.1
     "@ledgerhq/logs": ^6.10.1
   checksum: 5f5253417ba6f5eb4d979e031a24c8bef9a642bb6e317c49a6abec33e316061c13aac6de8a7b353a907a11bbb7dd14ef16716be4017f4a008a6cc9136a366cdd
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/hw-transport-webhid@patch:@ledgerhq/hw-transport-webhid@npm%3A6.27.12#./.yarn/patches/@ledgerhq-hw-transport-webhid-npm-6.27.12-35f726403f.patch::locator=metamask-crx%40workspace%3A.":
+  version: 6.27.12
+  resolution: "@ledgerhq/hw-transport-webhid@patch:@ledgerhq/hw-transport-webhid@npm%3A6.27.12#./.yarn/patches/@ledgerhq-hw-transport-webhid-npm-6.27.12-35f726403f.patch::version=6.27.12&hash=3efc94&locator=metamask-crx%40workspace%3A."
+  dependencies:
+    "@ledgerhq/devices": ^8.0.0
+    "@ledgerhq/errors": ^6.12.3
+    "@ledgerhq/hw-transport": ^6.28.1
+    "@ledgerhq/logs": ^6.10.1
+  checksum: 555f86be0dc556962a02043d1f67d84270da099e2f43609fcb70bc3b85bcf8f85579b5159678bff4235e8cee88ebf6bc57a638ef618212b0c8aef1db10bb07e0
   languageName: node
   linkType: hard
 

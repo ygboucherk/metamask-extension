@@ -1,0 +1,21 @@
+diff --git a/lib/TransportWebHID.js b/lib/TransportWebHID.js
+index 5dbe29b4ccd6f2e7c2b2852d956feedb5738d78c..4da0d8efd1a2cac3df7f1fd7514c6b8281f5c249 100644
+--- a/lib/TransportWebHID.js
++++ b/lib/TransportWebHID.js
+@@ -71,7 +71,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
+ };
+ exports.__esModule = true;
+ var hw_transport_1 = __importDefault(require("@ledgerhq/hw-transport"));
+-var hid_framing_1 = __importDefault(require("@ledgerhq/devices/hid-framing"));
+ var devices_1 = require("@ledgerhq/devices");
+ var logs_1 = require("@ledgerhq/logs");
+ var errors_1 = require("@ledgerhq/errors");
+@@ -194,7 +193,7 @@ var TransportWebHID = /** @class */ (function (_super) {
+                                     case 0:
+                                         _a = this, channel = _a.channel, packetSize = _a.packetSize;
+                                         (0, logs_1.log)("apdu", "=> " + apdu.toString("hex"));
+-                                        framing = (0, hid_framing_1["default"])(channel, packetSize);
++                                        framing = (0, devices_1.createHIDframing)(channel, packetSize);
+                                         blocks = framing.makeBlocks(apdu);
+                                         i = 0;
+                                         _b.label = 1;
