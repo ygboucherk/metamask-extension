@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-/* eslint-disable import/unambiguous */
 import TransportU2F from '@ledgerhq/hw-transport-u2f';
 import TransportWebHID from '@ledgerhq/hw-transport-webhid';
 import LedgerEth from '@ledgerhq/hw-app-eth';

@@ -113,8 +113,8 @@ import { STATIC_MAINNET_TOKEN_LIST } from '../../shared/constants/tokens';
 import { getTokenValueParam } from '../../shared/lib/metamask-controller-utils';
 import { isManifestV3 } from '../../shared/modules/mv3.utils';
 import { hexToDecimal } from '../../shared/modules/conversion.utils';
-import { LedgerBridgeOffscreen } from './lib/ledger-bridge-offscreen';
-import { TrezorBridgeOffscreen } from './lib/trezor-bridge-offscreen';
+import { LedgerBridgeOffscreen } from './lib/offscreen/ledger/ledger-bridge-offscreen';
+import { TrezorBridgeOffscreen } from './lib/offscreen/trezor/trezor-bridge-offscreen';
 import { LatticeKeyringOffscreen } from './lib/lattice-keyring-offscreen';
 import {
   onMessageReceived,

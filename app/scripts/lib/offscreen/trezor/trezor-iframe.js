@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import TrezorConnect from '@trezor/connect-web';
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
@@ -6,14 +5,14 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     return;
   }
 
-  switch (msg.topic) {
+  switch (msg.action) {
     case 'init':
       // console.log('OFFSCREEN INIT', msg.params);
 
       TrezorConnect.on('DEVICE_EVENT', (event) => {
         if (event && event.payload && event.payload.features) {
           chrome.runtime.sendMessage({
-            topic: 'trezor-device-event',
+            action: 'trezor-device-event',
             event,
           });
         }
