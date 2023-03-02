@@ -166,12 +166,13 @@ async function createOffscreen() {
     return;
   }
 
-  console.log('OFFSCREEN IS BEING LOADED');
   await chrome.offscreen.createDocument({
     url: './offscreen/offscreen.html',
     reasons: ['IFRAME_SCRIPTING'],
     justification: 'Load HW scripts',
   });
+
+  console.debug('Offscreen iframe loaded');
 }
 
 createOffscreen();

@@ -9,8 +9,6 @@ module.exports = {
   // Ignore files which are also in .prettierignore
   ignorePatterns: [
     'app/vendor/**',
-    'app/offscreen/**',
-    'app/scripts/offscreen/**',
     'builds/**/*',
     'development/chromereload.js',
     'development/charts/**',

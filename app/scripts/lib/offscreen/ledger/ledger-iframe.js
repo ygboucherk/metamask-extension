@@ -10,283 +10,287 @@ const BRIDGE_URL = 'ws://localhost:8435';
 const TRANSPORT_CHECK_DELAY = 1000;
 const TRANSPORT_CHECK_LIMIT = 120;
 
-let transportType = 'webhid';
-let app = null;
-let transport = null;
-
-chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
-  if (!msg.offscreenIframe || msg.target !== 'ledger') {
-    return;
-  }
-  console.log('LEDGER IFRAME MESSAGE RECEIVED 1', msg);
-
-  const { action, params } = msg;
-
-  executeAction(action, params)
-    .then((result) => {
-      console.log('LEDGER IFRAME RESULT', { action, params, result });
-      sendResponse(result);
-    })
-    .catch((error) => {
-      console.log('LEDGER IFRAME ERROR', { action, params, error });
-    });
-
-  // eslint-disable-next-line consistent-return
-  return true;
-});
-
-async function executeAction(action, params) {
-  switch (action) {
-    case 'ledger-unlock':
-      return unlock(params.hdPath);
-
-    case 'ledger-sign-transaction':
-      return signTransaction(params.hdPath, params.tx);
-
-    case 'ledger-sign-personal-message':
-      return signPersonalMessage(params.hdPath, params.message);
-
-    case 'ledger-close-bridge':
-      return cleanUp();
-
-    case 'ledger-update-transport':
-      const transportType =
-        params.transportType === 'ledgerLive' || params.useLedgerLive
-          ? 'ledgerLive'
-          : params.transportType === 'webhid'
-          ? 'webhid'
-          : 'u2f';
-
-      return updateTransportTypePreference(transportType);
-
-    case 'ledger-make-app':
-      return attemptMakeApp();
-
-    case 'ledger-sign-typed-data':
-      return signTypedData(
-        params.hdPath,
-        params.domainSeparatorHex,
-        params.hashStructMessageHex,
-      );
-
-    default:
-      return {
-        success: false,
-        error: new Error('Unknown ledger action'),
-      };
-  }
-}
-
-async function updateTransportTypePreference(transportType) {
-  transportType = transportType;
-
-  return cleanUp();
-}
-
-async function cleanUp() {
-  app = null;
-
-  if (transport) {
-    await transport.close();
-    transport = null;
+class LedgerBridge {
+  constructor() {
+    this.addEventListeners();
+    this.transportType = 'u2f';
   }
 
-  return {
-    success: true,
-  };
-}
-
-async function attemptMakeApp() {
-  try {
-    await makeApp({ openOnly: true });
-    await cleanUp();
-    return {
-      success: true,
-    };
-  } catch (error) {
-    await cleanUp();
-    return {
-      success: false,
-      error,
-    };
-  }
-}
-
-async function makeApp(config = {}) {
-  try {
-    if (transportType === 'ledgerLive') {
-      let reestablish = false;
-      try {
-        await WebSocketTransport.check(BRIDGE_URL);
-      } catch (_err) {
-        window.open('ledgerlive://bridge?appName=Ethereum');
-        await checkTransportLoop();
-        reestablish = true;
-      }
-      if (!app || reestablish) {
-        transport = await WebSocketTransport.open(BRIDGE_URL);
-        app = new LedgerEth(transport);
-      }
-    } else if (transportType === 'webhid') {
-      const device = transport && transport.device;
-      const nameOfDeviceType = device && device.constructor.name;
-      const deviceIsOpen = device && device.opened;
-      if (app && nameOfDeviceType === 'HIDDevice' && deviceIsOpen) {
+  addEventListeners() {
+    // eslint-disable-next-line no-undef
+    chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+      if (!msg.offscreenIframe || msg.target !== 'ledger') {
         return;
       }
-      transport = config.openOnly
-        ? await TransportWebHID.openConnected()
-        : await TransportWebHID.create();
-      app = new LedgerEth(transport);
-    } else {
-      transport = await TransportU2F.create();
-      app = new LedgerEth(transport);
-    }
-  } catch (error) {
-    console.log('LEDGER:::CREATE APP ERROR', error);
-    throw error;
-  }
-}
+      console.log('LEDGER IFRAME MESSAGE RECEIVED 1', msg);
 
-async function checkTransportLoop(i) {
-  const iterator = i || 0;
-  return WebSocketTransport.check(BRIDGE_URL).catch(async () => {
-    await new Promise((success) => setTimeout(success, TRANSPORT_CHECK_DELAY));
-    if (iterator < TRANSPORT_CHECK_LIMIT) {
-      return checkTransportLoop(iterator + 1);
-    } else {
+      const { action, params } = msg;
+
+      this.executeAction(action, params)
+        .then((result) => {
+          console.log('LEDGER IFRAME RESULT', { action, params, result });
+          sendResponse(result);
+        })
+        .catch((error) => {
+          console.log('LEDGER IFRAME ERROR', { action, params, error });
+        });
+
+      // eslint-disable-next-line consistent-return
+      return true;
+    });
+  }
+
+  async executeAction(action, params) {
+    switch (action) {
+      case 'ledger-unlock':
+        return this.unlock(params.hdPath);
+
+      case 'ledger-sign-transaction':
+        return this.signTransaction(params.hdPath, params.tx);
+
+      case 'ledger-sign-personal-message':
+        return this.signPersonalMessage(params.hdPath, params.message);
+
+      case 'ledger-close-bridge':
+        return this.cleanUp();
+
+      case 'ledger-update-transport':
+        if (params.transportType === 'ledgerLive' || params.useLedgerLive) {
+          return this.updateTransportTypePreference('ledgerLive');
+        } else if (params.transportType === 'webhid') {
+          return this.updateTransportTypePreference('webhid');
+        }
+        return this.updateTransportTypePreference('u2f');
+
+      case 'ledger-make-app':
+        return this.attemptMakeApp();
+
+      case 'ledger-sign-typed-data':
+        return this.signTypedData(
+          params.hdPath,
+          params.domainSeparatorHex,
+          params.hashStructMessageHex,
+        );
+
+      default:
+        throw new Error('Ledger action not executed');
+    }
+  }
+
+  delay(ms) {
+    return new Promise((success) => setTimeout(success, ms));
+  }
+
+  checkTransportLoop(i) {
+    const iterator = i || 0;
+    return WebSocketTransport.check(BRIDGE_URL).catch(async () => {
+      await this.delay(TRANSPORT_CHECK_DELAY);
+      if (iterator < TRANSPORT_CHECK_LIMIT) {
+        return this.checkTransportLoop(iterator + 1);
+      }
       throw new Error('Ledger transport check timeout');
-    }
-  });
-}
+    });
+  }
 
-async function unlock(hdPath) {
-  try {
-    await makeApp();
-    const res = await app.getAddress(hdPath, false, true);
+  async attemptMakeApp() {
+    try {
+      await this.makeApp({ openOnly: true });
+      await this.cleanUp();
+      return {
+        success: true,
+      };
+    } catch (error) {
+      await this.cleanUp();
+      return {
+        success: false,
+        error,
+      };
+    }
+  }
+
+  async makeApp(config = {}) {
+    try {
+      if (this.transportType === 'ledgerLive') {
+        let reestablish = false;
+        try {
+          await WebSocketTransport.check(BRIDGE_URL);
+        } catch (_err) {
+          window.open('ledgerlive://bridge?appName=Ethereum');
+          await this.checkTransportLoop();
+          reestablish = true;
+        }
+        if (!this.app || reestablish) {
+          this.transport = await WebSocketTransport.open(BRIDGE_URL);
+          this.app = new LedgerEth(this.transport);
+        }
+      } else if (this.transportType === 'webhid') {
+        const device = this.transport && this.transport.device;
+        const nameOfDeviceType = device && device.constructor.name;
+        const deviceIsOpen = device && device.opened;
+        if (this.app && nameOfDeviceType === 'HIDDevice' && deviceIsOpen) {
+          return;
+        }
+        this.transport = config.openOnly
+          ? await TransportWebHID.openConnected()
+          : await TransportWebHID.create();
+        this.app = new LedgerEth(this.transport);
+      } else {
+        this.transport = await TransportU2F.create();
+        this.app = new LedgerEth(this.transport);
+      }
+    } catch (e) {
+      console.log('LEDGER:::CREATE APP ERROR', e);
+      throw e;
+    }
+  }
+
+  updateTransportTypePreference(transportType) {
+    this.transportType = transportType;
+    return this.cleanUp();
+  }
+
+  async cleanUp() {
+    this.app = null;
+    if (this.transport) {
+      await this.transport.close();
+      this.transport = null;
+    }
+
     return {
       success: true,
-      payload: res,
     };
-  } catch (err) {
-    const e = ledgerErrToMessage(err);
-    return {
-      success: false,
-      payload: { error: e },
-    };
-  } finally {
-    if (transportType !== 'ledgerLive') {
-      cleanUp();
+  }
+
+  async unlock(hdPath) {
+    try {
+      await this.makeApp();
+      const res = await this.app.getAddress(hdPath, false, true);
+      return {
+        success: true,
+        payload: res,
+      };
+    } catch (err) {
+      const e = this.ledgerErrToMessage(err);
+      return {
+        success: false,
+        payload: { error: e },
+      };
+    } finally {
+      if (this.transportType !== 'ledgerLive') {
+        this.cleanUp();
+      }
     }
+  }
+
+  async signTransaction(hdPath, tx) {
+    try {
+      await this.makeApp();
+      const res = await this.app.signTransaction(hdPath, tx);
+      return {
+        success: true,
+        payload: res,
+      };
+    } catch (err) {
+      const e = this.ledgerErrToMessage(err);
+      return {
+        success: false,
+        payload: { error: e },
+      };
+    } finally {
+      if (this.transportType !== 'ledgerLive') {
+        this.cleanUp();
+      }
+    }
+  }
+
+  async signPersonalMessage(hdPath, message) {
+    try {
+      await this.makeApp();
+
+      const res = await this.app.signPersonalMessage(hdPath, message);
+      return {
+        success: true,
+        payload: res,
+      };
+    } catch (err) {
+      const e = this.ledgerErrToMessage(err);
+      return {
+        success: false,
+        payload: { error: e },
+      };
+    } finally {
+      if (this.transportType !== 'ledgerLive') {
+        this.cleanUp();
+      }
+    }
+  }
+
+  async signTypedData(hdPath, domainSeparatorHex, hashStructMessageHex) {
+    try {
+      await this.makeApp();
+
+      const res = await this.app.signEIP712HashedMessage(
+        hdPath,
+        domainSeparatorHex,
+        hashStructMessageHex,
+      );
+      return {
+        success: true,
+        payload: res,
+      };
+    } catch (err) {
+      const e = this.ledgerErrToMessage(err);
+      return {
+        success: false,
+        payload: { error: e },
+      };
+    } finally {
+      this.cleanUp();
+    }
+  }
+
+  ledgerErrToMessage(err) {
+    const isU2FError = (e) => Boolean(e) && Boolean(e.metaData);
+    const isStringError = (e) => typeof e === 'string';
+    const isErrorWithId = (e) =>
+      // eslint-disable-next-line no-prototype-builtins
+      e.hasOwnProperty('id') && e.hasOwnProperty('message');
+    const isWrongAppError = (e) => String(e.message || e).includes('6804');
+    const isLedgerLockedError = (e) =>
+      e.message && e.message.includes('OpenFailed');
+
+    // https://developers.yubico.com/U2F/Libraries/Client_error_codes.html
+    if (isU2FError(err)) {
+      if (err.metaData.code === 5) {
+        return new Error('LEDGER_TIMEOUT');
+      }
+      return err.metaData.type;
+    }
+
+    if (isWrongAppError(err)) {
+      return new Error('LEDGER_WRONG_APP');
+    }
+
+    if (
+      isLedgerLockedError(err) ||
+      (isStringError(err) && err.includes('6801'))
+    ) {
+      return new Error('LEDGER_LOCKED');
+    }
+
+    if (isErrorWithId(err)) {
+      // Browser doesn't support U2F
+      if (err.message.includes('U2F not supported')) {
+        return new Error('U2F_NOT_SUPPORTED');
+      }
+    }
+
+    // Other
+    return err;
   }
 }
 
-async function signTransaction(hdPath, tx) {
-  try {
-    await makeApp();
-    const res = await app.signTransaction(hdPath, tx);
-    return {
-      success: true,
-      payload: res,
-    };
-  } catch (err) {
-    const e = ledgerErrToMessage(err);
-    return {
-      success: false,
-      payload: { error: e },
-    };
-  } finally {
-    if (transportType !== 'ledgerLive') {
-      cleanUp();
-    }
-  }
-}
-
-async function signPersonalMessage(hdPath, message) {
-  try {
-    await makeApp();
-
-    const res = await app.signPersonalMessage(hdPath, message);
-    return {
-      success: true,
-      payload: res,
-    };
-  } catch (err) {
-    const e = ledgerErrToMessage(err);
-    return {
-      success: false,
-      payload: { error: e },
-    };
-  } finally {
-    if (transportType !== 'ledgerLive') {
-      cleanUp();
-    }
-  }
-}
-
-async function signTypedData(hdPath, domainSeparatorHex, hashStructMessageHex) {
-  try {
-    await makeApp();
-
-    const res = await app.signEIP712HashedMessage(
-      hdPath,
-      domainSeparatorHex,
-      hashStructMessageHex,
-    );
-    return {
-      success: true,
-      payload: res,
-    };
-  } catch (err) {
-    const e = ledgerErrToMessage(err);
-    return {
-      success: false,
-      payload: { error: e },
-    };
-  } finally {
-    if (transportType !== 'ledgerLive') {
-      cleanUp();
-    }
-  }
-}
-
-function ledgerErrToMessage(err) {
-  const isU2FError = (err) => !!err && !!err.metaData;
-  const isStringError = (err) => typeof err === 'string';
-  const isErrorWithId = (err) =>
-    err.hasOwnProperty('id') && err.hasOwnProperty('message');
-  const isWrongAppError = (err) => String(err.message || err).includes('6804');
-  const isLedgerLockedError = (err) =>
-    err.message && err.message.includes('OpenFailed');
-
-  // https://developers.yubico.com/U2F/Libraries/Client_error_codes.html
-  if (isU2FError(err)) {
-    if (err.metaData.code === 5) {
-      return new Error('LEDGER_TIMEOUT');
-    }
-    return err.metaData.type;
-  }
-
-  if (isWrongAppError(err)) {
-    return new Error('LEDGER_WRONG_APP');
-  }
-
-  if (
-    isLedgerLockedError(err) ||
-    (isStringError(err) && err.includes('6801'))
-  ) {
-    return new Error('LEDGER_LOCKED');
-  }
-
-  if (isErrorWithId(err)) {
-    // Browser doesn't support U2F
-    if (err.message.includes('U2F not supported')) {
-      return new Error('U2F_NOT_SUPPORTED');
-    }
-  }
-
-  // Other
-  return err;
-}
-
-console.log('LEDGER IFRAME OFFSCREEN LOADED');
+(() => {
+  // eslint-disable-next-line no-unused-vars
+  const bridge = new LedgerBridge();
+})();

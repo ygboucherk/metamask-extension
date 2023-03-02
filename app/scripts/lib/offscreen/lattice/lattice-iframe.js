@@ -141,5 +141,3 @@ async function findTabById(id) {
   const tabs = await browser.tabs.query({});
   return tabs.find((tab) => tab.id === id);
 }
-
-console.log('LATTICE IFRAME OFFSCREEN LOADED');

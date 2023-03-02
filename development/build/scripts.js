@@ -302,12 +302,6 @@ function createScriptTasks({
       createSentryBundle({ buildTarget }),
     );
 
-    // this can run whenever
-    const offscreenSubtask = createTask(
-      `${taskPrefix}:offscreen`,
-      createOffscreenBundle({ buildTarget }),
-    );
-
     // task for initiating browser livereload
     const initiateLiveReload = async () => {
       if (isDevBuild(buildTarget)) {
@@ -330,7 +324,6 @@ function createScriptTasks({
       contentscriptSubtask,
       disableConsoleSubtask,
       installSentrySubtask,
-      offscreenSubtask,
     ].map((subtask) =>
       runInChildProcess(subtask, {
         applyLavaMoat,
@@ -340,6 +333,24 @@ function createScriptTasks({
         shouldLintFenceFiles,
       }),
     );
+
+    if (process.env.ENABLE_MV3) {
+      const offscreenSubtask = createTask(
+        `${taskPrefix}:offscreen`,
+        createOffscreenBundle({ buildTarget }),
+      );
+
+      allSubtasks.push(
+        runInChildProcess(offscreenSubtask, {
+          applyLavaMoat,
+          buildType,
+          isLavaMoat,
+          policyOnly,
+          shouldLintFenceFiles,
+        }),
+      );
+    }
+
     // make a parent task that runs each task in a child thread
     return composeParallel(initiateLiveReload, ...allSubtasks);
   }

@@ -83,5 +83,3 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   // eslint-disable-next-line consistent-return
   return true;
 });
-
-console.log('TREZOR IFRAME OFFSCREEN LOADED', TrezorConnect);
