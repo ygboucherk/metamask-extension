@@ -1,4 +1,7 @@
-import { sendOffscreenMessage } from '../iframe-messenger';
+import {
+  addOffscreenListener,
+  sendOffscreenMessage,
+} from '../iframe-messenger';
 
 const target = 'ledger';
 
@@ -15,7 +18,13 @@ const responseCallback = (
 };
 
 export class LedgerBridgeOffscreen {
+  isDeviceConnected: boolean | undefined;
+
   init() {
+    addOffscreenListener('ledger-connection-event', (payload: boolean) => {
+      this.isDeviceConnected = payload;
+    });
+
     return Promise.resolve();
   }
 

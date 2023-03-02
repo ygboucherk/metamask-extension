@@ -10,10 +10,10 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       // console.log('OFFSCREEN INIT', msg.params);
 
       TrezorConnect.on('DEVICE_EVENT', (event) => {
-        if (event && event.payload && event.payload.features) {
+        if (event?.payload?.features) {
           chrome.runtime.sendMessage({
             action: 'trezor-device-event',
-            event,
+            payload: event.payload.features,
           });
         }
       });

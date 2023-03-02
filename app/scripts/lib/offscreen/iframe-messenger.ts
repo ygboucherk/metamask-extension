@@ -32,11 +32,11 @@ export function sendOffscreenMessage({
 
 export function addOffscreenListener(
   action: string,
-  callback: (msg: any) => void,
+  callback: (payload: any) => void,
 ) {
   chrome.runtime.onMessage.addListener((msg) => {
     if (msg.action === action) {
-      callback(msg);
+      callback(msg.payload);
     }
   });
 }

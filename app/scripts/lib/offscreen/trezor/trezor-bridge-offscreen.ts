@@ -25,8 +25,8 @@ export class TrezorBridgeOffscreen {
   model: string | undefined;
 
   init() {
-    addOffscreenListener('trezor-device-event', (msg: any) => {
-      this.model = msg?.event?.payload?.features;
+    addOffscreenListener('trezor-device-event', (payload: string) => {
+      this.model = payload;
     });
 
     return sendOffscreenMessage({
