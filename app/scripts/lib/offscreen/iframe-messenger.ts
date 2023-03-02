@@ -10,10 +10,10 @@ export function sendOffscreenMessage({
   action: string;
   params?: unknown;
   responseCallback: (
-    response: unknown,
-    resolve: (value: unknown) => void,
+    response: any,
+    resolve: (value: any) => void,
     reject: (reason?: any) => void,
-  ) => unknown;
+  ) => any;
 }) {
   return new Promise((resolve, reject) => {
     chrome.runtime.sendMessage(
@@ -23,7 +23,7 @@ export function sendOffscreenMessage({
         action,
         params,
       },
-      (response: unknown) => {
+      (response) => {
         responseCallback(response, resolve, reject);
       },
     );
@@ -32,7 +32,7 @@ export function sendOffscreenMessage({
 
 export function addOffscreenListener(
   action: string,
-  callback: (msg: unknown) => void,
+  callback: (msg: any) => void,
 ) {
   chrome.runtime.onMessage.addListener((msg) => {
     if (msg.action === action) {

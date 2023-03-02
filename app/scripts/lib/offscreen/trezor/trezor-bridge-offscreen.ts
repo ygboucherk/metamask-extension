@@ -17,10 +17,7 @@ import {
 
 const target = 'trezor';
 
-const responseCallback = (
-  response: unknown,
-  resolve: (value: unknown) => void,
-) => {
+const responseCallback = (response: any, resolve: (value: any) => void) => {
   resolve(response);
 };
 

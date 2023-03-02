@@ -41,19 +41,10 @@ async function executeAction(action, params) {
       return unlock(params.hdPath);
 
     case 'ledger-sign-transaction':
-      console.log('NOT IMPLEMENTED', action);
-      // this.signTransaction(replyAction, params.hdPath, params.tx, messageId);
-      break;
+      return signTransaction(params.hdPath, params.tx);
 
     case 'ledger-sign-personal-message':
-      console.log('NOT IMPLEMENTED', action);
-      // this.signPersonalMessage(
-      //   replyAction,
-      //   params.hdPath,
-      //   params.message,
-      //   messageId,
-      // );
-      break;
+      return signPersonalMessage(params.hdPath, params.message);
 
     case 'ledger-close-bridge':
       return cleanUp();
@@ -72,21 +63,16 @@ async function executeAction(action, params) {
       return attemptMakeApp();
 
     case 'ledger-sign-typed-data':
-      console.log('NOT IMPLEMENTED', action);
-      // this.signTypedData(
-      //   replyAction,
-      //   params.hdPath,
-      //   params.domainSeparatorHex,
-      //   params.hashStructMessageHex,
-      //   messageId,
-      // );
-      break;
+      return signTypedData(
+        params.hdPath,
+        params.domainSeparatorHex,
+        params.hashStructMessageHex,
+      );
 
     default:
-      console.error('Unknown ledger action', action);
       return {
         success: false,
-        error: 'Unknown ledger action',
+        error: new Error('Unknown ledger action'),
       };
   }
 }
@@ -190,43 +176,117 @@ async function unlock(hdPath) {
     };
   } finally {
     if (transportType !== 'ledgerLive') {
-      await cleanUp();
+      cleanUp();
     }
   }
 }
 
-function ledgerErrToMessage (err) {
-  const isU2FError = (err) => !!err && !!(err).metaData
-  const isStringError = (err) => typeof err === 'string'
-  const isErrorWithId = (err) => err.hasOwnProperty('id') && err.hasOwnProperty('message')
-  const isWrongAppError = (err) => String(err.message || err).includes('6804')
-  const isLedgerLockedError = (err) => err.message && err.message.includes('OpenFailed')
+async function signTransaction(hdPath, tx) {
+  try {
+    await makeApp();
+    const res = await app.signTransaction(hdPath, tx);
+    return {
+      success: true,
+      payload: res,
+    };
+  } catch (err) {
+    const e = ledgerErrToMessage(err);
+    return {
+      success: false,
+      payload: { error: e },
+    };
+  } finally {
+    if (transportType !== 'ledgerLive') {
+      cleanUp();
+    }
+  }
+}
+
+async function signPersonalMessage(hdPath, message) {
+  try {
+    await makeApp();
+
+    const res = await app.signPersonalMessage(hdPath, message);
+    return {
+      success: true,
+      payload: res,
+    };
+  } catch (err) {
+    const e = ledgerErrToMessage(err);
+    return {
+      success: false,
+      payload: { error: e },
+    };
+  } finally {
+    if (transportType !== 'ledgerLive') {
+      cleanUp();
+    }
+  }
+}
+
+async function signTypedData(hdPath, domainSeparatorHex, hashStructMessageHex) {
+  try {
+    await makeApp();
+
+    const res = await app.signEIP712HashedMessage(
+      hdPath,
+      domainSeparatorHex,
+      hashStructMessageHex,
+    );
+    return {
+      success: true,
+      payload: res,
+    };
+  } catch (err) {
+    const e = ledgerErrToMessage(err);
+    return {
+      success: false,
+      payload: { error: e },
+    };
+  } finally {
+    if (transportType !== 'ledgerLive') {
+      cleanUp();
+    }
+  }
+}
+
+function ledgerErrToMessage(err) {
+  const isU2FError = (err) => !!err && !!err.metaData;
+  const isStringError = (err) => typeof err === 'string';
+  const isErrorWithId = (err) =>
+    err.hasOwnProperty('id') && err.hasOwnProperty('message');
+  const isWrongAppError = (err) => String(err.message || err).includes('6804');
+  const isLedgerLockedError = (err) =>
+    err.message && err.message.includes('OpenFailed');
 
   // https://developers.yubico.com/U2F/Libraries/Client_error_codes.html
   if (isU2FError(err)) {
     if (err.metaData.code === 5) {
-      return new Error('LEDGER_TIMEOUT')
+      return new Error('LEDGER_TIMEOUT');
     }
-    return err.metaData.type
+    return err.metaData.type;
   }
 
   if (isWrongAppError(err)) {
-      return new Error('LEDGER_WRONG_APP')
+    return new Error('LEDGER_WRONG_APP');
   }
 
-  if (isLedgerLockedError(err) || (isStringError(err) && err.includes('6801'))) {
-      return new Error('LEDGER_LOCKED')
+  if (
+    isLedgerLockedError(err) ||
+    (isStringError(err) && err.includes('6801'))
+  ) {
+    return new Error('LEDGER_LOCKED');
   }
 
   if (isErrorWithId(err)) {
     // Browser doesn't support U2F
     if (err.message.includes('U2F not supported')) {
-      return new Error('U2F_NOT_SUPPORTED')
+      return new Error('U2F_NOT_SUPPORTED');
     }
   }
 
   // Other
-  return err
+  return err;
 }
 
 console.log('LEDGER IFRAME OFFSCREEN LOADED');
