@@ -1,8 +1,8 @@
 diff --git a/index.js b/index.js
-index 9b76a29305d48cd36b3ffd3b17f5ecdc9be96d0d..537536d0e4d5556220c8b35ebcd3e57401a4d5a1 100644
+index 9b76a29305d48cd36b3ffd3b17f5ecdc9be96d0d..6085ac9ad16e7bfce23c4fbdc7ef6fbcc22e8fe7 100644
 --- a/index.js
 +++ b/index.js
-@@ -1,519 +1,7 @@
+@@ -1,519 +1,8 @@
 -const { EventEmitter } = require('events');
 -const ethUtil = require('ethereumjs-util');
 -const HDKey = require('hdkey');
@@ -10,12 +10,11 @@ index 9b76a29305d48cd36b3ffd3b17f5ecdc9be96d0d..537536d0e4d5556220c8b35ebcd3e574
 -const { TransactionFactory } = require('@ethereumjs/tx');
 -const transformTypedData = require('trezor-connect/lib/plugins/ethereum/typedData');
 +const { TrezorKeyring, TREZOR_CONNECT_MANIFEST } = require('./trezor-keyring');
-+const TrezorBridgeMv2 = require('./trezor-bridge-mv2');
++const { TrezorBridgeWeb } = require('./trezor-bridge-web');
  
 -const hdPathString = `m/44'/60'/0'/0`;
 -const SLIP0044TestnetPath = `m/44'/1'/0'/0`;
-+module.exports.TrezorBridgeMv2 = TrezorBridgeMv2;
- 
+-
 -const ALLOWED_HD_PATHS = {
 -  [hdPathString]: true,
 -  [SLIP0044TestnetPath]: true,
@@ -28,7 +27,11 @@ index 9b76a29305d48cd36b3ffd3b17f5ecdc9be96d0d..537536d0e4d5556220c8b35ebcd3e574
 -const TREZOR_CONNECT_MANIFEST = {
 -  email: 'support@metamask.io',
 -  appUrl: 'https://metamask.io',
--};
++module.exports = {
++  TREZOR_CONNECT_MANIFEST,
++  TrezorKeyring,
++  TrezorBridgeWeb,
+ };
 -
 -function wait(ms) {
 -  return new Promise((resolve) => setTimeout(resolve, ms));
@@ -525,13 +528,20 @@ index 9b76a29305d48cd36b3ffd3b17f5ecdc9be96d0d..537536d0e4d5556220c8b35ebcd3e574
 -
 -TrezorKeyring.type = keyringType;
 -module.exports = TrezorKeyring;
-+module.exports.TrezorKeyring = TrezorKeyring;
-+module.exports.TREZOR_CONNECT_MANIFEST = TREZOR_CONNECT_MANIFEST;
 diff --git a/package.json b/package.json
-index 88f0450d3a578cdf6be1cd43c7bb2e09cd5a72e8..670079341d0c2505c3aca81ad205cd41fa366bbb 100644
+index 88f0450d3a578cdf6be1cd43c7bb2e09cd5a72e8..7610d46d10514902f29e2dcf0e882f05206d65d1 100644
 --- a/package.json
 +++ b/package.json
-@@ -19,13 +19,17 @@
+@@ -1,6 +1,6 @@
+ {
+-  "name": "eth-trezor-keyring",
+-  "version": "0.10.0",
++  "name": "@metamask/eth-trezor-keyring",
++  "version": "1.0.0",
+   "description": "A MetaMask compatible keyring, for trezor hardware wallets",
+   "keywords": [
+     "ethereum",
+@@ -19,31 +19,35 @@
    "license": "ISC",
    "author": "Bruno Barbieri",
    "main": "index.js",
@@ -540,45 +550,95 @@ index 88f0450d3a578cdf6be1cd43c7bb2e09cd5a72e8..670079341d0c2505c3aca81ad205cd41
 -    "index.js"
 +    "index.js",
 +    "trezor-keyring.js",
-+    "trezor-bridge-mv2.js",
++    "trezor-bridge-web.js",
 +    "types/index.d.ts"
    ],
    "scripts": {
-     "setup": "yarn install && yarn allow-scripts",
-     "test": "mocha",
+-    "setup": "yarn install && yarn allow-scripts",
+-    "test": "mocha",
 -    "lint:eslint": "eslint . --cache --ext js,ts",
-+    "lint:eslint": "eslint . --cache --ext js,ts --ignore-pattern types/index.d.ts",
-     "lint:misc": "prettier '**/*.json' '**/*.md' '!CHANGELOG.md' '**/*.yml' --ignore-path .gitignore",
+-    "lint:misc": "prettier '**/*.json' '**/*.md' '!CHANGELOG.md' '**/*.yml' --ignore-path .gitignore",
      "lint": "yarn lint:eslint && yarn lint:misc --check",
-     "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write"
-@@ -43,7 +47,7 @@
+-    "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write"
++    "lint:eslint": "eslint . --cache --ext js,ts",
++    "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write",
++    "lint:misc": "prettier '**/*.json' '**/*.md' '!CHANGELOG.md' '**/*.yml' '!.yarnrc.yml' --ignore-path .gitignore --no-error-on-unmatched-pattern",
++    "test": "mocha"
+   },
+   "resolutions": {
+     "mocha/mkdirp": "^0.5.1"
+   },
+   "dependencies": {
+-    "@ethereumjs/tx": "^3.2.1",
+-    "@metamask/eth-sig-util": "^4.0.0",
+-    "ethereumjs-util": "^7.0.9",
+-    "hdkey": "0.8.0",
+-    "trezor-connect": "8.2.6-extended"
++    "@ethereumjs/tx": "^4.0.0",
++    "@ethereumjs/util": "^8.0.0",
++    "@metamask/eth-sig-util": "^5.0.2",
++    "@trezor/connect-plugin-ethereum": "^9.0.1",
++    "@trezor/connect-web": "^9.0.6",
++    "hdkey": "0.8.0"
+   },
    "devDependencies": {
-     "@ethereumjs/common": "^2.4.0",
-     "@lavamoat/allow-scripts": "^1.0.6",
+-    "@ethereumjs/common": "^2.4.0",
+-    "@lavamoat/allow-scripts": "^1.0.6",
 -    "@metamask/auto-changelog": "^2.3.0",
++    "@ethereumjs/common": "^3.0.0",
++    "@lavamoat/allow-scripts": "^2.3.0",
 +    "@metamask/auto-changelog": "^3.0.0",
      "@metamask/eslint-config": "^8.0.0",
      "@metamask/eslint-config-mocha": "^8.0.0",
      "@metamask/eslint-config-nodejs": "^8.0.0",
-@@ -62,7 +66,7 @@
+@@ -61,8 +65,13 @@
+     "prettier-plugin-packagejson": "^2.2.12",
      "sinon": "^9.2.3"
    },
++  "packageManager": "yarn@3.3.1",
    "engines": {
 -    "node": ">=12.0.0"
 +    "node": ">=14.0.0"
++  },
++  "publishConfig": {
++    "access": "public",
++    "registry": "https://registry.npmjs.org/"
    },
    "lavamoat": {
      "allowScripts": {
-diff --git a/trezor-bridge-mv2.js b/trezor-bridge-mv2.js
+@@ -72,7 +81,21 @@
+       "core-js": false,
+       "blake-hash": false,
+       "tiny-secp256k1": false,
+-      "protobufjs": false
++      "protobufjs": false,
++      "ethereumjs-tx>ethereumjs-util>keccak": false,
++      "ethereumjs-util>ethereum-cryptography>keccak": false,
++      "ethereumjs-util>ethereum-cryptography>secp256k1": false,
++      "hdkey>secp256k1": false,
++      "trezor-connect>@trezor/transport>protobufjs": false,
++      "trezor-connect>@trezor/utxo-lib>blake-hash": false,
++      "trezor-connect>@trezor/utxo-lib>tiny-secp256k1": false,
++      "@trezor/connect-web>@trezor/connect>@trezor/transport>protobufjs": false,
++      "@trezor/connect-web>@trezor/connect>@trezor/utxo-lib>blake-hash": false,
++      "@trezor/connect-web>@trezor/connect>@trezor/utxo-lib>tiny-secp256k1": false,
++      "@ethereumjs/tx>ethereumjs-util>ethereum-cryptography>keccak": false,
++      "@ethereumjs/tx>ethereumjs-util>ethereum-cryptography>secp256k1": false,
++      "ethereumjs-tx>ethereumjs-util>ethereum-cryptography>keccak": false,
++      "ethereumjs-tx>ethereumjs-util>ethereum-cryptography>secp256k1": false
+     }
+   }
+ }
+diff --git a/trezor-bridge-web.js b/trezor-bridge-web.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..381351c470d49bab561ddd5f83a955bcb88681e1
+index 0000000000000000000000000000000000000000..d86ad8b2fec28b978ce7d7d77a685261e36e40f5
 --- /dev/null
-+++ b/trezor-bridge-mv2.js
-@@ -0,0 +1,40 @@
-+const { default: TrezorConnect, DEVICE_EVENT } = require('trezor-connect');
++++ b/trezor-bridge-web.js
+@@ -0,0 +1,42 @@
++const { default: TrezorConnect, DEVICE_EVENT } = require('@trezor/connect-web');
 +const { TREZOR_CONNECT_MANIFEST } = require('./trezor-keyring');
 +
-+class TrezorBridgeMv2 {
++class TrezorBridgeWeb {
 +  init() {
 +    TrezorConnect.on(DEVICE_EVENT, (event) => {
 +      if (event && event.payload && event.payload.features) {
@@ -614,18 +674,20 @@ index 0000000000000000000000000000000000000000..381351c470d49bab561ddd5f83a955bc
 +  }
 +}
 +
-+module.exports = TrezorBridgeMv2;
++module.exports = {
++  TrezorBridgeWeb,
++};
 diff --git a/trezor-keyring.js b/trezor-keyring.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..4e62ae655a9edd764d15a5fe2a65282ed96bbd8e
+index 0000000000000000000000000000000000000000..368667834955d56e749eba725d9b2ca06faa0d84
 --- /dev/null
 +++ b/trezor-keyring.js
 @@ -0,0 +1,534 @@
 +const { EventEmitter } = require('events');
-+const ethUtil = require('ethereumjs-util');
++const ethUtil = require('@ethereumjs/util');
 +const HDKey = require('hdkey');
 +const { TransactionFactory } = require('@ethereumjs/tx');
-+const transformTypedData = require('trezor-connect/lib/plugins/ethereum/typedData');
++const { transformTypedData } = require('@trezor/connect-plugin-ethereum');
 +
 +const hdPathString = `m/44'/60'/0'/0`;
 +const SLIP0044TestnetPath = `m/44'/1'/0'/0`;
@@ -884,7 +946,7 @@ index 0000000000000000000000000000000000000000..4e62ae655a9edd764d15a5fe2a65282e
 +    }
 +    return this._signTransaction(
 +      address,
-+      tx.common.chainIdBN().toNumber(),
++      Number(tx.common.chainId()),
 +      tx,
 +      (payload) => {
 +        // Because tx will be immutable, first get a plain javascript object that
@@ -1152,56 +1214,24 @@ index 0000000000000000000000000000000000000000..4e62ae655a9edd764d15a5fe2a65282e
 +TrezorKeyring.type = keyringType;
 +
 +module.exports = {
-+  TrezorKeyring,
 +  TREZOR_CONNECT_MANIFEST,
++  TrezorKeyring,
 +};
 diff --git a/types/index.d.ts b/types/index.d.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..d54904b90a97078fed27d0a3a53d5763b688f464
+index 0000000000000000000000000000000000000000..6890e807c30ff2ce76b26075c6b581e7207001a2
 --- /dev/null
 +++ b/types/index.d.ts
-@@ -0,0 +1,63 @@
-+export const TREZOR_CONNECT_MANIFEST: {
-+  email: string;
-+  appUrl: string;
-+};
-+
-+export type GetPublicKeyPayload = { path: string; coin: 'ETH' };
-+export type GetPublicKeyResponse = {
-+  success: boolean;
-+  payload?: { publicKey?: string; chainCode?: string; error?: unknown };
-+};
-+
-+export type EthereumSignTransactionPayload = {
-+  path: string;
-+  transaction: Record<string, unknown>;
-+};
-+export type EthereumSignTransactionResponse = {
-+  success: boolean;
-+  payload?: { v?: string; r?: string; s?: string; error?: unknown };
-+};
-+
-+export type EthereumSignMessagePayload = {
-+  path: string;
-+  message: string;
-+  hex: boolean;
-+};
-+export type EthereumSignMessageResponse = {
-+  success: boolean;
-+  payload?: { address?: string; signature?: string; error?: unknown };
-+};
-+
-+export type EthereumSignTypedDataPayload = {
-+  path: string;
-+  data: Record<string, unknown>;
-+  metamask_v4_compat: boolean;
-+  domain_separator_hash: string;
-+  message_hash: string;
-+};
-+export type EthereumSignTypedDataResponse = {
-+  success: boolean;
-+  payload?: { address?: string; signature?: string; error?: unknown };
-+};
+@@ -0,0 +1,31 @@
++import type {
++  TrezorConnect,
++  EthereumSignMessage,
++  EthereumSignTransaction,
++  Params,
++  EthereumSignTypedData,
++  EthereumSignTypedDataTypes,
++  GetPublicKey,
++} from '@trezor/connect-web';
 +
 +export interface TrezorBridge {
 +  init(): Promise<void>;
@@ -1209,18 +1239,18 @@ index 0000000000000000000000000000000000000000..d54904b90a97078fed27d0a3a53d5763
 +  dispose(): Promise<void>;
 +
 +  getPublicKey(
-+    params: GetPublicKeyPayload,
-+  ): Promise<GetPublicKeyResponse>;
++    params: Params<GetPublicKey>,
++  ): ReturnType<TrezorConnect['getPublicKey']>;
 +
 +  ethereumSignTransaction(
-+    params: EthereumSignTransactionPayload,
-+  ): Promise<EthereumSignTransactionResponse>;
++    params: Params<EthereumSignTransaction>,
++  ): ReturnType<TrezorConnect['ethereumSignTransaction']>;
 +
 +  ethereumSignMessage(
-+    params: EthereumSignMessagePayload,
-+  ): Promise<EthereumSignMessageResponse>;
++    params: Params<EthereumSignMessage>,
++  ): ReturnType<TrezorConnect['ethereumSignMessage']>;
 +
 +  ethereumSignTypedData(
-+    params: EthereumSignTypedDataPayload,
-+  ): Promise<EthereumSignTypedDataResponse>;
++    params: Params<EthereumSignTypedData<EthereumSignTypedDataTypes>>,
++  ): ReturnType<TrezorConnect['ethereumSignTypedData']>;
 +}

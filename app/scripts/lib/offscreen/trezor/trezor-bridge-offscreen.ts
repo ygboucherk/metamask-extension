@@ -12,9 +12,7 @@ import {
   addOffscreenListener,
   sendOffscreenMessage,
 } from '../iframe-messenger';
-import { TREZOR_ACTION, TREZOR_EVENT } from './constants';
-
-const target = 'trezor';
+import { TREZOR_ACTION, TREZOR_EVENT, TREZOR_TARGET } from './constants';
 
 const responseCallback = (response: any, resolve: (value: any) => void) => {
   resolve(response);
@@ -29,7 +27,7 @@ export class TrezorBridgeOffscreen {
     });
 
     return sendOffscreenMessage({
-      target,
+      target: TREZOR_TARGET,
       action: TREZOR_ACTION.INIT,
       params: { manifest: TREZOR_CONNECT_MANIFEST, lazyLoad: true },
       responseCallback,
@@ -38,7 +36,7 @@ export class TrezorBridgeOffscreen {
 
   dispose() {
     return sendOffscreenMessage({
-      target,
+      target: TREZOR_TARGET,
       action: TREZOR_ACTION.DISPOSE,
       responseCallback,
     }) as Promise<void>;
@@ -46,7 +44,7 @@ export class TrezorBridgeOffscreen {
 
   getPublicKey(params: Params<GetPublicKey>) {
     return sendOffscreenMessage({
-      target,
+      target: TREZOR_TARGET,
       action: TREZOR_ACTION.GET_PUBLIC_KEY,
       params,
       responseCallback,
@@ -55,7 +53,7 @@ export class TrezorBridgeOffscreen {
 
   ethereumSignTransaction(params: Params<EthereumSignTransaction>) {
     return sendOffscreenMessage({
-      target,
+      target: TREZOR_TARGET,
       action: TREZOR_ACTION.SIGN_TRANSACTION,
       params,
       responseCallback,
@@ -64,7 +62,7 @@ export class TrezorBridgeOffscreen {
 
   ethereumSignMessage(params: Params<EthereumSignMessage>) {
     return sendOffscreenMessage({
-      target,
+      target: TREZOR_TARGET,
       action: TREZOR_ACTION.SIGN_MESSAGE,
       params,
       responseCallback,
@@ -75,7 +73,7 @@ export class TrezorBridgeOffscreen {
     params: Params<EthereumSignTypedData<EthereumSignTypedDataTypes>>,
   ) {
     return sendOffscreenMessage({
-      target,
+      target: TREZOR_TARGET,
       action: TREZOR_ACTION.SIGN_TYPED_DATA,
       params,
       responseCallback,

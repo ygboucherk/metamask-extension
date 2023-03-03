@@ -6648,6 +6648,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@trezor/connect-plugin-ethereum@npm:^9.0.1":
+  version: 9.0.1
+  resolution: "@trezor/connect-plugin-ethereum@npm:9.0.1"
+  peerDependencies:
+    "@metamask/eth-sig-util": ^5.0.2
+  checksum: 24ae4103d4873cc5ca083577ca0f561e983fa9eebd3c2bdb1de1ee1c509f773b9bca758a21c05043212aef997cd8544fc820f7b6764c0c43edb9ab77efbc10ae
+  languageName: node
+  linkType: hard
+
 "@trezor/connect-web@npm:^9.0.6":
   version: 9.0.6
   resolution: "@trezor/connect-web@npm:9.0.6"
@@ -15824,14 +15833,14 @@ __metadata:
 
 "eth-trezor-keyring@patch:eth-trezor-keyring@npm%3A0.10.0#./.yarn/patches/eth-trezor-keyring-npm-0.10.0-1bf9aa3f4d.patch::locator=metamask-crx%40workspace%3A.":
   version: 0.10.0
-  resolution: "eth-trezor-keyring@patch:eth-trezor-keyring@npm%3A0.10.0#./.yarn/patches/eth-trezor-keyring-npm-0.10.0-1bf9aa3f4d.patch::version=0.10.0&hash=7019c5&locator=metamask-crx%40workspace%3A."
+  resolution: "eth-trezor-keyring@patch:eth-trezor-keyring@npm%3A0.10.0#./.yarn/patches/eth-trezor-keyring-npm-0.10.0-1bf9aa3f4d.patch::version=0.10.0&hash=04c015&locator=metamask-crx%40workspace%3A."
   dependencies:
     "@ethereumjs/tx": ^3.2.1
     "@metamask/eth-sig-util": ^4.0.0
     ethereumjs-util: ^7.0.9
     hdkey: 0.8.0
     trezor-connect: 8.2.6-extended
-  checksum: d8095b34fca87d61b370da0e8f5484bf180e2cddd6ce6d041d795de630eb4866ff3f0a9106ed9793282aad645ae2843cfbb2631ac79e7e7a364bb1a335553c7e
+  checksum: 7928ce1276ea990e0a68a58859edb6677c2c83bc8de05abd509996fb9932bae530a480f501de37d2e45a95d4bdd9b338627d140f3d8be777b25b62924d0a898f
   languageName: node
   linkType: hard
 
@@ -24406,6 +24415,7 @@ __metadata:
     "@testing-library/react": ^10.4.8
     "@testing-library/react-hooks": ^8.0.1
     "@testing-library/user-event": ^14.4.3
+    "@trezor/connect-plugin-ethereum": ^9.0.1
     "@trezor/connect-web": ^9.0.6
     "@truffle/codec": ^0.14.12
     "@truffle/decoder": ^5.3.5
