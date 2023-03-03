@@ -337,7 +337,7 @@ function createScriptTasks({
     if (process.env.ENABLE_MV3) {
       const offscreenSubtask = createTask(
         `${taskPrefix}:offscreen`,
-        createOffscreenBundle({ buildTarget }),
+        createOffscreenHWBundle({ buildTarget }),
       );
 
       allSubtasks.push(
@@ -446,57 +446,32 @@ function createScriptTasks({
   }
 
   /**
-   * Create a bundle for the "offscreen" module.
+   * Create a bundle for Hardware Wallet iframes on the "offscreen" page.
    *
    * @param {object} options - The build options.
    * @param {BUILD_TARGETS} options.buildTarget - The current build target.
    * @returns {Function} A function that creates the bundle.
    */
-  function createOffscreenBundle({ buildTarget }) {
-    const trezor = 'trezor';
-    const ledger = 'ledger';
-    const lattice = 'lattice';
-    return composeSeries(
-      createNormalBundle({
+  function createOffscreenHWBundle({ buildTarget }) {
+    const bundles = ['trezor', 'ledger', 'lattice'].map((label) => {
+      return createNormalBundle({
         buildTarget,
         buildType,
         browserPlatforms,
-        destFilepath: `offscreen/${trezor}/${trezor}-iframe.js`,
-        entryFilepath: `./app/scripts/lib/offscreen/${trezor}/${trezor}-iframe.js`,
-        label: trezor,
+        destFilepath: `offscreen/${label}/${label}-iframe.js`,
+        entryFilepath: `./app/scripts/lib/offscreen/${label}/${label}-iframe.${
+          label === 'trezor' ? 'ts' : 'js'
+        }`,
+        label,
         ignoredFiles,
         policyOnly,
         shouldLintFenceFiles,
         version,
         applyLavaMoat,
-      }),
-      createNormalBundle({
-        buildTarget,
-        buildType,
-        browserPlatforms,
-        destFilepath: `offscreen/${ledger}/${ledger}-iframe.js`,
-        entryFilepath: `./app/scripts/lib/offscreen/${ledger}/${ledger}-iframe.js`,
-        label: ledger,
-        ignoredFiles,
-        policyOnly,
-        shouldLintFenceFiles,
-        version,
-        applyLavaMoat,
-      }),
-      createNormalBundle({
-        buildTarget,
-        buildType,
-        browserPlatforms,
-        destFilepath: `offscreen/${lattice}/${lattice}-iframe.js`,
-        entryFilepath: `./app/scripts/lib/offscreen/${lattice}/${lattice}-iframe.js`,
-        label: lattice,
-        ignoredFiles,
-        policyOnly,
-        shouldLintFenceFiles,
-        version,
-        applyLavaMoat,
-      }),
-    );
+      });
+    });
+
+    return composeSeries(...bundles);
   }
 }
 

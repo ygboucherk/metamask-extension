@@ -1,11 +1,9 @@
 import { TREZOR_CONNECT_MANIFEST } from 'eth-trezor-keyring';
 import type {
-  EthereumSignedTx,
+  TrezorConnect,
   EthereumSignMessage,
   EthereumSignTransaction,
   Params,
-  Response,
-  PROTO,
   EthereumSignTypedData,
   EthereumSignTypedDataTypes,
   GetPublicKey,
@@ -14,6 +12,7 @@ import {
   addOffscreenListener,
   sendOffscreenMessage,
 } from '../iframe-messenger';
+import { TREZOR_ACTION, TREZOR_EVENT } from './constants';
 
 const target = 'trezor';
 
@@ -25,13 +24,13 @@ export class TrezorBridgeOffscreen {
   model: string | undefined;
 
   init() {
-    addOffscreenListener('trezor-device-event', (payload: string) => {
-      this.model = payload;
+    addOffscreenListener(TREZOR_EVENT.DEVICE_CONNECT, (model: string) => {
+      this.model = model;
     });
 
     return sendOffscreenMessage({
       target,
-      action: 'init',
+      action: TREZOR_ACTION.INIT,
       params: { manifest: TREZOR_CONNECT_MANIFEST, lazyLoad: true },
       responseCallback,
     }) as Promise<void>;
@@ -40,37 +39,36 @@ export class TrezorBridgeOffscreen {
   dispose() {
     return sendOffscreenMessage({
       target,
-      action: 'dispose',
+      action: TREZOR_ACTION.DISPOSE,
       responseCallback,
     }) as Promise<void>;
   }
 
   getPublicKey(params: Params<GetPublicKey>) {
-    // TODO Extract HDNodeResponse from TrezorConnect
     return sendOffscreenMessage({
       target,
-      action: 'get-public-key',
+      action: TREZOR_ACTION.GET_PUBLIC_KEY,
       params,
       responseCallback,
-    });
+    }) as ReturnType<TrezorConnect['getPublicKey']>;
   }
 
   ethereumSignTransaction(params: Params<EthereumSignTransaction>) {
     return sendOffscreenMessage({
       target,
-      action: 'sign-transaction',
+      action: TREZOR_ACTION.SIGN_TRANSACTION,
       params,
       responseCallback,
-    }) as Promise<Response<EthereumSignedTx>>;
+    }) as ReturnType<TrezorConnect['ethereumSignTransaction']>;
   }
 
   ethereumSignMessage(params: Params<EthereumSignMessage>) {
     return sendOffscreenMessage({
       target,
-      action: 'sign-message',
+      action: TREZOR_ACTION.SIGN_MESSAGE,
       params,
       responseCallback,
-    }) as Promise<Response<PROTO.MessageSignature>>;
+    }) as ReturnType<TrezorConnect['ethereumSignMessage']>;
   }
 
   ethereumSignTypedData(
@@ -78,9 +76,9 @@ export class TrezorBridgeOffscreen {
   ) {
     return sendOffscreenMessage({
       target,
-      action: 'sign-typed-data',
+      action: TREZOR_ACTION.SIGN_TYPED_DATA,
       params,
       responseCallback,
-    }) as Promise<Response<PROTO.EthereumTypedDataSignature>>;
+    }) as ReturnType<TrezorConnect['ethereumSignTypedData']>;
   }
 }
