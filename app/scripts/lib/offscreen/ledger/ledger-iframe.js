@@ -1,41 +1,43 @@
-/* eslint-disable no-undef */
-/* eslint-disable import/unambiguous */
-const CONNECTION_EVENT = 'ledger-connection-change';
+import { CallbackProcessor } from './callback-processor';
 
-const messageCallbacks = {};
-let currentMessageId = 0;
+const OFFSCREEN_MESSAGE_TARGET = 'ledger';
+const CONNECTION_EVENT = 'ledger-connection-change';
+const LEDGER_FRAME_ORIGIN_URL = 'https://metamask.github.io';
+
+const callbackProcessor = new CallbackProcessor();
 
 window.addEventListener('message', ({ origin, data }) => {
-  if (origin !== 'https://metamask.github.io') {
+  if (origin !== LEDGER_FRAME_ORIGIN_URL) {
     return;
   }
 
   if (data) {
-    if (messageCallbacks[data.messageId]) {
-      messageCallbacks[data.messageId](data);
-    } else if (data.action === CONNECTION_EVENT) {
+    if (data.action === CONNECTION_EVENT) {
+      // eslint-disable-next-line no-undef
       chrome.runtime.sendMessage({
-        action: 'ledger-connection-event',
+        action: CONNECTION_EVENT,
         payload: data.payload.connected,
       });
     }
+
+    callbackProcessor.processCallback(data);
   }
 });
 
+// eslint-disable-next-line no-undef
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
-  if (!msg.offscreenIframe || msg.target !== 'ledger') {
+  if (!msg.offscreenIframe || msg.target !== OFFSCREEN_MESSAGE_TARGET) {
     return;
   }
 
   const iframe = document.querySelector('iframe');
 
-  currentMessageId += 1;
+  const messageId = callbackProcessor.registerCallback(sendResponse);
   const iframeMsg = {
     ...msg,
     target: 'LEDGER-IFRAME',
-    messageId: currentMessageId,
+    messageId,
   };
-  messageCallbacks[currentMessageId] = sendResponse;
 
   iframe.contentWindow.postMessage(iframeMsg, '*');
 
