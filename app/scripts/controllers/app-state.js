@@ -40,9 +40,9 @@ export default class AppStateController extends EventEmitter {
       outdatedBrowserWarningLastShown: new Date().getTime(),
       nftsDetectionNoticeDismissed: false,
       showTestnetMessageInDropdown: true,
-      showPortfolioTooltip: true,
       showBetaHeader: isBeta(),
       trezorModel: null,
+      currentPopupId: undefined,
       ...initState,
       qrHardware: {},
       nftsDropdownState: {},
@@ -303,15 +303,6 @@ export default class AppStateController extends EventEmitter {
   }
 
   /**
-   * Sets whether the portfolio site tooltip should be shown on the home page
-   *
-   * @param showPortfolioTooltip
-   */
-  setShowPortfolioTooltip(showPortfolioTooltip) {
-    this.store.updateState({ showPortfolioTooltip });
-  }
-
-  /**
    * Sets whether the beta notification heading on the home page
    *
    * @param showBetaHeader
@@ -352,5 +343,23 @@ export default class AppStateController extends EventEmitter {
     usedNetworks[chainId] = true;
 
     this.store.updateState({ usedNetworks });
+  }
+
+  /**
+   * A setter for the currentPopupId which indicates the id of popup window that's currently active
+   *
+   * @param currentPopupId
+   */
+  setCurrentPopupId(currentPopupId) {
+    this.store.updateState({
+      currentPopupId,
+    });
+  }
+
+  /**
+   * A getter to retrieve currentPopupId saved in the appState
+   */
+  getCurrentPopupId() {
+    return this.store.getState().currentPopupId;
   }
 }

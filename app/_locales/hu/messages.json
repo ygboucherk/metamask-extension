@@ -75,12 +75,6 @@
   "asset": {
     "message": "Eszköz"
   },
-  "attemptToCancel": {
-    "message": "Megpróbálja törölni?"
-  },
-  "attemptToCancelDescription": {
-    "message": "A próbálkozás elküldése nem garantálja, hogy az eredeti tranzakció törlésre kerül. Ha a törlési kísérlet sikeres, akkor a fenti tranzakciós díjat számítjuk fel önnek."
-  },
   "attemptingConnect": {
     "message": "Próbálunk csatlakozni a blokklánchoz."
   },
@@ -130,20 +124,11 @@
   "browserNotSupported": {
     "message": "Az ön böngészője nem támogatott..."
   },
-  "buyWithWyre": {
-    "message": "Vásároljon $1 -t a Wyre-rel"
-  },
-  "buyWithWyreDescription": {
-    "message": "A Wyre segítségével egyensen a MetaMaks fiókjában tehet letétbe ETH-t."
-  },
   "bytes": {
     "message": "Bájtok"
   },
   "cancel": {
     "message": "Mégse"
-  },
-  "cancellationGasFee": {
-    "message": "A törlés gázára"
   },
   "cancelled": {
     "message": "Megszakítva"
@@ -180,9 +165,6 @@
   },
   "connectingToMainnet": {
     "message": "Csatlakozás a fő Ethereum hálózathoz"
-  },
-  "continueToWyre": {
-    "message": "Tovább a Wyre-re"
   },
   "contractDeployment": {
     "message": "Szerződés alkalmazása"
@@ -331,13 +313,6 @@
   },
   "general": {
     "message": "Általános"
-  },
-  "getEther": {
-    "message": "Ether beszerzése"
-  },
-  "getEtherFromFaucet": {
-    "message": "Szerezzen Ethert pénzcsapból a(z) $1-ért",
-    "description": "Displays network name for Ether faucet"
   },
   "goerli": {
     "message": "Goerli teszthálózat"
@@ -783,9 +758,6 @@
   "terms": {
     "message": "Használati feltételek"
   },
-  "testFaucet": {
-    "message": "Teszt csap"
-  },
   "tips": {
     "message": "Adományok"
   },
@@ -901,9 +873,6 @@
   "userName": {
     "message": "Felhasználónév"
   },
-  "viewAccount": {
-    "message": "Fiók megtekintése"
-  },
   "viewContact": {
     "message": "Névjegy megtekintése"
   },
@@ -912,9 +881,6 @@
   },
   "welcomeBack": {
     "message": "Üdvözöljük újra!"
-  },
-  "yesLetsTry": {
-    "message": "Igen, próbáljuk ki!"
   },
   "youNeedToAllowCameraAccess": {
     "message": "Ennek a funkciónak a használatához engedélyeznie kell a kamerához való hozzáférést."
