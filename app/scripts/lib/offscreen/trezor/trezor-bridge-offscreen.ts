@@ -1,4 +1,4 @@
-import { TREZOR_CONNECT_MANIFEST } from 'eth-trezor-keyring';
+import { TrezorBridge, TREZOR_CONNECT_MANIFEST } from 'eth-trezor-keyring';
 import type {
   TrezorConnect,
   EthereumSignMessage,
@@ -8,75 +8,111 @@ import type {
   EthereumSignTypedDataTypes,
   GetPublicKey,
 } from '@trezor/connect-web';
-import {
-  addOffscreenListener,
-  sendOffscreenMessage,
-} from '../iframe-messenger';
 import { TREZOR_ACTION, TREZOR_EVENT, TREZOR_TARGET } from './constants';
 
-const responseCallback = (response: any, resolve: (value: any) => void) => {
-  resolve(response);
-};
-
-export class TrezorBridgeOffscreen {
+export class TrezorBridgeOffscreen implements TrezorBridge {
   model: string | undefined;
 
   init() {
-    addOffscreenListener(TREZOR_EVENT.DEVICE_CONNECT, (model: string) => {
-      this.model = model;
+    chrome.runtime.onMessage.addListener((msg) => {
+      if (msg.event === TREZOR_EVENT.DEVICE_CONNECT) {
+        this.model = msg.payload;
+      }
     });
 
-    return sendOffscreenMessage({
-      target: TREZOR_TARGET,
-      action: TREZOR_ACTION.INIT,
-      params: { manifest: TREZOR_CONNECT_MANIFEST, lazyLoad: true },
-      responseCallback,
-    }) as Promise<void>;
+    return new Promise<void>((resolve) => {
+      chrome.runtime.sendMessage(
+        {
+          offscreenIframe: true,
+          target: TREZOR_TARGET,
+          action: TREZOR_ACTION.INIT,
+          params: { manifest: TREZOR_CONNECT_MANIFEST, lazyLoad: true },
+        },
+        (response) => {
+          resolve(response);
+        },
+      );
+    });
   }
 
   dispose() {
-    return sendOffscreenMessage({
-      target: TREZOR_TARGET,
-      action: TREZOR_ACTION.DISPOSE,
-      responseCallback,
-    }) as Promise<void>;
+    return new Promise<void>((resolve) => {
+      chrome.runtime.sendMessage(
+        {
+          offscreenIframe: true,
+          target: TREZOR_TARGET,
+          action: TREZOR_ACTION.DISPOSE,
+        },
+        (response) => {
+          resolve(response);
+        },
+      );
+    });
   }
 
   getPublicKey(params: Params<GetPublicKey>) {
-    return sendOffscreenMessage({
-      target: TREZOR_TARGET,
-      action: TREZOR_ACTION.GET_PUBLIC_KEY,
-      params,
-      responseCallback,
+    return new Promise((resolve) => {
+      chrome.runtime.sendMessage(
+        {
+          offscreenIframe: true,
+          target: TREZOR_TARGET,
+          action: TREZOR_ACTION.GET_PUBLIC_KEY,
+          params,
+        },
+        (response) => {
+          resolve(response);
+        },
+      );
     }) as ReturnType<TrezorConnect['getPublicKey']>;
   }
 
   ethereumSignTransaction(params: Params<EthereumSignTransaction>) {
-    return sendOffscreenMessage({
-      target: TREZOR_TARGET,
-      action: TREZOR_ACTION.SIGN_TRANSACTION,
-      params,
-      responseCallback,
+    return new Promise((resolve) => {
+      chrome.runtime.sendMessage(
+        {
+          offscreenIframe: true,
+          target: TREZOR_TARGET,
+          action: TREZOR_ACTION.SIGN_TRANSACTION,
+          params,
+        },
+        (response) => {
+          resolve(response);
+        },
+      );
     }) as ReturnType<TrezorConnect['ethereumSignTransaction']>;
   }
 
   ethereumSignMessage(params: Params<EthereumSignMessage>) {
-    return sendOffscreenMessage({
-      target: TREZOR_TARGET,
-      action: TREZOR_ACTION.SIGN_MESSAGE,
-      params,
-      responseCallback,
+    return new Promise((resolve) => {
+      chrome.runtime.sendMessage(
+        {
+          offscreenIframe: true,
+          target: TREZOR_TARGET,
+          action: TREZOR_ACTION.SIGN_MESSAGE,
+          params,
+        },
+        (response) => {
+          resolve(response);
+        },
+      );
     }) as ReturnType<TrezorConnect['ethereumSignMessage']>;
   }
 
   ethereumSignTypedData(
     params: Params<EthereumSignTypedData<EthereumSignTypedDataTypes>>,
   ) {
-    return sendOffscreenMessage({
-      target: TREZOR_TARGET,
-      action: TREZOR_ACTION.SIGN_TYPED_DATA,
-      params,
-      responseCallback,
+    return new Promise((resolve) => {
+      chrome.runtime.sendMessage(
+        {
+          offscreenIframe: true,
+          target: TREZOR_TARGET,
+          action: TREZOR_ACTION.SIGN_TYPED_DATA,
+          params,
+        },
+        (response) => {
+          resolve(response);
+        },
+      );
     }) as ReturnType<TrezorConnect['ethereumSignTypedData']>;
   }
 }

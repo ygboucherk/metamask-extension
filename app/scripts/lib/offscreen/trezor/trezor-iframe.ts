@@ -77,7 +77,6 @@ chrome.runtime.onMessage.addListener(
         break;
 
       default:
-        console.error('Trezor action not supported', msg.action);
         sendResponse({
           success: false,
           payload: {

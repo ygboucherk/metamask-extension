@@ -1,28 +1,13 @@
-import {
-  addOffscreenListener,
-  sendOffscreenMessage,
-} from '../iframe-messenger';
-
-const target = 'ledger';
-
-const responseCallback = (
-  response: { success: boolean; payload: { error?: Error } },
-  resolve: (value: any) => void,
-  reject: (reason?: any) => void,
-) => {
-  if (response.success) {
-    resolve(response.payload);
-  } else {
-    reject(response.payload.error);
-  }
-};
+import { LEDGER_ACTION, LEDGER_EVENT, LEDGER_TARGET } from './constants';
 
 export class LedgerBridgeOffscreen {
-  isDeviceConnected: boolean | undefined;
+  isDeviceConnected = false;
 
   init() {
-    addOffscreenListener('ledger-connection-event', (payload: boolean) => {
-      this.isDeviceConnected = payload;
+    chrome.runtime.onMessage.addListener((msg) => {
+      if (msg.event === LEDGER_EVENT.DEVICE_CONNECT) {
+        this.isDeviceConnected = msg.payload;
+      }
     });
 
     return Promise.resolve();
@@ -33,79 +18,114 @@ export class LedgerBridgeOffscreen {
   }
 
   attemptMakeApp() {
-    return sendOffscreenMessage({
-      target,
-      action: 'ledger-make-app',
-      responseCallback: (
-        response: { success: boolean; error?: Error },
-        resolve: (value: any) => void,
-        reject: (reason?: any) => void,
-      ) => {
-        if (response.success) {
-          resolve(true);
-        } else {
-          reject(response.error);
-        }
-      },
-    }) as Promise<boolean>;
+    return new Promise<boolean>((resolve, reject) => {
+      chrome.runtime.sendMessage(
+        {
+          offscreenIframe: true,
+          target: LEDGER_TARGET,
+          action: LEDGER_ACTION.MAKE_APP,
+        },
+        (response) => {
+          if (response.success) {
+            resolve(true);
+          } else {
+            reject(response.error);
+          }
+        },
+      );
+    });
   }
 
   updateTransportMethod(transportType: string) {
-    return sendOffscreenMessage({
-      target,
-      action: 'ledger-update-transport',
-      params: { transportType },
-      responseCallback: (
-        response: { success: boolean },
-        resolve: (value: any) => void,
-        reject: (reason?: any) => void,
-      ) => {
-        if (response.success) {
-          resolve(true);
-        } else {
-          reject(new Error('Ledger transport could not be updated'));
-        }
-      },
-    }) as Promise<boolean>;
+    return new Promise<boolean>((resolve, reject) => {
+      chrome.runtime.sendMessage(
+        {
+          offscreenIframe: true,
+          target: LEDGER_TARGET,
+          action: LEDGER_ACTION.UPDATE_TRANSPORT,
+          params: { transportType },
+        },
+        (response) => {
+          if (response.success) {
+            resolve(true);
+          } else {
+            reject(new Error('Ledger transport could not be updated'));
+          }
+        },
+      );
+    });
   }
 
   getPublicKey(params: { hdPath: string }) {
-    return sendOffscreenMessage({
-      target,
-      action: 'ledger-unlock',
-      params,
-      responseCallback,
-    }) as Promise<{
+    return new Promise<{
       publicKey: string;
       address: string;
       chainCode?: string;
-    }>;
+    }>((resolve, reject) => {
+      chrome.runtime.sendMessage(
+        {
+          offscreenIframe: true,
+          target: LEDGER_TARGET,
+          action: LEDGER_ACTION.UNLOCK,
+          params,
+        },
+        (response) => {
+          if (response.success) {
+            resolve(response.payload);
+          } else {
+            reject(response.payload.error);
+          }
+        },
+      );
+    });
   }
 
   deviceSignTransaction(params: { hdPath: string; tx: string }) {
-    return sendOffscreenMessage({
-      target,
-      action: 'ledger-sign-transaction',
-      params,
-      responseCallback,
-    }) as Promise<{
-      s: string;
-      v: string;
-      r: string;
-    }>;
-  }
-
-  deviceSignMessage(params: { hdPath: string; message: string }) {
-    return sendOffscreenMessage({
-      target,
-      action: 'ledger-sign-personal-message',
-      params,
-      responseCallback,
-    }) as Promise<{
+    return new Promise<{
       v: number;
       s: string;
       r: string;
-    }>;
+    }>((resolve, reject) => {
+      chrome.runtime.sendMessage(
+        {
+          offscreenIframe: true,
+          target: LEDGER_TARGET,
+          action: LEDGER_ACTION.SIGN_TRANSACTION,
+          params,
+        },
+        (response) => {
+          if (response.success) {
+            resolve(response.payload);
+          } else {
+            reject(response.payload.error);
+          }
+        },
+      );
+    });
+  }
+
+  deviceSignMessage(params: { hdPath: string; message: string }) {
+    return new Promise<{
+      v: number;
+      s: string;
+      r: string;
+    }>((resolve, reject) => {
+      chrome.runtime.sendMessage(
+        {
+          offscreenIframe: true,
+          target: LEDGER_TARGET,
+          action: LEDGER_ACTION.SIGN_MESSAGE,
+          params,
+        },
+        (response) => {
+          if (response.success) {
+            resolve(response.payload);
+          } else {
+            reject(response.payload.error);
+          }
+        },
+      );
+    });
   }
 
   deviceSignTypedData(params: {
@@ -113,15 +133,26 @@ export class LedgerBridgeOffscreen {
     domainSeparatorHex: string;
     hashStructMessageHex: string;
   }) {
-    return sendOffscreenMessage({
-      target,
-      action: 'ledger-sign-typed-data',
-      params,
-      responseCallback,
-    }) as Promise<{
+    return new Promise<{
       v: number;
       s: string;
       r: string;
-    }>;
+    }>((resolve, reject) => {
+      chrome.runtime.sendMessage(
+        {
+          offscreenIframe: true,
+          target: LEDGER_TARGET,
+          action: LEDGER_ACTION.SIGN_TYPED_DATA,
+          params,
+        },
+        (response) => {
+          if (response.success) {
+            resolve(response.payload);
+          } else {
+            reject(response.payload.error);
+          }
+        },
+      );
+    });
   }
 }

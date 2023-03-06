@@ -13,7 +13,6 @@ window.addEventListener('message', ({ origin, data }) => {
 
   if (data) {
     if (data.action === CONNECTION_EVENT) {
-      // eslint-disable-next-line no-undef
       chrome.runtime.sendMessage({
         action: CONNECTION_EVENT,
         payload: data.payload.connected,
@@ -24,13 +23,23 @@ window.addEventListener('message', ({ origin, data }) => {
   }
 });
 
-// eslint-disable-next-line no-undef
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (!msg.offscreenIframe || msg.target !== OFFSCREEN_MESSAGE_TARGET) {
     return;
   }
 
   const iframe = document.querySelector('iframe');
+
+  if (!iframe?.contentWindow) {
+    const error = new Error('Ledger iframe not present');
+    sendResponse({
+      success: false,
+      error,
+      payload: {
+        error,
+      },
+    });
+  }
 
   const messageId = callbackProcessor.registerCallback(sendResponse);
   const iframeMsg = {
@@ -39,8 +48,12 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     messageId,
   };
 
-  iframe.contentWindow.postMessage(iframeMsg, '*');
+  // It has already been checked that they are not null
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  iframe!.contentWindow!.postMessage(iframeMsg, '*');
 
+  // This keeps sendResponse function valid after return
+  // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onMessage
   // eslint-disable-next-line consistent-return
   return true;
 });

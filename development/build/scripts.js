@@ -459,9 +459,7 @@ function createScriptTasks({
         buildType,
         browserPlatforms,
         destFilepath: `offscreen/${label}/${label}-iframe.js`,
-        entryFilepath: `./app/scripts/lib/offscreen/${label}/${label}-iframe.${
-          label === 'trezor' ? 'ts' : 'js'
-        }`,
+        entryFilepath: `./app/scripts/lib/offscreen/${label}/${label}-iframe.ts`,
         label,
         ignoredFiles,
         policyOnly,
