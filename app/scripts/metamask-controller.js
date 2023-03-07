@@ -115,7 +115,7 @@ import { isManifestV3 } from '../../shared/modules/mv3.utils';
 import { hexToDecimal } from '../../shared/modules/conversion.utils';
 import { LedgerOffscreenBridge } from './lib/offscreen/ledger/ledger-offscreen-bridge';
 import { TrezorOffscreenBridge } from './lib/offscreen/trezor/trezor-offscreen-bridge';
-import { LatticeKeyringOffscreen } from './lib/lattice-keyring-offscreen';
+import { LatticeKeyringOffscreen } from './lib/offscreen/lattice/lattice-keyring-offscreen';
 import {
   onMessageReceived,
   checkForMultipleVersionsRunning,

@@ -1,8 +1,11 @@
-/* eslint-disable no-undef */
-/* eslint-disable import/unambiguous */
 import LatticeKeyring from 'eth-lattice-keyring';
+import { LATTICE_TARGET } from './constants';
 
 class LatticeKeyringOffscreen extends LatticeKeyring {
+  static type: string;
+
+  appName: string | undefined;
+
   constructor(opts = {}) {
     super(opts);
   }
@@ -19,19 +22,15 @@ class LatticeKeyringOffscreen extends LatticeKeyring {
       // send a msg to the render process to open lattice connector
       // and collect the credentials
       const creds = await new Promise((resolve, reject) => {
-        console.log('LATTICE MV3 BRIDGE - GET CREDS');
         chrome.runtime.sendMessage(
           {
             offscreenIframe: true,
-            target: 'lattice',
-            action: 'lattice-credentials',
+            target: LATTICE_TARGET,
             params: {
               url,
             },
           },
           (response) => {
-            console.log('LATTICE MV3 BRIDGE - GET CREDS RESPONSE', response);
-
             if (response.error) {
               reject(response.error);
             }
@@ -42,7 +41,7 @@ class LatticeKeyringOffscreen extends LatticeKeyring {
       });
 
       return creds;
-    } catch (err) {
+    } catch (err: any) {
       throw new Error(err);
     }
   }
