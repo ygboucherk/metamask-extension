@@ -1,4 +1,4 @@
-export const LEDGER_TARGET = 'ledger';
+export const LEDGER_TARGET = 'ledger-offscreen';
 
 export const LEDGER_EVENT = {
   DEVICE_CONNECT: 'ledger-connection-event',

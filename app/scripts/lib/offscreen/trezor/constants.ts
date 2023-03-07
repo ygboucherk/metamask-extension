@@ -1,4 +1,4 @@
-export const TREZOR_TARGET = 'trezor';
+export const TREZOR_TARGET = 'trezor-offscreen';
 
 export const TREZOR_EVENT = {
   DEVICE_CONNECT: 'trezor-device-connect',

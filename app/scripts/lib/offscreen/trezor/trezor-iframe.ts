@@ -1,16 +1,17 @@
 import TrezorConnectSDK, { DEVICE, DEVICE_EVENT } from '@trezor/connect-web';
 import { TREZOR_ACTION, TREZOR_EVENT, TREZOR_TARGET } from './constants';
 
-type TrezorAction = {
-  offscreenIframe: boolean;
-  target: string;
-  action: typeof TREZOR_ACTION[keyof typeof TREZOR_ACTION];
-  params: any;
-};
-
 chrome.runtime.onMessage.addListener(
-  (msg: TrezorAction, _sender, sendResponse) => {
-    if (!msg.offscreenIframe || msg.target !== TREZOR_TARGET) {
+  (
+    msg: {
+      target: string;
+      action: typeof TREZOR_ACTION[keyof typeof TREZOR_ACTION];
+      params: any;
+    },
+    _sender,
+    sendResponse,
+  ) => {
+    if (msg.target !== TREZOR_TARGET) {
       return;
     }
 

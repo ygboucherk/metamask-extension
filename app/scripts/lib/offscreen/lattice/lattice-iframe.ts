@@ -3,7 +3,7 @@ import { LATTICE_TARGET } from './constants';
 const LATTICE_ORIGIN_URL = 'https://lattice.gridplus.io';
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
-  if (!msg.offscreenIframe || msg.target !== LATTICE_TARGET) {
+  if (msg.target !== LATTICE_TARGET) {
     return;
   }
 

@@ -4,8 +4,6 @@ import { LATTICE_TARGET } from './constants';
 class LatticeKeyringOffscreen extends LatticeKeyring {
   static type: string;
 
-  appName: string | undefined;
-
   constructor(opts = {}) {
     super(opts);
   }
@@ -21,10 +19,13 @@ class LatticeKeyringOffscreen extends LatticeKeyring {
 
       // send a msg to the render process to open lattice connector
       // and collect the credentials
-      const creds = await new Promise((resolve, reject) => {
+      const creds = await new Promise<{
+        deviceID: string;
+        password: string;
+        endpoint: string;
+      }>((resolve, reject) => {
         chrome.runtime.sendMessage(
           {
-            offscreenIframe: true,
             target: LATTICE_TARGET,
             params: {
               url,
@@ -48,4 +49,5 @@ class LatticeKeyringOffscreen extends LatticeKeyring {
 }
 
 LatticeKeyringOffscreen.type = LatticeKeyring.type;
+
 export { LatticeKeyringOffscreen };

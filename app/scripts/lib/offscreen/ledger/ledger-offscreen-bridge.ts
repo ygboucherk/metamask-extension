@@ -22,7 +22,6 @@ export class LedgerOffscreenBridge implements LedgerBridge {
     return new Promise<boolean>((resolve, reject) => {
       chrome.runtime.sendMessage(
         {
-          offscreenIframe: true,
           target: LEDGER_TARGET,
           action: LEDGER_ACTION.MAKE_APP,
         },
@@ -41,7 +40,6 @@ export class LedgerOffscreenBridge implements LedgerBridge {
     return new Promise<boolean>((resolve, reject) => {
       chrome.runtime.sendMessage(
         {
-          offscreenIframe: true,
           target: LEDGER_TARGET,
           action: LEDGER_ACTION.UPDATE_TRANSPORT,
           params: { transportType },
@@ -65,7 +63,6 @@ export class LedgerOffscreenBridge implements LedgerBridge {
     }>((resolve, reject) => {
       chrome.runtime.sendMessage(
         {
-          offscreenIframe: true,
           target: LEDGER_TARGET,
           action: LEDGER_ACTION.UNLOCK,
           params,
@@ -89,7 +86,6 @@ export class LedgerOffscreenBridge implements LedgerBridge {
     }>((resolve, reject) => {
       chrome.runtime.sendMessage(
         {
-          offscreenIframe: true,
           target: LEDGER_TARGET,
           action: LEDGER_ACTION.SIGN_TRANSACTION,
           params,
@@ -113,7 +109,6 @@ export class LedgerOffscreenBridge implements LedgerBridge {
     }>((resolve, reject) => {
       chrome.runtime.sendMessage(
         {
-          offscreenIframe: true,
           target: LEDGER_TARGET,
           action: LEDGER_ACTION.SIGN_MESSAGE,
           params,
@@ -141,7 +136,6 @@ export class LedgerOffscreenBridge implements LedgerBridge {
     }>((resolve, reject) => {
       chrome.runtime.sendMessage(
         {
-          offscreenIframe: true,
           target: LEDGER_TARGET,
           action: LEDGER_ACTION.SIGN_TYPED_DATA,
           params,

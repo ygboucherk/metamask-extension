@@ -23,7 +23,6 @@ export class TrezorOffscreenBridge implements TrezorBridge {
     return new Promise<void>((resolve) => {
       chrome.runtime.sendMessage(
         {
-          offscreenIframe: true,
           target: TREZOR_TARGET,
           action: TREZOR_ACTION.INIT,
           params: { manifest: TREZOR_CONNECT_MANIFEST, lazyLoad: true },
@@ -39,7 +38,6 @@ export class TrezorOffscreenBridge implements TrezorBridge {
     return new Promise<void>((resolve) => {
       chrome.runtime.sendMessage(
         {
-          offscreenIframe: true,
           target: TREZOR_TARGET,
           action: TREZOR_ACTION.DISPOSE,
         },
@@ -54,7 +52,6 @@ export class TrezorOffscreenBridge implements TrezorBridge {
     return new Promise((resolve) => {
       chrome.runtime.sendMessage(
         {
-          offscreenIframe: true,
           target: TREZOR_TARGET,
           action: TREZOR_ACTION.GET_PUBLIC_KEY,
           params,
@@ -70,7 +67,6 @@ export class TrezorOffscreenBridge implements TrezorBridge {
     return new Promise((resolve) => {
       chrome.runtime.sendMessage(
         {
-          offscreenIframe: true,
           target: TREZOR_TARGET,
           action: TREZOR_ACTION.SIGN_TRANSACTION,
           params,
@@ -86,7 +82,6 @@ export class TrezorOffscreenBridge implements TrezorBridge {
     return new Promise((resolve) => {
       chrome.runtime.sendMessage(
         {
-          offscreenIframe: true,
           target: TREZOR_TARGET,
           action: TREZOR_ACTION.SIGN_MESSAGE,
           params,
@@ -104,7 +99,6 @@ export class TrezorOffscreenBridge implements TrezorBridge {
     return new Promise((resolve) => {
       chrome.runtime.sendMessage(
         {
-          offscreenIframe: true,
           target: TREZOR_TARGET,
           action: TREZOR_ACTION.SIGN_TYPED_DATA,
           params,
