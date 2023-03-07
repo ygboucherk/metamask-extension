@@ -1,5 +1,6 @@
 import React from 'react';
 import configureMockStore from 'redux-mock-store';
+import thunk from 'redux-thunk';
 import { fireEvent } from '@testing-library/react';
 import { renderWithProvider } from '../../../test/lib/render-helpers';
 import { KeyringType } from '../../../shared/constants/keyring';
@@ -72,6 +73,8 @@ const state = {
         accounts: ['0x0dcd5d886577d5081b0c52e242ef29e70be3e7bc'],
       },
     ],
+    nextNonce: 1,
+    customNonceValue: '',
   },
   history: {
     mostRecentOverviewPage: '/',
@@ -80,6 +83,8 @@ const state = {
     txData: {},
   },
 };
+
+const mockShowModal = jest.fn();
 
 jest.mock('../../store/actions', () => ({
   disconnectGasFeeEstimatePoller: jest.fn(),
@@ -92,6 +97,8 @@ jest.mock('../../store/actions', () => ({
   updateTransactionGasFees: () => ({ type: 'UPDATE_TRANSACTION_PARAMS' }),
   updatePreviousGasParams: () => ({ type: 'UPDATE_TRANSACTION_PARAMS' }),
   createTransactionEventFragment: jest.fn(),
+  getNextNonce: () => jest.fn(),
+  showModal: () => mockShowModal,
   updateCustomNonce: () => ({ type: 'UPDATE_TRANSACTION_PARAMS' }),
 }));
 
@@ -137,11 +144,7 @@ describe('TokenAllowancePage', () => {
     currentTokenBalance: '10',
     toAddress: '0x9bc5baf874d2da8d216ae9f137804184ee5afef4',
     tokenSymbol: 'TST',
-    getNextNonce: jest.fn(),
     showCustomizeGasModal: jest.fn(),
-    showCustomizeNonceModal: jest.fn(),
-    nextNonce: 1,
-    customNonceValue: '',
     warning: '',
     txData: {
       id: 3049568294499567,
@@ -181,7 +184,7 @@ describe('TokenAllowancePage', () => {
 
   let store;
   beforeEach(() => {
-    store = configureMockStore()(state);
+    store = configureMockStore([thunk])(state);
   });
 
   it('should render title "Set a spending cap for your" in token allowance page', () => {
@@ -208,7 +211,7 @@ describe('TokenAllowancePage', () => {
     );
     expect(queryByText('Nonce')).not.toBeInTheDocument();
     expect(queryByText('1')).not.toBeInTheDocument();
-    expect(props.showCustomizeNonceModal).not.toHaveBeenCalledTimes(1);
+    expect(mockShowModal).not.toHaveBeenCalledTimes(1);
   });
 
   it('should render customize nonce modal if useNonceField is set to true', () => {
@@ -222,7 +225,7 @@ describe('TokenAllowancePage', () => {
     expect(queryByText('Nonce')).toBeInTheDocument();
     expect(queryByText('1')).toBeInTheDocument();
     fireEvent.click(editButton);
-    expect(props.showCustomizeNonceModal).toHaveBeenCalledTimes(1);
+    expect(mockShowModal).toHaveBeenCalledTimes(1);
   });
 
   it('should render nextNonce value when custom nonce value is a empty string', () => {
@@ -236,12 +239,12 @@ describe('TokenAllowancePage', () => {
     expect(queryByText('Nonce')).toBeInTheDocument();
     expect(queryByText('1')).toBeInTheDocument();
     fireEvent.click(editButton);
-    expect(props.showCustomizeNonceModal).toHaveBeenCalledTimes(2);
+    expect(mockShowModal).toHaveBeenCalledTimes(2);
   });
 
   it('should render edited custom nonce value', () => {
     props.useNonceField = true;
-    props.customNonceValue = '3';
+    state.metamask.customNonceValue = '3';
     const { queryByText, getByText } = renderWithProvider(
       <TokenAllowance {...props} />,
       store,
@@ -250,7 +253,7 @@ describe('TokenAllowancePage', () => {
     expect(queryByText('Nonce')).toBeInTheDocument();
     expect(queryByText('3')).toBeInTheDocument();
     fireEvent.click(editButton);
-    expect(props.showCustomizeNonceModal).toHaveBeenCalledTimes(3);
+    expect(mockShowModal).toHaveBeenCalledTimes(3);
   });
 
   it('should render customize nonce warning if custom nonce value is higher than nextNonce value', () => {
@@ -285,7 +288,7 @@ describe('TokenAllowancePage', () => {
 
   it('should render customize nonce modal when next button is clicked and if useNonceField is set to true', () => {
     props.useNonceField = true;
-    props.customNonceValue = '2';
+    state.metamask.customNonceValue = '2';
     const { getByText, getAllByText, queryByText, getByTestId } =
       renderWithProvider(<TokenAllowance {...props} />, store);
 
@@ -299,12 +302,12 @@ describe('TokenAllowancePage', () => {
     expect(queryByText('Nonce')).toBeInTheDocument();
     expect(queryByText('2')).toBeInTheDocument();
     fireEvent.click(editButton[1]);
-    expect(props.showCustomizeNonceModal).toHaveBeenCalledTimes(4);
+    expect(mockShowModal).toHaveBeenCalledTimes(4);
   });
 
   it('should render customize nonce modal when next button is clicked, than back button is clicked, than return to previous page and if useNonceField is set to true', () => {
     props.useNonceField = true;
-    props.customNonceValue = '2';
+    state.metamask.customNonceValue = '2';
     const { getByText, getByTestId, queryByText } = renderWithProvider(
       <TokenAllowance {...props} />,
       store,
@@ -323,7 +326,7 @@ describe('TokenAllowancePage', () => {
     expect(queryByText('Nonce')).toBeInTheDocument();
     expect(queryByText('2')).toBeInTheDocument();
     fireEvent.click(editButton);
-    expect(props.showCustomizeNonceModal).toHaveBeenCalledTimes(5);
+    expect(mockShowModal).toHaveBeenCalledTimes(5);
   });
 
   it('should click View details and show function type', () => {

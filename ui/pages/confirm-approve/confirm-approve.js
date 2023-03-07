@@ -135,14 +135,9 @@ export default function ConfirmApprove({
     setIsContract(isContractAddress);
   }, [setIsContract, toAddress]);
 
-  const getNextNonceMemo = useCallback(() => {
-    dispatch(getNextNonce());
-  }, [dispatch]);
-
   useEffect(() => {
     checkIfContract();
-    getNextNonceMemo();
-  }, [checkIfContract, getNextNonceMemo]);
+  }, [checkIfContract]);
 
   const { origin } = transaction;
   const formattedOrigin = origin || '';
@@ -204,32 +199,6 @@ export default function ConfirmApprove({
             toAddress={toAddress}
             tokenSymbol={tokenSymbol}
             decimals={decimals}
-            nextNonce={nextNonce}
-            customNonceValue={customNonceValue}
-            updateCustomNonce={(value) => {
-              dispatch(updateCustomNonce(value));
-            }}
-            getNextNonce={() => dispatch(getNextNonce())}
-            showCustomizeNonceModal={({
-              /* eslint-disable no-shadow */
-              useNonceField,
-              nextNonce,
-              customNonceValue,
-              updateCustomNonce,
-              getNextNonce,
-              /* eslint-disable no-shadow */
-            }) =>
-              dispatch(
-                showModal({
-                  name: 'CUSTOMIZE_NONCE',
-                  useNonceField,
-                  nextNonce,
-                  customNonceValue,
-                  updateCustomNonce,
-                  getNextNonce,
-                }),
-              )
-            }
             warning={submitWarning}
           />
           {showCustomizeGasPopover && !supportsEIP1559 && (

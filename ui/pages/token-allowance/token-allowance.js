@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -18,8 +18,6 @@ import {
   TEXT_ALIGN,
   TextColor,
   TypographyVariant,
-  TextVariant,
-  BorderRadius,
 } from '../../helpers/constants/design-system';
 import { I18nContext } from '../../contexts/i18n';
 import ContractTokenValues from '../../components/ui/contract-token-values/contract-token-values';
@@ -38,6 +36,8 @@ import {
   getUnapprovedTransactions,
   getUseCurrencyRateCheck,
   isHardwareWallet,
+  getCustomNonceValue,
+  getNextSuggestedNonce,
 } from '../../selectors';
 import { NETWORK_TO_NAME_MAP } from '../../../shared/constants/network';
 import {
@@ -45,6 +45,8 @@ import {
   cancelTxs,
   showModal,
   updateAndApproveTx,
+  getNextNonce,
+  updateCustomNonce,
 } from '../../store/actions';
 import { clearConfirmTransaction } from '../../ducks/confirm-transaction/confirm-transaction.duck';
 import { getMostRecentOverviewPage } from '../../ducks/history/history';
@@ -63,9 +65,10 @@ import {
 import { ConfirmPageContainerNavigation } from '../../components/app/confirm-page-container';
 import { useSimulationFailureWarning } from '../../hooks/useSimulationFailureWarning';
 import SimulationErrorMessage from '../../components/ui/simulation-error-message';
-import { Icon, ICON_NAMES, Text } from '../../components/component-library';
+import { Icon, ICON_NAMES } from '../../components/component-library';
 import LedgerInstructionField from '../../components/app/ledger-instruction-field/ledger-instruction-field';
 import { ConfirmPageContainerWarning } from '../../components/app/confirm-page-container/confirm-page-container-content';
+import CustomNonce from '../../components/ui/custom-nonce';
 
 export default function TokenAllowance({
   origin,
@@ -90,11 +93,6 @@ export default function TokenAllowance({
   currentTokenBalance,
   toAddress,
   tokenSymbol,
-  customNonceValue,
-  updateCustomNonce,
-  getNextNonce,
-  nextNonce,
-  showCustomizeNonceModal,
   warning,
 }) {
   const t = useContext(I18nContext);
@@ -122,6 +120,8 @@ export default function TokenAllowance({
   const unapprovedTxs = useSelector(getUnapprovedTransactions);
   const useCurrencyRateCheck = useSelector(getUseCurrencyRateCheck);
   const isHardwareWalletConnected = useSelector(isHardwareWallet);
+  const nextNonce = useSelector(getNextSuggestedNonce);
+  const customNonceValue = useSelector(getCustomNonceValue);
 
   const replaceCommaToDot = (inputValue) => {
     return inputValue.replace(/,/gu, '.');
@@ -246,6 +246,39 @@ export default function TokenAllowance({
           dispatch(clearConfirmTransaction());
           history.push(mostRecentOverviewPage);
         },
+      }),
+    );
+  };
+
+  const handleNextNonce = () => {
+    dispatch(getNextNonce());
+  };
+
+  useEffect(() => {
+    handleNextNonce();
+  }, [dispatch]);
+
+  const handleUpdateCustomNonce = (value) => {
+    dispatch(updateCustomNonce(value));
+  };
+
+  const handleCustomizeNonceModal = (
+    /* eslint-disable no-shadow */
+    useNonceField,
+    nextNonce,
+    customNonceValue,
+    updateCustomNonce,
+    getNextNonce,
+    /* eslint-disable no-shadow */
+  ) => {
+    dispatch(
+      showModal({
+        name: 'CUSTOMIZE_NONCE',
+        useNonceField,
+        nextNonce,
+        customNonceValue,
+        updateCustomNonce,
+        getNextNonce,
       }),
     );
   };
@@ -458,54 +491,20 @@ export default function TokenAllowance({
         </Box>
       )}
       {useNonceField && (
-        <Box
-          display={DISPLAY.FLEX}
-          marginTop={4}
-          marginRight={4}
-          marginBottom={4}
-          marginLeft={4}
-          paddingTop={3}
-          paddingRight={3}
-          paddingBottom={4}
-          paddingLeft={3}
-          borderRadius={BorderRadius.MD}
-          alignItems={AlignItems.center}
-          className="token-allowance-container__custom-nonce-content"
-        >
-          <Box
-            className="token-allowance-container__custom-nonce-header"
-            justifyContent={JustifyContent.flexStart}
-            alignItems={AlignItems.center}
-          >
-            <Text
-              variant={TextVariant.bodySm}
-              fontWeight={FONT_WEIGHT.NORMAL}
-              as="h6"
-            >
-              {t('nonce')}
-            </Text>
-            <Button
-              type="link"
-              className="token-allowance-container__custom-nonce-edit"
-              onClick={() =>
-                showCustomizeNonceModal({
-                  nextNonce,
-                  customNonceValue,
-                  updateCustomNonce,
-                  getNextNonce,
-                })
-              }
-            >
-              {t('edit')}
-            </Button>
-          </Box>
-          <Text
-            className="confirm-approve-content__custom-nonce-value"
-            variant={TextVariant.bodySmBold}
-            as="h6"
-          >
-            {customNonceValue || nextNonce}
-          </Text>
+        <Box marginTop={4} marginRight={4} marginLeft={4}>
+          <CustomNonce
+            nextNonce={nextNonce}
+            customNonceValue={customNonceValue}
+            showCustomizeNonceModal={() =>
+              handleCustomizeNonceModal(
+                useNonceField,
+                nextNonce,
+                customNonceValue,
+                handleUpdateCustomNonce,
+                handleNextNonce,
+              )
+            }
+          />
         </Box>
       )}
       <Box
@@ -684,26 +683,6 @@ TokenAllowance.propTypes = {
    * Symbol of the token that is waiting to be allowed
    */
   tokenSymbol: PropTypes.string,
-  /**
-   * Custom nonce value
-   */
-  customNonceValue: PropTypes.string,
-  /**
-   * Function that is supposed to update custom nonce
-   */
-  updateCustomNonce: PropTypes.func,
-  /**
-   * Function that is supposed to get the next nonce to use
-   */
-  getNextNonce: PropTypes.func,
-  /**
-   * Getting the next suggested nonce
-   */
-  nextNonce: PropTypes.number,
-  /**
-   * Function that is supposed to open the customized nonce modal
-   */
-  showCustomizeNonceModal: PropTypes.func,
   /**
    * Customize nonce warning message
    */
