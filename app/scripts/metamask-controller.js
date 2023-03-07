@@ -17,10 +17,10 @@ import {
 } from 'eth-rpc-errors';
 import { Mutex } from 'await-semaphore';
 import log from 'loglevel';
-import { TrezorKeyring, TrezorBridgeMv2 } from 'eth-trezor-keyring';
+import { TrezorKeyring, TrezorConnectBridge } from 'eth-trezor-keyring';
 import {
   LedgerKeyring,
-  LedgerBridgeIframe,
+  LedgerIframeBridge,
 } from '@metamask/eth-ledger-bridge-keyring';
 import LatticeKeyring from 'eth-lattice-keyring';
 import { MetaMaskKeyring as QRHardwareKeyring } from '@keystonehq/metamask-airgapped-keyring';
@@ -113,8 +113,8 @@ import { STATIC_MAINNET_TOKEN_LIST } from '../../shared/constants/tokens';
 import { getTokenValueParam } from '../../shared/lib/metamask-controller-utils';
 import { isManifestV3 } from '../../shared/modules/mv3.utils';
 import { hexToDecimal } from '../../shared/modules/conversion.utils';
-import { LedgerBridgeOffscreen } from './lib/offscreen/ledger/ledger-bridge-offscreen';
-import { TrezorBridgeOffscreen } from './lib/offscreen/trezor/trezor-bridge-offscreen';
+import { LedgerOffscreenBridge } from './lib/offscreen/ledger/ledger-offscreen-bridge';
+import { TrezorOffscreenBridge } from './lib/offscreen/trezor/trezor-offscreen-bridge';
 import { LatticeKeyringOffscreen } from './lib/lattice-keyring-offscreen';
 import {
   onMessageReceived,
@@ -661,16 +661,16 @@ export default class MetamaskController extends EventEmitter {
     if (isManifestV3) {
       additionalKeyrings = [
         keyringBuilderFactory(QRHardwareKeyring),
-        keyringBuilderFactoryWithBridge(TrezorKeyring, TrezorBridgeOffscreen),
-        keyringBuilderFactoryWithBridge(LedgerKeyring, LedgerBridgeOffscreen),
+        keyringBuilderFactoryWithBridge(TrezorKeyring, TrezorOffscreenBridge),
+        keyringBuilderFactoryWithBridge(LedgerKeyring, LedgerOffscreenBridge),
         keyringBuilderFactory(LatticeKeyringOffscreen),
       ];
     } else {
       additionalKeyrings = [
         keyringBuilderFactory(QRHardwareKeyring),
-        keyringBuilderFactoryWithBridge(LedgerKeyring, LedgerBridgeIframe),
+        keyringBuilderFactoryWithBridge(LedgerKeyring, LedgerIframeBridge),
         keyringBuilderFactory(LatticeKeyring),
-        keyringBuilderFactoryWithBridge(TrezorKeyring, TrezorBridgeMv2),
+        keyringBuilderFactoryWithBridge(TrezorKeyring, TrezorConnectBridge),
       ];
     }
 

@@ -10,7 +10,7 @@ import type {
 } from '@trezor/connect-web';
 import { TREZOR_ACTION, TREZOR_EVENT, TREZOR_TARGET } from './constants';
 
-export class TrezorBridgeOffscreen implements TrezorBridge {
+export class TrezorOffscreenBridge implements TrezorBridge {
   model: string | undefined;
 
   init() {

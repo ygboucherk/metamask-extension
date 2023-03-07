@@ -3778,13 +3778,13 @@ __metadata:
 
 "@metamask/eth-ledger-bridge-keyring@patch:@metamask/eth-ledger-bridge-keyring@npm%3A0.13.0#./.yarn/patches/@metamask-eth-ledger-bridge-keyring-npm-0.13.0-189684913d.patch::locator=metamask-crx%40workspace%3A.":
   version: 0.13.0
-  resolution: "@metamask/eth-ledger-bridge-keyring@patch:@metamask/eth-ledger-bridge-keyring@npm%3A0.13.0#./.yarn/patches/@metamask-eth-ledger-bridge-keyring-npm-0.13.0-189684913d.patch::version=0.13.0&hash=976238&locator=metamask-crx%40workspace%3A."
+  resolution: "@metamask/eth-ledger-bridge-keyring@patch:@metamask/eth-ledger-bridge-keyring@npm%3A0.13.0#./.yarn/patches/@metamask-eth-ledger-bridge-keyring-npm-0.13.0-189684913d.patch::version=0.13.0&hash=b9d97b&locator=metamask-crx%40workspace%3A."
   dependencies:
     "@ethereumjs/tx": ^3.2.0
     eth-sig-util: ^2.0.0
     ethereumjs-util: ^7.0.9
     hdkey: 0.8.0
-  checksum: 4e0cb9e1991888f5f63ad7c7d5271c492a0b185373ac0b9884f7e40bff9c6703ff3cfc93cf0003578d99d780a0e551cd7cb361afcdede21bb5c268ec250a47f4
+  checksum: 40089462a47d9a28f94dfcbe3e5ea3087a643f36bb977521217b356bb2aa0025898621d0931d2ff1e46e0cf7bec20831ee058c1357616e0e47c283a04597ea93
   languageName: node
   linkType: hard
 
@@ -15833,14 +15833,14 @@ __metadata:
 
 "eth-trezor-keyring@patch:eth-trezor-keyring@npm%3A0.10.0#./.yarn/patches/eth-trezor-keyring-npm-0.10.0-1bf9aa3f4d.patch::locator=metamask-crx%40workspace%3A.":
   version: 0.10.0
-  resolution: "eth-trezor-keyring@patch:eth-trezor-keyring@npm%3A0.10.0#./.yarn/patches/eth-trezor-keyring-npm-0.10.0-1bf9aa3f4d.patch::version=0.10.0&hash=04c015&locator=metamask-crx%40workspace%3A."
+  resolution: "eth-trezor-keyring@patch:eth-trezor-keyring@npm%3A0.10.0#./.yarn/patches/eth-trezor-keyring-npm-0.10.0-1bf9aa3f4d.patch::version=0.10.0&hash=b88b99&locator=metamask-crx%40workspace%3A."
   dependencies:
     "@ethereumjs/tx": ^3.2.1
     "@metamask/eth-sig-util": ^4.0.0
     ethereumjs-util: ^7.0.9
     hdkey: 0.8.0
     trezor-connect: 8.2.6-extended
-  checksum: 7928ce1276ea990e0a68a58859edb6677c2c83bc8de05abd509996fb9932bae530a480f501de37d2e45a95d4bdd9b338627d140f3d8be777b25b62924d0a898f
+  checksum: a3772d45f20ed1cd6eabfb8942a512c400c30281a6395bd0141550d6fcc3bceb114c51850eb3d93ca32992448476a4ce81a0bcc539cf6414e7cd50be382fd4ef
   languageName: node
   linkType: hard
 

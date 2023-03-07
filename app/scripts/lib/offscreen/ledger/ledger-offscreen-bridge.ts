@@ -1,6 +1,7 @@
+import { LedgerBridge } from '@metamask/eth-ledger-bridge-keyring';
 import { LEDGER_ACTION, LEDGER_EVENT, LEDGER_TARGET } from './constants';
 
-export class LedgerBridgeOffscreen {
+export class LedgerOffscreenBridge implements LedgerBridge {
   isDeviceConnected = false;
 
   init() {
@@ -82,7 +83,7 @@ export class LedgerBridgeOffscreen {
 
   deviceSignTransaction(params: { hdPath: string; tx: string }) {
     return new Promise<{
-      v: number;
+      v: string;
       s: string;
       r: string;
     }>((resolve, reject) => {

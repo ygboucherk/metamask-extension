@@ -1,5 +1,5 @@
 diff --git a/index.js b/index.js
-index 2c6a7def1a0320c7928e5fdafcc7fdcdbc44432b..5cdb1e3c6455e8f51b96c87b6776e9d0f036c7cc 100644
+index 2c6a7def1a0320c7928e5fdafcc7fdcdbc44432b..6e16be48dd8020f1c604dcdd89632d270f5b600c 100644
 --- a/index.js
 +++ b/index.js
 @@ -1,651 +1,7 @@
@@ -9,7 +9,7 @@ index 2c6a7def1a0320c7928e5fdafcc7fdcdbc44432b..5cdb1e3c6455e8f51b96c87b6776e9d0
 -const sigUtil = require('eth-sig-util')
 -const { TransactionFactory } = require('@ethereumjs/tx')
 +const { LedgerKeyring } = require('./ledger-keyring')
-+const { LedgerBridgeIframe } = require('./ledger-bridge-iframe')
++const { LedgerIframeBridge } = require('./ledger-iframe-bridge')
  
 -const pathBase = 'm'
 -const hdPathString = `${pathBase}/44'/60'/0'`
@@ -25,7 +25,7 @@ index 2c6a7def1a0320c7928e5fdafcc7fdcdbc44432b..5cdb1e3c6455e8f51b96c87b6776e9d0
 -  mainnet: 'https://api.etherscan.io',
 +module.exports = {
 +  LedgerKeyring,
-+  LedgerBridgeIframe,
++  LedgerIframeBridge,
  }
 -
 -const CONNECTION_EVENT = 'ledger-connection-change'
@@ -659,23 +659,22 @@ index 2c6a7def1a0320c7928e5fdafcc7fdcdbc44432b..5cdb1e3c6455e8f51b96c87b6776e9d0
 -
 -LedgerBridgeKeyring.type = type
 -module.exports = LedgerBridgeKeyring
-diff --git a/ledger-bridge-iframe.js b/ledger-bridge-iframe.js
+diff --git a/ledger-iframe-bridge.js b/ledger-iframe-bridge.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..605b22c988f77cb7181268a0aa5853b90387dd77
+index 0000000000000000000000000000000000000000..7c9b9cb42a88d928c57ca209f48d5eed0ea0efe0
 --- /dev/null
-+++ b/ledger-bridge-iframe.js
-@@ -0,0 +1,202 @@
++++ b/ledger-iframe-bridge.js
+@@ -0,0 +1,163 @@
 +const CONNECTION_EVENT = 'ledger-connection-change'
 +
-+class LedgerBridgeIframe {
++class LedgerIframeBridge {
 +  init (bridgeUrl) {
-+    this.bridgeUrl = bridgeUrl
 +    this.iframeLoaded = false
 +    this._setupIframe(bridgeUrl)
 +
 +    this.currentMessageId = 0
 +    this.messageCallbacks = {}
-+    this._setupListener()
++    this._setupListener(bridgeUrl)
 +
 +    return Promise.resolve()
 +  }
@@ -733,64 +732,26 @@ index 0000000000000000000000000000000000000000..605b22c988f77cb7181268a0aa5853b9
 +  }
 +
 +  getPublicKey (params) {
-+    return new Promise((resolve, reject) => {
-+      this._sendMessage(
-+        {
-+          action: 'ledger-unlock',
-+          params,
-+        },
-+        ({ success, payload }) => {
-+          if (success) {
-+            resolve(payload)
-+          }
-+          // eslint-disable-next-line prefer-promise-reject-errors
-+          reject(payload && payload.error)
-+        },
-+      )
-+    })
++    return this._deviceActionMessage('ledger-unlock', params)
 +  }
 +
 +  deviceSignTransaction (params) {
-+    return new Promise((resolve, reject) => {
-+      this._sendMessage(
-+        {
-+          action: 'ledger-sign-transaction',
-+          params,
-+        },
-+        ({ success, payload }) => {
-+          if (success) {
-+            resolve(payload)
-+          }
-+          // eslint-disable-next-line prefer-promise-reject-errors
-+          reject(payload && payload.error)
-+        },
-+      )
-+    })
++    return this._deviceActionMessage('ledger-sign-transaction', params)
 +  }
 +
 +  deviceSignMessage (params) {
-+    return new Promise((resolve, reject) => {
-+      this._sendMessage(
-+        {
-+          action: 'ledger-sign-personal-message',
-+          params,
-+        },
-+        ({ success, payload }) => {
-+          if (success) {
-+            resolve(payload)
-+          }
-+          // eslint-disable-next-line prefer-promise-reject-errors
-+          reject(payload && payload.error)
-+        },
-+      )
-+    })
++    return this._deviceActionMessage('ledger-sign-personal-message', params)
 +  }
 +
 +  deviceSignTypedData (params) {
++    return this._deviceActionMessage('ledger-sign-typed-data', params)
++  }
++
++  _deviceActionMessage (action, params) {
 +    return new Promise((resolve, reject) => {
 +      this._sendMessage(
 +        {
-+          action: 'ledger-sign-typed-data',
++          action,
 +          params,
 +        },
 +        ({ success, payload }) => {
@@ -804,9 +765,9 @@ index 0000000000000000000000000000000000000000..605b22c988f77cb7181268a0aa5853b9
 +    })
 +  }
 +
-+  _setupIframe () {
++  _setupIframe (bridgeUrl) {
 +    this.iframe = document.createElement('iframe')
-+    this.iframe.src = this.bridgeUrl
++    this.iframe.src = bridgeUrl
 +    this.iframe.allow = `hid 'src'`
 +    this.iframe.onload = async () => {
 +      // If the ledger live preference was set before the iframe is loaded,
@@ -828,15 +789,15 @@ index 0000000000000000000000000000000000000000..605b22c988f77cb7181268a0aa5853b9
 +    document.head.appendChild(this.iframe)
 +  }
 +
-+  _getOrigin () {
-+    const tmp = this.bridgeUrl.split('/')
++  _getOrigin (bridgeUrl) {
++    const tmp = bridgeUrl.split('/')
 +    tmp.splice(-1, 1)
 +    return tmp.join('/')
 +  }
 +
-+  _setupListener () {
++  _setupListener (bridgeUrl) {
 +    this._eventListener = ({ origin, data }) => {
-+      if (origin !== this._getOrigin()) {
++      if (origin !== this._getOrigin(bridgeUrl)) {
 +        return false
 +      }
 +
@@ -865,14 +826,14 @@ index 0000000000000000000000000000000000000000..605b22c988f77cb7181268a0aa5853b9
 +}
 +
 +module.exports = {
-+  LedgerBridgeIframe,
++  LedgerIframeBridge,
 +}
 diff --git a/ledger-keyring.js b/ledger-keyring.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..d72d230edbc24c046a0a25f3009155a80dc9a9b8
+index 0000000000000000000000000000000000000000..7a30121111535b394f2ce68c3e28fe2a2211d526
 --- /dev/null
 +++ b/ledger-keyring.js
-@@ -0,0 +1,586 @@
+@@ -0,0 +1,587 @@
 +const { EventEmitter } = require('events')
 +const HDKey = require('hdkey')
 +const ethUtil = require('ethereumjs-util')
@@ -1457,20 +1418,85 @@ index 0000000000000000000000000000000000000000..d72d230edbc24c046a0a25f3009155a8
 +
 +LedgerKeyring.type = type
 +module.exports = {
++  BRIDGE_URL,
 +  LedgerKeyring,
 +}
 diff --git a/package.json b/package.json
-index d0c42007fc7d8b3766cef309f0d5fb38aab30e72..a4784f559259a1c76c85369443943f88df21296a 100644
+index d0c42007fc7d8b3766cef309f0d5fb38aab30e72..19f4e45b4fb47e7a328212fa60a4afd57105ce12 100644
 --- a/package.json
 +++ b/package.json
-@@ -4,7 +4,9 @@
+@@ -3,8 +3,12 @@
+   "version": "0.13.0",
    "description": "A MetaMask compatible keyring, for ledger hardware wallets",
    "main": "index.js",
++  "types": "types/index.d.ts",
    "files": [
 -    "index.js"
 +    "index.js",
 +    "ledger-keyring.js",
-+    "ledger-bridge-iframe.js"
++    "ledger-iframe-bridge.js",
++    "types/index.d.ts"
    ],
    "engines": {
      "node": ">=12.0.0"
+diff --git a/types/index.d.ts b/types/index.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..0cae26d2f16fa0d753d27eaf8c9477b62848940c
+--- /dev/null
++++ b/types/index.d.ts
+@@ -0,0 +1,55 @@
++export type GetPublicKeyParams = { hdPath: string };
++export type GetPublicKeyResponse = {
++  publicKey: string;
++  address: string;
++  chainCode?: string;
++};
++
++export type LedgerSignTransactionParams = { hdPath: string; tx: string };
++export type LedgerSignTransactionResponse = {
++  s: string;
++  v: string;
++  r: string;
++};
++
++export type LedgerSignMessageParams = { hdPath: string; message: string };
++export type LedgerSignMessageResponse = {
++  v: number;
++  s: string;
++  r: string;
++};
++
++export type LedgerSignTypedDataParams = {
++  hdPath: string;
++  domainSeparatorHex: string;
++  hashStructMessageHex: string;
++};
++export type LedgerSignTypedDataResponse = {
++  v: number;
++  s: string;
++  r: string;
++};
++
++export interface LedgerBridge {
++  init(): Promise<void>;
++
++  destroy(): Promise<void>;
++
++  attemptMakeApp(): Promise<boolean>;
++
++  updateTransportMethod(transportType: string): Promise<boolean>;
++
++  getPublicKey(params: GetPublicKeyParams): Promise<GetPublicKeyResponse>;
++
++  deviceSignTransaction(
++    params: LedgerSignTransactionParams
++  ): Promise<LedgerSignTransactionResponse>;
++
++  deviceSignMessage(
++    params: LedgerSignMessageParams
++  ): Promise<LedgerSignMessageResponse>;
++
++  deviceSignTypedData(
++    params: LedgerSignTypedDataParams
++  ): Promise<LedgerSignTypedDataResponse>;
++}

@@ -17,6 +17,8 @@ window.addEventListener('message', ({ origin, data }) => {
         action: CONNECTION_EVENT,
         payload: data.payload.connected,
       });
+
+      return;
     }
 
     callbackProcessor.processCallback(data);

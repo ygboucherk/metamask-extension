@@ -1,5 +1,5 @@
 diff --git a/index.js b/index.js
-index 9b76a29305d48cd36b3ffd3b17f5ecdc9be96d0d..6085ac9ad16e7bfce23c4fbdc7ef6fbcc22e8fe7 100644
+index 9b76a29305d48cd36b3ffd3b17f5ecdc9be96d0d..6a53e1dd3b4f23790d3c2af5946596e0e2e448c1 100644
 --- a/index.js
 +++ b/index.js
 @@ -1,519 +1,8 @@
@@ -10,7 +10,7 @@ index 9b76a29305d48cd36b3ffd3b17f5ecdc9be96d0d..6085ac9ad16e7bfce23c4fbdc7ef6fbc
 -const { TransactionFactory } = require('@ethereumjs/tx');
 -const transformTypedData = require('trezor-connect/lib/plugins/ethereum/typedData');
 +const { TrezorKeyring, TREZOR_CONNECT_MANIFEST } = require('./trezor-keyring');
-+const { TrezorBridgeWeb } = require('./trezor-bridge-web');
++const { TrezorConnectBridge } = require('./trezor-connect-bridge');
  
 -const hdPathString = `m/44'/60'/0'/0`;
 -const SLIP0044TestnetPath = `m/44'/1'/0'/0`;
@@ -30,7 +30,7 @@ index 9b76a29305d48cd36b3ffd3b17f5ecdc9be96d0d..6085ac9ad16e7bfce23c4fbdc7ef6fbc
 +module.exports = {
 +  TREZOR_CONNECT_MANIFEST,
 +  TrezorKeyring,
-+  TrezorBridgeWeb,
++  TrezorConnectBridge,
  };
 -
 -function wait(ms) {
@@ -529,7 +529,7 @@ index 9b76a29305d48cd36b3ffd3b17f5ecdc9be96d0d..6085ac9ad16e7bfce23c4fbdc7ef6fbc
 -TrezorKeyring.type = keyringType;
 -module.exports = TrezorKeyring;
 diff --git a/package.json b/package.json
-index 88f0450d3a578cdf6be1cd43c7bb2e09cd5a72e8..7610d46d10514902f29e2dcf0e882f05206d65d1 100644
+index 88f0450d3a578cdf6be1cd43c7bb2e09cd5a72e8..92204a613f9cc3c94b1bfc2396a4b65ccde47b00 100644
 --- a/package.json
 +++ b/package.json
 @@ -1,6 +1,6 @@
@@ -550,7 +550,7 @@ index 88f0450d3a578cdf6be1cd43c7bb2e09cd5a72e8..7610d46d10514902f29e2dcf0e882f05
 -    "index.js"
 +    "index.js",
 +    "trezor-keyring.js",
-+    "trezor-bridge-web.js",
++    "trezor-connect-bridge.js",
 +    "types/index.d.ts"
    ],
    "scripts": {
@@ -629,16 +629,16 @@ index 88f0450d3a578cdf6be1cd43c7bb2e09cd5a72e8..7610d46d10514902f29e2dcf0e882f05
      }
    }
  }
-diff --git a/trezor-bridge-web.js b/trezor-bridge-web.js
+diff --git a/trezor-connect-bridge.js b/trezor-connect-bridge.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..d86ad8b2fec28b978ce7d7d77a685261e36e40f5
+index 0000000000000000000000000000000000000000..cac87238078b33fe71194823010d369b1d48dfab
 --- /dev/null
-+++ b/trezor-bridge-web.js
++++ b/trezor-connect-bridge.js
 @@ -0,0 +1,42 @@
 +const { default: TrezorConnect, DEVICE_EVENT } = require('@trezor/connect-web');
 +const { TREZOR_CONNECT_MANIFEST } = require('./trezor-keyring');
 +
-+class TrezorBridgeWeb {
++class TrezorConnectBridge {
 +  init() {
 +    TrezorConnect.on(DEVICE_EVENT, (event) => {
 +      if (event && event.payload && event.payload.features) {
@@ -675,7 +675,7 @@ index 0000000000000000000000000000000000000000..d86ad8b2fec28b978ce7d7d77a685261
 +}
 +
 +module.exports = {
-+  TrezorBridgeWeb,
++  TrezorConnectBridge,
 +};
 diff --git a/trezor-keyring.js b/trezor-keyring.js
 new file mode 100644
@@ -1219,10 +1219,10 @@ index 0000000000000000000000000000000000000000..368667834955d56e749eba725d9b2ca0
 +};
 diff --git a/types/index.d.ts b/types/index.d.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..6890e807c30ff2ce76b26075c6b581e7207001a2
+index 0000000000000000000000000000000000000000..3fc45ab887e6aab4a02192623af01b1a453042db
 --- /dev/null
 +++ b/types/index.d.ts
-@@ -0,0 +1,31 @@
+@@ -0,0 +1,36 @@
 +import type {
 +  TrezorConnect,
 +  EthereumSignMessage,
@@ -1232,6 +1232,11 @@ index 0000000000000000000000000000000000000000..6890e807c30ff2ce76b26075c6b581e7
 +  EthereumSignTypedDataTypes,
 +  GetPublicKey,
 +} from '@trezor/connect-web';
++
++export declare const TREZOR_CONNECT_MANIFEST: {
++  email: string;
++  appUrl: string;
++};
 +
 +export interface TrezorBridge {
 +  init(): Promise<void>;
