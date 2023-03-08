@@ -202,7 +202,6 @@ describe('Actions', () => {
 
       const expectedActions = [
         { type: 'SHOW_LOADING_INDICATION', payload: undefined },
-        { type: 'DISPLAY_WARNING', payload: 'error' },
         { type: 'HIDE_LOADING_INDICATION' },
       ];
 
@@ -351,9 +350,11 @@ describe('Actions', () => {
       _setBackgroundConnection(background);
 
       await store.dispatch(
-        actions.importNewAccount('Private Key', [
-          'c87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3',
-        ]),
+        actions.importNewAccount(
+          'Private Key',
+          ['c87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3'],
+          '',
+        ),
       );
       expect(importAccountWithStrategy.callCount).toStrictEqual(1);
     });
@@ -370,9 +371,8 @@ describe('Actions', () => {
       const expectedActions = [
         {
           type: 'SHOW_LOADING_INDICATION',
-          payload: 'This may take a while, please be patient.',
+          payload: undefined,
         },
-        { type: 'DISPLAY_WARNING', payload: 'error' },
         { type: 'HIDE_LOADING_INDICATION' },
       ];
 
@@ -1831,6 +1831,30 @@ describe('Actions', () => {
 
       expect(expectedActions[0].value.id).toStrictEqual(msgsList[0].id);
       expect(expectedActions[1].value.id).toStrictEqual(msgsList[1].id);
+    });
+  });
+
+  describe('Desktop', () => {
+    describe('#setDesktopEnabled', () => {
+      it('calls background setDesktopEnabled method', async () => {
+        const store = mockStore();
+        const setDesktopEnabled = sinon.stub().callsFake((_, cb) => cb());
+
+        background.getApi.returns({
+          setDesktopEnabled,
+          getState: sinon.stub().callsFake((cb) =>
+            cb(null, {
+              desktopEnabled: true,
+            }),
+          ),
+        });
+
+        _setBackgroundConnection(background.getApi());
+
+        await store.dispatch(actions.setDesktopEnabled(true));
+
+        expect(setDesktopEnabled.calledOnceWith(true)).toBeTruthy();
+      });
     });
   });
 });

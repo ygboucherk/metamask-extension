@@ -93,6 +93,7 @@ export default class ConfirmTransactionBase extends Component {
     sendTransaction: PropTypes.func,
     showTransactionConfirmedModal: PropTypes.func,
     showRejectTransactionsConfirmationModal: PropTypes.func,
+    toAccounts: PropTypes.array,
     toAddress: PropTypes.string,
     tokenData: PropTypes.object,
     tokenProps: PropTypes.object,
@@ -103,6 +104,7 @@ export default class ConfirmTransactionBase extends Component {
     txData: PropTypes.object,
     unapprovedTxCount: PropTypes.number,
     customGas: PropTypes.object,
+    addToAddressBookIfNew: PropTypes.func,
     // Component props
     actionKey: PropTypes.string,
     contentComponent: PropTypes.node,
@@ -593,9 +595,7 @@ export default class ConfirmTransactionBase extends Component {
               : () => this.handleEditGas()
           }
           rows={[
-            renderSimulationFailureWarning &&
-              !this.supportsEIP1559 &&
-              simulationFailureWarning(),
+            renderSimulationFailureWarning && simulationFailureWarning(),
             !renderSimulationFailureWarning &&
               !isMultiLayerFeeNetwork &&
               renderGasDetailsItem(),
@@ -776,14 +776,12 @@ export default class ConfirmTransactionBase extends Component {
       cancelTransaction,
       history,
       mostRecentOverviewPage,
-      clearConfirmTransaction,
       updateCustomNonce,
     } = this.props;
 
     this._removeBeforeUnload();
     updateCustomNonce('');
     cancelTransaction(txData).then(() => {
-      clearConfirmTransaction();
       history.push(mostRecentOverviewPage);
     });
   }
@@ -791,7 +789,6 @@ export default class ConfirmTransactionBase extends Component {
   handleSubmit() {
     const {
       sendTransaction,
-      clearConfirmTransaction,
       txData,
       history,
       mostRecentOverviewPage,
@@ -803,10 +800,16 @@ export default class ConfirmTransactionBase extends Component {
       maxPriorityFeePerGas,
       baseFeePerGas,
       methodData,
+      addToAddressBookIfNew,
+      toAccounts,
+      toAddress,
     } = this.props;
     const { submitting } = this.state;
     const { name } = methodData;
 
+    if (txData.type === TransactionType.simpleSend) {
+      addToAddressBookIfNew(toAddress, toAccounts);
+    }
     if (submitting) {
       return;
     }
@@ -859,7 +862,10 @@ export default class ConfirmTransactionBase extends Component {
 
         sendTransaction(txData)
           .then(() => {
-            clearConfirmTransaction();
+            if (!this._isMounted) {
+              return;
+            }
+
             this.setState(
               {
                 submitting: false,
@@ -871,6 +877,10 @@ export default class ConfirmTransactionBase extends Component {
             );
           })
           .catch((error) => {
+            if (!this._isMounted) {
+              return;
+            }
+
             this.setState({
               submitting: false,
               submitError: error.message,
@@ -981,6 +991,7 @@ export default class ConfirmTransactionBase extends Component {
   componentWillUnmount() {
     this._beforeUnloadForGasPolling();
     this._removeBeforeUnload();
+    this.props.clearConfirmTransaction();
   }
 
   supportsEIP1559 =
