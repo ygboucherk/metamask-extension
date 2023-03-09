@@ -68,7 +68,7 @@ import SimulationErrorMessage from '../../components/ui/simulation-error-message
 import { Icon, ICON_NAMES } from '../../components/component-library';
 import LedgerInstructionField from '../../components/app/ledger-instruction-field/ledger-instruction-field';
 import { ConfirmPageContainerWarning } from '../../components/app/confirm-page-container/confirm-page-container-content';
-import CustomNonce from '../../components/ui/custom-nonce';
+import CustomNonce from '../../components/app/custom-nonce';
 
 export default function TokenAllowance({
   origin,

@@ -31,7 +31,7 @@ import {
   Icon,
   Text,
 } from '../../../components/component-library';
-import CustomNonce from '../../../components/ui/custom-nonce';
+import CustomNonce from '../../../components/app/custom-nonce';
 
 export default class ConfirmApproveContent extends Component {
   static contextTypes = {
