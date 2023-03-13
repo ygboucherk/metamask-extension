@@ -5,7 +5,7 @@ const { mergeWith, cloneDeep } = require('lodash');
 const baseManifest = process.env.ENABLE_MV3
   ? require('../../app/manifest/v3/_base.json')
   : require('../../app/manifest/v2/_base.json');
-const { BuildType } = require('../lib/build-type');
+const { BuildType, loadBuildTypesConfig } = require('../lib/build-type');
 
 const { TASKS } = require('./constants');
 const { createTask, composeSeries } = require('./task');
@@ -137,7 +137,7 @@ async function writeJson(obj, file) {
 async function getBuildModifications(buildType, platform) {
   if (!Object.values(BuildType).includes(buildType)) {
     throw new Error(`Invalid build type: ${buildType}`);
-  } else if (buildType === BuildType.main) {
+  } else if (buildType === loadBuildTypesConfig().default) {
     return {};
   }
 
