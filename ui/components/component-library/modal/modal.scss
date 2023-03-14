@@ -1,0 +1,12 @@
+.mm-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  // z-index: 1040; // Aligns with modal z-index in extension to check if this is needed
+}
+
+// Used to prevent scrolling on the element behind the modal
+// applied to document.body
+.modal-open {
+  overflow: hidden;
+}

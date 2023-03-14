@@ -31,6 +31,9 @@ export { Text, TEXT_DIRECTIONS, INVISIBLE_CHARACTER } from './text';
 export { Input, INPUT_TYPES } from './input';
 export { TextField, TEXT_FIELD_TYPES, TEXT_FIELD_SIZES } from './text-field';
 export { TextFieldSearch } from './text-field-search';
+export { Modal } from './modal';
+export { ModalOverlay } from './modal-overlay';
+export { ModalContent } from './modal-content';
 
 // Molecules
 export { BannerBase } from './banner-base';

@@ -1,0 +1,120 @@
+import { Story, Canvas, ArgsTable } from '@storybook/addon-docs';
+
+import { Modal } from './modal';
+
+# Modal
+
+The `Modal` is a component that renders a child outside of the normal document flow. It is useful for rendering a child on top of other content.
+
+<Canvas>
+  <Story id="components-componentlibrary-modal--default-story" />
+</Canvas>
+
+## Props
+
+The `Modal` accepts all props below as well as all [Box](/docs/components-ui-box--default-story#props) component props
+
+<ArgsTable of={Modal} />
+
+### Is Open
+
+Use the `isOpen` prop to control whether the modal is open or closed.
+
+```jsx
+import React, { useState } from 'react';
+import Box from '../../ui/box';
+import { Modal, ModalOverlay, ModalContent, ModalHeader, Text } from '../../component-library';
+
+const [open, setOpen] = useState(false);
+
+const handleOnClick = () => {
+  setOpen(true);
+};
+
+const handleOnClose = () => {
+  setOpen(false);
+};
+
+<button onClick={handleOnClick}>OpenModal</button>
+<Modal
+  isOpen={open}
+  modalRef={modalRef}
+  onClose={handleOnClose}
+>
+  <ModalOverlay />
+  <ModalContent ref={modalRef}>
+    // TODO: Replace with ModalHeader component
+    <Box
+      className="mm-modal-header"
+      display={DISPLAY.FLEX}
+      justifyContent={JustifyContent.spaceBetween}
+      alignItems={AlignItems.flexStart}
+      width={BLOCK_SIZES.FULL}
+      marginBottom={4}
+    >
+      <button onClick={handleOnClose}>Back</button>
+      <Text variant={TextVariant.headingSm} textAlign={TEXT_ALIGN.CENTER}>
+        Modal Header
+      </Text>
+      <button onClick={handleOnClose}>Close</button>
+    </Box>
+    <Text>Children</Text>
+  </ModalContent>
+</Modal>
+```
+
+<Canvas>
+  <Story id="components-componentlibrary-modal--is-open" />
+</Canvas>
+
+### On Close
+
+Use the `onClose` prop to fire a callback when the modal is closed. This is used for the `closeOnOutsideClick` prop and the `closeOnEscapeKey`.
+
+<Canvas>
+  <Story id="components-componentlibrary-modal--on-close" />
+</Canvas>
+
+### Children
+
+The `Modal` component is a very atomic level component that is meant to be used with `ModalOverlay`, `ModalContent`, `ModalHeader` and `ModalFooter`. However, if you want to use the `Modal` component as a portal to render a custom component without the other components, you can pass a custom child to the `Modal` component.
+
+<Canvas>
+  <Story id="components-componentlibrary-modal--children" />
+</Canvas>
+
+### Modal Ref
+
+Use the `modalRef` prop to pass a ref to `ModalContent` component. This is used for the `closeOnOutsideClick` prop. If the ref is not equal to `modalRef`, the modal will close.
+
+<Canvas>
+  <Story id="components-componentlibrary-modal--modal-ref" />
+</Canvas>
+
+### Is Scrollable
+
+Use the `isScrollable` prop to control the background content is scrollable when the modal is open.
+Defaults to `false`.
+
+<Canvas>
+  <Story id="components-componentlibrary-modal--is-scrollable" />
+</Canvas>
+
+### Close On Outside Click
+
+Use the `closeOnOutsideClick` prop to control whether the modal should close when the user clicks outside of the modal.
+Defaults to `true`.
+
+<Canvas>
+  <Story id="components-componentlibrary-modal--close-on-outside-click" />
+</Canvas>
+
+### Close On Escape Key
+
+Use the `closeOnEscapeKey` prop to control whether the modal should close when the user presses the escape key.
+Defaults to `true`.
+
+<Canvas>
+  <Story id="components-componentlibrary-modal--close-on-escape-key" />
+</Canvas>
+````
