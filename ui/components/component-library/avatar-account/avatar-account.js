@@ -14,7 +14,7 @@ import {
 } from './avatar-account.types';
 
 export const AvatarAccount = ({
-  size = AvatarAccountSize.Md,
+  size = AvatarAccountSize.MD,
   address,
   className,
   variant = AvatarAccountVariant.Jazzicon,
