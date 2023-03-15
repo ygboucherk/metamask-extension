@@ -1,19 +1,26 @@
-import { TrezorBridge, TREZOR_CONNECT_MANIFEST } from 'eth-trezor-keyring';
+import { TrezorBridge } from 'eth-trezor-keyring';
 import type {
-  TrezorConnect,
   EthereumSignMessage,
   EthereumSignTransaction,
   Params,
-  EthereumSignTypedData,
   EthereumSignTypedDataTypes,
-  GetPublicKey,
+  ConnectSettings,
+  Manifest,
+  Response,
+  EthereumSignedTx,
+  PROTO,
+  EthereumSignTypedHash,
 } from '@trezor/connect-web';
 import { TREZOR_ACTION, TREZOR_EVENT, TREZOR_TARGET } from './constants';
 
 export class TrezorOffscreenBridge implements TrezorBridge {
   model: string | undefined;
 
-  init() {
+  init(
+    settings: {
+      manifest: Manifest;
+    } & Partial<ConnectSettings>,
+  ) {
     chrome.runtime.onMessage.addListener((msg) => {
       if (msg.event === TREZOR_EVENT.DEVICE_CONNECT) {
         this.model = msg.payload;
@@ -25,7 +32,7 @@ export class TrezorOffscreenBridge implements TrezorBridge {
         {
           target: TREZOR_TARGET,
           action: TREZOR_ACTION.INIT,
-          params: { manifest: TREZOR_CONNECT_MANIFEST, lazyLoad: true },
+          params: settings,
         },
         (response) => {
           resolve(response);
@@ -48,7 +55,7 @@ export class TrezorOffscreenBridge implements TrezorBridge {
     });
   }
 
-  getPublicKey(params: Params<GetPublicKey>) {
+  getPublicKey(params: { path: string; coin: string }) {
     return new Promise((resolve) => {
       chrome.runtime.sendMessage(
         {
@@ -60,7 +67,7 @@ export class TrezorOffscreenBridge implements TrezorBridge {
           resolve(response);
         },
       );
-    }) as ReturnType<TrezorConnect['getPublicKey']>;
+    }) as Response<{ publicKey: string; chainCode: string }>;
   }
 
   ethereumSignTransaction(params: Params<EthereumSignTransaction>) {
@@ -75,7 +82,7 @@ export class TrezorOffscreenBridge implements TrezorBridge {
           resolve(response);
         },
       );
-    }) as ReturnType<TrezorConnect['ethereumSignTransaction']>;
+    }) as Response<EthereumSignedTx>;
   }
 
   ethereumSignMessage(params: Params<EthereumSignMessage>) {
@@ -90,11 +97,11 @@ export class TrezorOffscreenBridge implements TrezorBridge {
           resolve(response);
         },
       );
-    }) as ReturnType<TrezorConnect['ethereumSignMessage']>;
+    }) as Response<PROTO.MessageSignature>;
   }
 
   ethereumSignTypedData(
-    params: Params<EthereumSignTypedData<EthereumSignTypedDataTypes>>,
+    params: Params<EthereumSignTypedHash<EthereumSignTypedDataTypes>>,
   ) {
     return new Promise((resolve) => {
       chrome.runtime.sendMessage(
@@ -107,6 +114,6 @@ export class TrezorOffscreenBridge implements TrezorBridge {
           resolve(response);
         },
       );
-    }) as ReturnType<TrezorConnect['ethereumSignTypedData']>;
+    }) as Response<PROTO.MessageSignature>;
   }
 }

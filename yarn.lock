@@ -15739,14 +15739,14 @@ __metadata:
 
 "eth-trezor-keyring@patch:eth-trezor-keyring@npm%3A0.10.0#./.yarn/patches/eth-trezor-keyring-npm-0.10.0-1bf9aa3f4d.patch::locator=metamask-crx%40workspace%3A.":
   version: 0.10.0
-  resolution: "eth-trezor-keyring@patch:eth-trezor-keyring@npm%3A0.10.0#./.yarn/patches/eth-trezor-keyring-npm-0.10.0-1bf9aa3f4d.patch::version=0.10.0&hash=b88b99&locator=metamask-crx%40workspace%3A."
+  resolution: "eth-trezor-keyring@patch:eth-trezor-keyring@npm%3A0.10.0#./.yarn/patches/eth-trezor-keyring-npm-0.10.0-1bf9aa3f4d.patch::version=0.10.0&hash=0cb15f&locator=metamask-crx%40workspace%3A."
   dependencies:
     "@ethereumjs/tx": ^3.2.1
     "@metamask/eth-sig-util": ^4.0.0
     ethereumjs-util: ^7.0.9
     hdkey: 0.8.0
     trezor-connect: 8.2.6-extended
-  checksum: a3772d45f20ed1cd6eabfb8942a512c400c30281a6395bd0141550d6fcc3bceb114c51850eb3d93ca32992448476a4ce81a0bcc539cf6414e7cd50be382fd4ef
+  checksum: 18187e108d480d5564fe15f0215fd8d5318a015b826e12f20a3d2b97d3e22af0f3146a6b3ea25fe562be61939a7180fa4f993f32220246a931c00f492955be76
   languageName: node
   linkType: hard
 
