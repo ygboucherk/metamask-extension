@@ -12,7 +12,6 @@ import { useI18nContext } from '../../../hooks/useI18nContext';
 import { getOriginOfCurrentTab } from '../../../selectors';
 import { MetaMetricsContext } from '../../../contexts/metametrics';
 import { ButtonIcon, ICON_NAMES } from '../../component-library';
-import { MultichainConnectedSiteMenu } from '../../multichain-connected-site-menu/multichain-connected-site-menu.component';
 import AccountOptionsMenu from './account-options-menu';
 
 export default function MenuBar() {
@@ -54,7 +53,6 @@ export default function MenuBar() {
           }}
         />
       </span>
-      <MultichainConnectedSiteMenu />
       {accountOptionsMenuOpen ? (
         <AccountOptionsMenu
           anchorElement={ref.current}
