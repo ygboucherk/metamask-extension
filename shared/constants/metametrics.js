@@ -370,6 +370,9 @@ export const EVENT_NAMES = {
   ONBOARDING_WALLET_IMPORT_ATTEMPTED: 'Wallet Import Attempted',
   ONBOARDING_WALLET_VIDEO_PLAY: 'SRP Intro Video Played',
   ONBOARDING_TWITTER_CLICK: 'External Link Clicked',
+  ///: BEGIN:ONLY_INCLUDE_IN(mmi)
+  USER_CLICKED_DEEPLINK: 'User clicked deeplink',
+  ///: END:ONLY_INCLUDE_IN
 };
 
 export const EVENT = {
@@ -405,6 +408,9 @@ export const EVENT = {
     TRANSACTIONS: 'Transactions',
     WALLET: 'Wallet',
     DESKTOP: 'Desktop',
+    ///: BEGIN:ONLY_INCLUDE_IN(mmi)
+    MMI: 'Institutional',
+    ///: END:ONLY_INCLUDE_IN
   },
   EXTERNAL_LINK_TYPES: {
     TRANSACTION_BLOCK_EXPLORER: 'Transaction Block Explorer',

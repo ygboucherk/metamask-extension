@@ -1370,3 +1370,20 @@ export function getHasTheOpenSeaTransactionSecurityProviderPopoverBeenShown(
 ) {
   return state.metamask.openSeaTransactionSecurityProviderPopoverHasBeenShown;
 }
+
+///: BEGIN:ONLY_INCLUDE_IN(mmi)
+export function getMMIAddressFromModalOrAddress(state) {
+  return (
+    state.appState.modal.modalState.props.address ||
+    state.metamask.selectedAddress
+  );
+}
+
+export function getCustodyAccountDetails(state) {
+  return state.metamask.custodyAccountDetails;
+}
+
+export function getMMIConfiguration(state) {
+  return state.metamask.mmiConfiguration;
+}
+///: END:ONLY_INCLUDE_IN
