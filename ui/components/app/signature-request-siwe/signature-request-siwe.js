@@ -62,6 +62,13 @@ export default function SignatureRequestSIWE({
   const [showDomainWarning, setShowingDomainWarning] = useState(false);
   const [agreeToDomainWarning, setAgreeToDomainWarning] = useState(false);
 
+  const showSecurityProviderBanner =
+    (txData?.securityProviderResponse?.flagAsDangerous !== undefined &&
+      txData?.securityProviderResponse?.flagAsDangerous !==
+        SECURITY_PROVIDER_MESSAGE_SEVERITIES.NOT_MALICIOUS) ||
+    (txData?.securityProviderResponse &&
+      Object.keys(txData.securityProviderResponse).length === 0);
+
   const onSign = useCallback(
     async (event) => {
       try {
@@ -92,15 +99,13 @@ export default function SignatureRequestSIWE({
         isSIWEDomainValid={isSIWEDomainValid}
         subjectMetadata={targetSubjectMetadata}
       />
-      {(txData?.securityProviderResponse?.flagAsDangerous !== undefined &&
-        txData?.securityProviderResponse?.flagAsDangerous !==
-          SECURITY_PROVIDER_MESSAGE_SEVERITIES.NOT_MALICIOUS) ||
-      (txData?.securityProviderResponse &&
-        Object.keys(txData.securityProviderResponse).length === 0) ? (
+
+      {showSecurityProviderBanner && (
         <SecurityProviderBannerMessage
           securityProviderResponse={txData.securityProviderResponse}
         />
-      ) : null}
+      )}
+
       <Message data={formatMessageParams(parsedMessage, t)} />
       {!isMatchingAddress && (
         <BannerAlert
