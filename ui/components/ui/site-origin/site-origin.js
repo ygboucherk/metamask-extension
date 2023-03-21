@@ -17,7 +17,7 @@ export default function SiteOrigin({
   rightIcon,
   showTooltip = false,
 }) {
-  const siteOriginElem = (
+  const siteOriginElem = () => (
     <div className={classnames('site-origin', className)} title={title}>
       {chip ? (
         <Chip
@@ -40,11 +40,11 @@ export default function SiteOrigin({
   return (
     <>
       {showTooltip ? (
-        <Tooltip position="bottom" html={siteOrigin} interactive>
-          {siteOriginElem}
+        <Tooltip position="bottom" title={siteOrigin} interactive>
+          {siteOriginElem()}
         </Tooltip>
       ) : (
-        { siteOriginElem }
+        siteOriginElem()
       )}
     </>
   );
