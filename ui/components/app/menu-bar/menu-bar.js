@@ -12,13 +12,6 @@ import { useI18nContext } from '../../../hooks/useI18nContext';
 import { getOriginOfCurrentTab } from '../../../selectors';
 import { MetaMetricsContext } from '../../../contexts/metametrics';
 import { ButtonIcon, ICON_NAMES } from '../../component-library';
-import { MultichainConnectedSiteMenu } from '../../multichain';
-import Box from '../../ui/box';
-import {
-  AlignItems,
-  DISPLAY,
-  JustifyContent,
-} from '../../../helpers/constants/design-system';
 import AccountOptionsMenu from './account-options-menu';
 
 export default function MenuBar() {
@@ -42,52 +35,24 @@ export default function MenuBar() {
         />
       ) : null}
       <SelectedAccount />
-      {process.env.MULTICHAIN ? ( // TODO: replace MultichainConnectedSiteMenu design once we add new header
-        <Box
-          display={DISPLAY.FLEX}
-          alignItems={AlignItems.center}
-          justifyContent={JustifyContent.spaceBetween}
-        >
-          <MultichainConnectedSiteMenu />
-          <Box ref={ref}>
-            <ButtonIcon
-              iconName={ICON_NAMES.MORE_VERTICAL}
-              className="menu-bar__account-options"
-              data-testid="account-options-menu-button"
-              ariaLabel={t('accountOptions')}
-              onClick={() => {
-                trackEvent({
-                  event: EVENT_NAMES.NAV_ACCOUNT_MENU_OPENED,
-                  category: EVENT.CATEGORIES.NAVIGATION,
-                  properties: {
-                    location: 'Home',
-                  },
-                });
-                setAccountOptionsMenuOpen(true);
-              }}
-            />
-          </Box>
-        </Box>
-      ) : (
-        <span style={{ display: 'inherit' }} ref={ref}>
-          <ButtonIcon
-            iconName={ICON_NAMES.MORE_VERTICAL}
-            className="menu-bar__account-options"
-            data-testid="account-options-menu-button"
-            ariaLabel={t('accountOptions')}
-            onClick={() => {
-              trackEvent({
-                event: EVENT_NAMES.NAV_ACCOUNT_MENU_OPENED,
-                category: EVENT.CATEGORIES.NAVIGATION,
-                properties: {
-                  location: 'Home',
-                },
-              });
-              setAccountOptionsMenuOpen(true);
-            }}
-          />
-        </span>
-      )}
+      <span style={{ display: 'inherit' }} ref={ref}>
+        <ButtonIcon
+          iconName={ICON_NAMES.MORE_VERTICAL}
+          className="menu-bar__account-options"
+          data-testid="account-options-menu-button"
+          ariaLabel={t('accountOptions')}
+          onClick={() => {
+            trackEvent({
+              event: EVENT_NAMES.NAV_ACCOUNT_MENU_OPENED,
+              category: EVENT.CATEGORIES.NAVIGATION,
+              properties: {
+                location: 'Home',
+              },
+            });
+            setAccountOptionsMenuOpen(true);
+          }}
+        />
+      </span>
       {accountOptionsMenuOpen ? (
         <AccountOptionsMenu
           anchorElement={ref.current}
