@@ -63,6 +63,7 @@ export default class PermissionsConnectHeader extends Component {
       <div className="permissions-connect-header__icon">
         <SiteOrigin
           chip
+          showTooltip
           siteOrigin={siteOrigin}
           iconSrc={iconUrl}
           name={iconName}

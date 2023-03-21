@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import Chip from '../chip';
+import Tooltip from '../tooltip';
 import IconWithFallback from '../icon-with-fallback';
 import { BorderColor } from '../../../helpers/constants/design-system';
 
@@ -14,8 +15,9 @@ export default function SiteOrigin({
   title,
   leftIcon,
   rightIcon,
+  showTooltip = false,
 }) {
-  return (
+  const siteOriginElem = (
     <div className={classnames('site-origin', className)} title={title}>
       {chip ? (
         <Chip
@@ -33,6 +35,18 @@ export default function SiteOrigin({
         <bdi dir="ltr">{siteOrigin}</bdi>
       )}
     </div>
+  );
+
+  return (
+    <>
+      {showTooltip ? (
+        <Tooltip position="bottom" html={siteOrigin} interactive>
+          {siteOriginElem}
+        </Tooltip>
+      ) : (
+        { siteOriginElem }
+      )}
+    </>
   );
 }
 
@@ -72,4 +86,8 @@ SiteOrigin.propTypes = {
    * The icon to display on the right side of the chip.
    */
   rightIcon: PropTypes.node,
+  /**
+   * Can show a tooltip with the siteOrigin as the text on hover.
+   */
+  showTooltip: PropTypes.boolean,
 };
