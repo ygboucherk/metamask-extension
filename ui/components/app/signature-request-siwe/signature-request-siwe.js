@@ -59,7 +59,7 @@ export default function SignatureRequestSIWE({
 
   const isSIWEDomainValid = checkSIWEDomain();
 
-  const [isShowingDomainWarning, setIsShowingDomainWarning] = useState(false);
+  const [showDomainWarning, setShowingDomainWarning] = useState(false);
   const [agreeToDomainWarning, setAgreeToDomainWarning] = useState(false);
 
   const onSign = useCallback(
@@ -132,15 +132,15 @@ export default function SignatureRequestSIWE({
         footerClassName="signature-request-siwe__page-container-footer"
         onCancel={onCancel}
         onSubmit={
-          isSIWEDomainValid ? onSign : () => setIsShowingDomainWarning(true)
+          isSIWEDomainValid ? onSign : () => setShowingDomainWarning(true)
         }
         cancelText={t('cancel')}
         submitText={t('signin')}
         submitButtonType={isSIWEDomainValid ? 'primary' : 'danger-primary'}
       />
-      {isShowingDomainWarning && (
+      {showDomainWarning && (
         <Popover
-          onClose={() => setIsShowingDomainWarning(false)}
+          onClose={() => setShowingDomainWarning(false)}
           title={t('SIWEWarningTitle')}
           subtitle={t('SIWEWarningSubtitle')}
           className="signature-request-siwe__warning-popover"
@@ -148,7 +148,7 @@ export default function SignatureRequestSIWE({
           footer={
             <PageContainerFooter
               footerClassName="signature-request-siwe__warning-popover__footer__warning-footer"
-              onCancel={() => setIsShowingDomainWarning(false)}
+              onCancel={() => setShowingDomainWarning(false)}
               cancelText={t('cancel')}
               cancelButtonType="default"
               onSubmit={onSign}
