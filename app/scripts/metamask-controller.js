@@ -2079,6 +2079,7 @@ export default class MetamaskController extends EventEmitter {
       ),
       dismissNotifications: this.dismissNotifications.bind(this),
       markNotificationsAsRead: this.markNotificationsAsRead.bind(this),
+      removeSnapKeyring: this.removeSnapKeyring.bind(this),
       // Desktop
       getDesktopEnabled: this.desktopController.getDesktopEnabled.bind(
         this.desktopController,
@@ -3137,6 +3138,19 @@ export default class MetamaskController extends EventEmitter {
   }
 
   ///: BEGIN:ONLY_INCLUDE_IN(flask)
+  async removeSnapKeyring(keyringId) {
+    const releaseLock = await this.createVaultMutex.acquire();
+    try {
+      const snapKeyring =
+        this.keyringController.getKeyringsByType('Snap Keyring');
+      await snapKeyring.removeKeyring(keyringId);
+    } catch {
+      // Handle Error
+    } finally {
+      releaseLock();
+    }
+  }
+
   /**
    * Gets an "app key" corresponding to an Ethereum address. An app key is more
    * or less an addrdess hashed together with some string, in this case a

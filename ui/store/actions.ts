@@ -1295,8 +1295,18 @@ export function removeSnap(
   snapId: string,
 ): ThunkAction<void, MetaMaskReduxState, unknown, AnyAction> {
   return async (dispatch: MetaMaskReduxDispatch) => {
-    await submitRequestToBackground('removeSnap', [snapId]);
-    await forceUpdateMetamaskState(dispatch);
+    dispatch(showLoadingIndication());
+
+    try {
+      await submitRequestToBackground('removeSnapKeyring', [snapId]);
+      await submitRequestToBackground('removeSnap', [snapId]);
+      await forceUpdateMetamaskState(dispatch);
+    } catch (error) {
+      dispatch(displayWarning(error));
+      throw error;
+    } finally {
+      dispatch(hideLoadingIndication());
+    }
   };
 }
 
