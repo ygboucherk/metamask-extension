@@ -711,6 +711,9 @@
   "connectingToGoerli": {
     "message": "Goerliテストネットワークに接続中"
   },
+  "connectingToLineaTestnet": {
+    "message": "Linea Goerli テストネットワークに接続中"
+  },
   "connectingToMainnet": {
     "message": "イーサリアムメインネットに接続中"
   },
@@ -1320,9 +1323,6 @@
   "etherscanViewOn": {
     "message": "Etherscanで表示"
   },
-  "expandExperience": {
-    "message": "MetaMask Snaps で web3 エクスペリエンスを拡張"
-  },
   "expandView": {
     "message": "ビューを展開"
   },
@@ -1895,6 +1895,9 @@
   "likeToImportTokens": {
     "message": "これらのトークンを追加しますか?"
   },
+  "lineatestnet": {
+    "message": "Linea Goerli テストネットワーク"
+  },
   "link": {
     "message": "リンク"
   },
@@ -1954,9 +1957,6 @@
   },
   "malformedData": {
     "message": "不正な形式のデータ"
-  },
-  "manageSnaps": {
-    "message": "インストールされたスナップの管理"
   },
   "max": {
     "message": "最大"
@@ -2190,9 +2190,6 @@
   "nextNonceWarning": {
     "message": "ナンスが提案され$1よりも大きいです",
     "description": "The next nonce according to MetaMask's internal logic"
-  },
-  "nft": {
-    "message": "NFT"
   },
   "nftAddFailedMessage": {
     "message": "所有者情報が一致していないため、NFT を追加できません。入力された情報が正しいことを確認してください。"
@@ -3376,15 +3373,8 @@
     "message": "スナップ「$1」に $2 へのキーアクセスを許可しようとしています。この操作は取り消し不能であり、$2 アカウントとアセットのコントロールを「$1」に許可することになります。続行する前に、必ず「$1」が信頼できることを確認してください。",
     "description": "The first parameter is the name of the snap and the second one is the protocol"
   },
-  "snapRequestsPermission": {
-    "message": "このスナップが次のパーミッションをリクエストしています:"
-  },
   "snapUpdate": {
     "message": "スナップを更新"
-  },
-  "snapUpdateExplanation": {
-    "message": "$1 に新しいバージョンのスナップが必要です。",
-    "description": "$1 is the dapp that is requesting an update to the snap."
   },
   "snaps": {
     "message": "スナップ"

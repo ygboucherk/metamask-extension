@@ -711,6 +711,9 @@
   "connectingToGoerli": {
     "message": "Kumokonekta sa Goerli Test Network"
   },
+  "connectingToLineaTestnet": {
+    "message": "Kumokonekta sa Linea Goerli test network"
+  },
   "connectingToMainnet": {
     "message": "Kumokonekta sa Ethereum Mainnet"
   },
@@ -1320,9 +1323,6 @@
   "etherscanViewOn": {
     "message": "Tingnan sa Etherscan"
   },
-  "expandExperience": {
-    "message": "Palawakin ang iyong karanasan sa web3 gamit ang MetaMask Snaps"
-  },
   "expandView": {
     "message": "I-expand ang view"
   },
@@ -1895,6 +1895,9 @@
   "likeToImportTokens": {
     "message": "Gusto mo bang idagdag ang mga token na ito?"
   },
+  "lineatestnet": {
+    "message": "Linea Goerli test network"
+  },
   "link": {
     "message": "Link"
   },
@@ -1954,9 +1957,6 @@
   },
   "malformedData": {
     "message": "Pangit na datos"
-  },
-  "manageSnaps": {
-    "message": "Pamahalaan ang iyong mga naka-install na snap"
   },
   "max": {
     "message": "Max"
@@ -2190,9 +2190,6 @@
   "nextNonceWarning": {
     "message": "Mas mataas ang noncesa iminumungkahing nonce na $1",
     "description": "The next nonce according to MetaMask's internal logic"
-  },
-  "nft": {
-    "message": "NFT"
   },
   "nftAddFailedMessage": {
     "message": "Hindi maidaragdag ang NFT dahil hindi tumutugma ang mga detalye ng pagmamay-ari. Siguraduhing tamang impormasyon ang iyong nailagay."
@@ -3376,15 +3373,8 @@
     "message": "Binibigyan mo ang $2 ng key access sa snap na \"$1\". Hindi na ito mababawi at nagbibigay ito sa \"$1\" ng kontrol sa iyong mga $2 account at asset. Tiyaking pinagkakatiwalaan mo ang \"$1\" bago magpatuloy.",
     "description": "The first parameter is the name of the snap and the second one is the protocol"
   },
-  "snapRequestsPermission": {
-    "message": "Hinihiling ng snap na ito ang mga sumusunod na pahintulot:"
-  },
   "snapUpdate": {
     "message": "I-update ang snap"
-  },
-  "snapUpdateExplanation": {
-    "message": "Kailangan ng $1 ng bagong bersyon ng iyong snap.",
-    "description": "$1 is the dapp that is requesting an update to the snap."
   },
   "snaps": {
     "message": "Mga Snap"

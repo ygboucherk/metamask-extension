@@ -711,6 +711,9 @@
   "connectingToGoerli": {
     "message": "Estableciendo conexión a la red de prueba Goerli"
   },
+  "connectingToLineaTestnet": {
+    "message": "Conectando a la red de prueba Linea Goerli"
+  },
   "connectingToMainnet": {
     "message": "Estableciendo conexión a la red principal de Ethereum"
   },
@@ -1320,9 +1323,6 @@
   "etherscanViewOn": {
     "message": "Ver en Etherscan"
   },
-  "expandExperience": {
-    "message": "Amplíe su experiencia web3 con complementos de MetaMask"
-  },
   "expandView": {
     "message": "Expandir vista"
   },
@@ -1895,6 +1895,9 @@
   "likeToImportTokens": {
     "message": "¿Le gustaría agregar estos tokens?"
   },
+  "lineatestnet": {
+    "message": "Red de prueba Linea Goerli"
+  },
   "link": {
     "message": "Vínculo"
   },
@@ -1954,9 +1957,6 @@
   },
   "malformedData": {
     "message": "Datos con formato incorrecto"
-  },
-  "manageSnaps": {
-    "message": "Administre sus complementos instalados"
   },
   "max": {
     "message": "Máx."
@@ -2190,9 +2190,6 @@
   "nextNonceWarning": {
     "message": "El nonce es superior al nonce sugerido de $1",
     "description": "The next nonce according to MetaMask's internal logic"
-  },
-  "nft": {
-    "message": "NFT"
   },
   "nftAddFailedMessage": {
     "message": "No se puede agregar el NFT porque los detalles de propiedad no coinciden. Asegúrese de haber ingresado la información correcta."
@@ -3376,15 +3373,8 @@
     "message": "Está otorgando acceso clave de $2 al complemento \"$1\". Esto es irrevocable y le otorga a \"$1\" el control de sus cuentas y activos de $2. Asegúrese de que confía en \"$1\" antes de continuar.",
     "description": "The first parameter is the name of the snap and the second one is the protocol"
   },
-  "snapRequestsPermission": {
-    "message": "Este complemento solicita los siguientes permisos:"
-  },
   "snapUpdate": {
     "message": "Actualizar complemento"
-  },
-  "snapUpdateExplanation": {
-    "message": "$1 necesita una versión más reciente de su complemento.",
-    "description": "$1 is the dapp that is requesting an update to the snap."
   },
   "snaps": {
     "message": "Complementos"

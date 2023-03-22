@@ -711,6 +711,9 @@
   "connectingToGoerli": {
     "message": "Đang kết nối với mạng thử nghiệm Goerli"
   },
+  "connectingToLineaTestnet": {
+    "message": "Đang kết nối với mạng thử nghiệm Linea Goerli"
+  },
   "connectingToMainnet": {
     "message": "Đang kết nối với mạng chính thức của Ethereum"
   },
@@ -1320,9 +1323,6 @@
   "etherscanViewOn": {
     "message": "Xem trên Etherscan"
   },
-  "expandExperience": {
-    "message": "Mở rộng trải nghiệm web3 của bạn với MetaMask Snap"
-  },
   "expandView": {
     "message": "Mở rộng cửa sổ xem"
   },
@@ -1895,6 +1895,9 @@
   "likeToImportTokens": {
     "message": "Bạn có muốn nhập những token này không?"
   },
+  "lineatestnet": {
+    "message": "Mạng thử nghiệm Linea Goerli"
+  },
   "link": {
     "message": "Liên kết"
   },
@@ -1954,9 +1957,6 @@
   },
   "malformedData": {
     "message": "Dữ liệu không đúng định dạng"
-  },
-  "manageSnaps": {
-    "message": "Quản lý các Snap đã cài đặt"
   },
   "max": {
     "message": "Tối đa"
@@ -2190,9 +2190,6 @@
   "nextNonceWarning": {
     "message": "Số chỉ dùng một lần lớn hơn số chỉ dùng một lần gợi ý là $1",
     "description": "The next nonce according to MetaMask's internal logic"
-  },
-  "nft": {
-    "message": "NFT"
   },
   "nftAddFailedMessage": {
     "message": "Không thể thêm NFT vì thông tin quyền sở hữu không trùng khớp. Đảm bảo bạn đã nhập đúng thông tin."
@@ -3376,15 +3373,8 @@
     "message": "Bạn đang cấp quyền truy cập khóa $2 cho Snap \"$1\". Hành động này không thể hủy bỏ và sẽ cấp quyền kiểm soát tài khoản và tài sản $2 của bạn cho \"$1\". Đảm bảo bạn tin tưởng \"$1\" trước khi tiếp tục.",
     "description": "The first parameter is the name of the snap and the second one is the protocol"
   },
-  "snapRequestsPermission": {
-    "message": "Snap này đang yêu cầu các quyền sau:"
-  },
   "snapUpdate": {
     "message": "Cập nhật Snap"
-  },
-  "snapUpdateExplanation": {
-    "message": "$1 cần một phiên bản Snap mới hơn.",
-    "description": "$1 is the dapp that is requesting an update to the snap."
   },
   "snaps": {
     "message": "Snap"

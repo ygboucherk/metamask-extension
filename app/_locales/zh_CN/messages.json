@@ -711,6 +711,9 @@
   "connectingToGoerli": {
     "message": "正在连接 Goerli 测试网络"
   },
+  "connectingToLineaTestnet": {
+    "message": "正在连接Linea测试网络"
+  },
   "connectingToMainnet": {
     "message": "正在连接到以太坊主网"
   },
@@ -1320,9 +1323,6 @@
   "etherscanViewOn": {
     "message": "在 Etherscan 上查看"
   },
-  "expandExperience": {
-    "message": "扩展MetaMask Snap的web3体验"
-  },
   "expandView": {
     "message": "展开视图"
   },
@@ -1895,6 +1895,9 @@
   "likeToImportTokens": {
     "message": "您想导入这些代币吗？"
   },
+  "lineatestnet": {
+    "message": "Linea测试网络"
+  },
   "link": {
     "message": "链接"
   },
@@ -1954,9 +1957,6 @@
   },
   "malformedData": {
     "message": "格式错误的数据"
-  },
-  "manageSnaps": {
-    "message": "管理已安装的Snap"
   },
   "max": {
     "message": "最大"
@@ -2190,9 +2190,6 @@
   "nextNonceWarning": {
     "message": "Nonce 高于建议的 nouce 值 $1",
     "description": "The next nonce according to MetaMask's internal logic"
-  },
-  "nft": {
-    "message": "非同质化代币(NFT)"
   },
   "nftAddFailedMessage": {
     "message": "由于所有权信息不匹配，无法添加NFT。请确保所输入的信息正确无误。"
@@ -3376,15 +3373,8 @@
     "message": "您正在向snap \"$1\"授予$2的密钥访问权限。此操作不可撤销，并会向\"$1\"授予对您的$2账户和资产的控制权。在继续之前，请确保您信任\"$1\"。",
     "description": "The first parameter is the name of the snap and the second one is the protocol"
   },
-  "snapRequestsPermission": {
-    "message": "此Snap正在请求以下权限："
-  },
   "snapUpdate": {
     "message": "更新Snap"
-  },
-  "snapUpdateExplanation": {
-    "message": "$1需要更新版本的snap。",
-    "description": "$1 is the dapp that is requesting an update to the snap."
   },
   "snaps": {
     "message": "Snap"
