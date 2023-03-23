@@ -1,4 +1,5 @@
 import React from 'react';
+import { ComponentStory, ComponentMeta } from '@storybook/react';
 import {
   DISPLAY,
   BackgroundColor,
@@ -26,7 +27,6 @@ const marginSizeKnobOptions = [...sizeKnobOptions, 'auto'];
 
 export default {
   title: 'Components/ComponentLibrary/Text',
-
   parameters: {
     docs: {
       page: README,
@@ -124,7 +124,9 @@ export default {
       table: { category: 'box props' },
     },
   },
-};
+} as ComponentMeta<typeof Text>;
+
+const Template: ComponentStory<typeof Text> = (args) => <Text {...args} />;
 
 function renderBackgroundColor(color) {
   let bgColor;
@@ -164,15 +166,13 @@ function renderBackgroundColor(color) {
   return bgColor;
 }
 
-export const DefaultStory = (args) => <Text {...args}>{args.children}</Text>;
-
+export const DefaultStory = Template.bind({});
 DefaultStory.storyName = 'Default';
-
 DefaultStory.args = {
   children: 'The quick orange fox jumped over the lazy dog.',
 };
 
-export const Variant = (args) => (
+export const Variant: ComponentStory<typeof Text> = (args) => (
   <>
     {Object.values(TextVariant).map((variant) => (
       <Text {...args} variant={variant} key={variant}>
@@ -182,7 +182,7 @@ export const Variant = (args) => (
   </>
 );
 
-export const ColorStory = (args) => {
+export const ColorStory: ComponentStory<typeof Text> = (args) => {
   // Index of last valid color in TextColor array
   return (
     <>
@@ -203,7 +203,7 @@ export const ColorStory = (args) => {
 };
 ColorStory.storyName = 'Color';
 
-export const FontWeight = (args) => (
+export const FontWeight: ComponentStory<typeof Text> = (args) => (
   <>
     {Object.values(FONT_WEIGHT).map((weight) => (
       <Text {...args} fontWeight={weight} key={weight}>
@@ -213,7 +213,7 @@ export const FontWeight = (args) => (
   </>
 );
 
-export const FontStyle = (args) => (
+export const FontStyle: ComponentStory<typeof Text> = (args) => (
   <>
     {Object.values(FONT_STYLE).map((style) => (
       <Text {...args} fontStyle={style} key={style}>
@@ -223,7 +223,7 @@ export const FontStyle = (args) => (
   </>
 );
 
-export const TextTransform = (args) => (
+export const TextTransform: ComponentStory<typeof Text> = (args) => (
   <>
     {Object.values(TEXT_TRANSFORM).map((transform) => (
       <Text {...args} textTransform={transform} key={transform}>
@@ -233,7 +233,7 @@ export const TextTransform = (args) => (
   </>
 );
 
-export const TextAlign = (args) => (
+export const TextAlign: ComponentStory<typeof Text> = (args) => (
   <>
     {Object.values(TEXT_ALIGN).map((align) => (
       <Text {...args} textAlign={align} key={align}>
@@ -243,7 +243,7 @@ export const TextAlign = (args) => (
   </>
 );
 
-export const OverflowWrap = (args) => (
+export const OverflowWrap: ComponentStory<typeof Text> = (args) => (
   <Box
     borderColor={BorderColor.warningDefault}
     display={DISPLAY.BLOCK}
@@ -258,7 +258,7 @@ export const OverflowWrap = (args) => (
   </Box>
 );
 
-export const Ellipsis = (args) => (
+export const Ellipsis: ComponentStory<typeof Text> = (args) => (
   <Box
     borderColor={BorderColor.primaryDefault}
     display={DISPLAY.BLOCK}
@@ -273,7 +273,7 @@ export const Ellipsis = (args) => (
   </Box>
 );
 
-export const As = (args) => (
+export const As: ComponentStory<typeof Text> = (args) => (
   <>
     {ValidTags.map((tag) => {
       if (tag === 'input') {
@@ -290,7 +290,7 @@ export const As = (args) => (
   </>
 );
 
-export const TextDirection = (args) => (
+export const TextDirection: ComponentStory<typeof Text> = (args) => (
   <Box
     style={{ maxWidth: 300 }}
     display={DISPLAY.FLEX}

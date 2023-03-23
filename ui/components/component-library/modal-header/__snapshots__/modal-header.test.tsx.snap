@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ModalHeader should match snapshot 1`] = `
+<div>
+  <div
+    class="box mm-header-base mm-modal-header box--display-flex box--flex-direction-row box--justify-content-space-between"
+  >
+    <div
+      class="box box--flex-direction-row box--width-full"
+    >
+      <h4
+        class="box mm-text mm-text--heading-sm mm-text--text-align-center box--flex-direction-row box--color-text-default"
+      >
+        modal header
+      </h4>
+    </div>
+  </div>
+</div>
+`;

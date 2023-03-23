@@ -1,4 +1,5 @@
 import React from 'react';
+import { ComponentStory, ComponentMeta } from '@storybook/react';
 import {
   AlignItems,
   Color,
@@ -89,9 +90,13 @@ export default {
       table: { category: 'box props' },
     },
   },
-};
+} as ComponentMeta<typeof ButtonIcon>;
 
-export const DefaultStory = (args) => <ButtonIcon {...args} />;
+const Template: ComponentStory<typeof ButtonIcon> = (args) => (
+  <ButtonIcon {...args} />
+);
+
+export const DefaultStory = Template.bind({});
 
 DefaultStory.args = {
   iconName: ICON_NAMES.CLOSE,
@@ -100,14 +105,14 @@ DefaultStory.args = {
 
 DefaultStory.storyName = 'Default';
 
-export const IconName = (args) => <ButtonIcon {...args} />;
+export const IconName = Template.bind({});
 
 IconName.args = {
   iconName: ICON_NAMES.CLOSE,
   ariaLabel: 'Close',
 };
 
-export const SizeStory = (args) => (
+export const SizeStory: ComponentStory<typeof ButtonIcon> = (args) => (
   <Box
     display={DISPLAY.FLEX}
     alignItems={AlignItems.baseline}
@@ -132,7 +137,7 @@ export const SizeStory = (args) => (
 
 SizeStory.storyName = 'Size';
 
-export const AriaLabel = (args) => (
+export const AriaLabel: ComponentStory<typeof ButtonIcon> = (args) => (
   <>
     <ButtonIcon
       as="button"
@@ -152,7 +157,7 @@ export const AriaLabel = (args) => (
   </>
 );
 
-export const As = (args) => (
+export const As: ComponentStory<typeof ButtonIcon> = (args) => (
   <Box display={DISPLAY.FLEX} flexDirection={FLEX_DIRECTION.ROW} gap={2}>
     <ButtonIcon {...args} iconName={ICON_NAMES.CLOSE} ariaLabel="close" />
     <ButtonIcon
@@ -166,7 +171,7 @@ export const As = (args) => (
   </Box>
 );
 
-export const Href = (args) => (
+export const Href: ComponentStory<typeof ButtonIcon> = (args) => (
   <ButtonIcon iconName={ICON_NAMES.EXPORT} {...args} target="_blank" />
 );
 
@@ -176,7 +181,7 @@ Href.args = {
   color: Color.primaryDefault,
 };
 
-export const ColorStory = (args) => (
+export const ColorStory: ComponentStory<typeof ButtonIcon> = (args) => (
   <ButtonIcon {...args} iconName={ICON_NAMES.CLOSE} ariaLabel="close" />
 );
 ColorStory.storyName = 'Color';
@@ -185,7 +190,7 @@ ColorStory.args = {
   color: Color.primaryDefault,
 };
 
-export const Disabled = (args) => (
+export const Disabled: ComponentStory<typeof ButtonIcon> = (args) => (
   <ButtonIcon {...args} iconName={ICON_NAMES.CLOSE} ariaLabel="close" />
 );
 
