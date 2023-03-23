@@ -142,12 +142,12 @@ exports[`Signature Request Component render should match snapshot when we are us
             class="box box--display-flex box--flex-direction-column box--align-items-flex-start"
           >
             <h6
-              class="box box--margin-top-1 box--flex-direction-row typography typography--h6 typography--weight-normal typography--style-normal typography--color-text-alternative"
+              class="box box--margin-top-1 box--margin-bottom-0 box--flex-direction-row typography typography--h6 typography--weight-normal typography--style-normal typography--color-text-alternative"
             >
               Unknown private network
             </h6>
             <h6
-              class="box box--margin-bottom-1 box--flex-direction-row typography typography--h6 typography--weight-bold typography--style-normal typography--color-text-default"
+              class="box box--margin-top-0 box--margin-bottom-1 box--flex-direction-row typography typography--h6 typography--weight-bold typography--style-normal typography--color-text-default"
             >
               Antonio
             </h6>
@@ -157,12 +157,12 @@ exports[`Signature Request Component render should match snapshot when we are us
           class="box box--display-flex box--flex-direction-column box--align-items-flex-end"
         >
           <h6
-            class="box box--margin-top-1 box--flex-direction-row typography typography--h6 typography--weight-normal typography--style-normal typography--color-text-alternative"
+            class="box box--margin-top-1 box--margin-bottom-0 box--flex-direction-row typography typography--h6 typography--weight-normal typography--style-normal typography--color-text-alternative"
           >
             Balance
           </h6>
           <h6
-            class="box box--margin-bottom-1 box--flex-direction-row typography typography--h6 typography--weight-bold typography--style-normal typography--align-end typography--color-text-default"
+            class="box box--margin-top-0 box--margin-bottom-1 box--flex-direction-row typography typography--h6 typography--weight-bold typography--style-normal typography--align-end typography--color-text-default"
           >
             966.987986
              
@@ -917,12 +917,12 @@ exports[`Signature Request Component render should match snapshot when we want t
             class="box box--display-flex box--flex-direction-column box--align-items-flex-start"
           >
             <h6
-              class="box box--margin-top-1 box--flex-direction-row typography typography--h6 typography--weight-normal typography--style-normal typography--color-text-alternative"
+              class="box box--margin-top-1 box--margin-bottom-0 box--flex-direction-row typography typography--h6 typography--weight-normal typography--style-normal typography--color-text-alternative"
             >
               Unknown private network
             </h6>
             <h6
-              class="box box--margin-bottom-1 box--flex-direction-row typography typography--h6 typography--weight-bold typography--style-normal typography--color-text-default"
+              class="box box--margin-top-0 box--margin-bottom-1 box--flex-direction-row typography typography--h6 typography--weight-bold typography--style-normal typography--color-text-default"
             >
               Antonio
             </h6>
@@ -932,12 +932,12 @@ exports[`Signature Request Component render should match snapshot when we want t
           class="box box--display-flex box--flex-direction-column box--align-items-flex-end"
         >
           <h6
-            class="box box--margin-top-1 box--flex-direction-row typography typography--h6 typography--weight-normal typography--style-normal typography--color-text-alternative"
+            class="box box--margin-top-1 box--margin-bottom-0 box--flex-direction-row typography typography--h6 typography--weight-normal typography--style-normal typography--color-text-alternative"
           >
             Balance
           </h6>
           <h6
-            class="box box--margin-bottom-1 box--flex-direction-row typography typography--h6 typography--weight-bold typography--style-normal typography--align-end typography--color-text-default"
+            class="box box--margin-top-0 box--margin-bottom-1 box--flex-direction-row typography typography--h6 typography--weight-bold typography--style-normal typography--align-end typography--color-text-default"
           >
             1515270.174798
              
