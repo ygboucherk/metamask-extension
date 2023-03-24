@@ -467,9 +467,11 @@ class Driver {
     const { exceptions } = this;
     const cdpConnection = await this.driver.createCDPConnection('page');
     await this.driver.onLogException(cdpConnection, (exception) => {
-      const { description } = exception.exceptionDetails.exception;
-      exceptions.push(description);
-      logBrowserError(failOnConsoleError, description);
+      const description = exception.exceptionDetails.exception?.description;
+      if (description) {
+        exceptions.push(description);
+        logBrowserError(failOnConsoleError, description);
+      }
     });
   }
 
