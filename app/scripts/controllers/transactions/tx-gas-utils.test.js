@@ -36,7 +36,11 @@ describe('txUtils', function () {
       const ethTx = TransactionFactory.fromTxData(txParams, {
         common: new Common({ chain: 'goerli' }),
       });
-      assert.equal(Number(ethTx.chainId), 5, 'chainId is set from tx params');
+      assert.equal(
+        Number(ethTx.common.chainId()),
+        5,
+        'chainId is set from tx params',
+      );
     });
   });
 
