@@ -487,7 +487,7 @@ class Driver {
     await this.driver.onLogEvent(cdpConnection, (event) => {
       if (event.type === 'error') {
         const eventDescription = event.args.filter(
-          (err) => err.description !== undefined,
+          (err) => err?.description !== undefined,
         );
         const [{ description }] = eventDescription;
         const ignore = ignoredErrorMessages.some((message) =>
